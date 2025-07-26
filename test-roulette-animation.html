@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roulette Animation Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .easing-test {
+            background: #2a2a2a;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .animation-demo {
+            height: 100px;
+            background: #333;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .moving-element {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #10b981, #059669);
+            border-radius: 8px;
+            position: absolute;
+            top: 25px;
+            left: 0;
+            transition: none;
+        }
+        
+        .center-line {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 2px;
+            height: 100%;
+            background: #10b981;
+            z-index: 10;
+        }
+        
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #059669;
+        }
+        
+        .config-display {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎰 Roulette Animation Test</h1>
+        
+        <div class="easing-test">
+            <h2>Animation Configuration</h2>
+            <div class="config-display">
+                <div>Total Duration: 5000ms (5 seconds)</div>
+                <div>Acceleration Phase: 15% (0-750ms)</div>
+                <div>Fast Phase: 35% (750-2500ms)</div>
+                <div>Deceleration Phase: 50% (2500-5000ms)</div>
+                <div>Final Position Tolerance: 2px</div>
+            </div>
+        </div>
+        
+        <div class="easing-test">
+            <h2>Animation Demo</h2>
+            <div class="animation-demo">
+                <div class="center-line"></div>
+                <div class="moving-element" id="demoElement"></div>
+            </div>
+            <button onclick="startAnimation()">Start Animation</button>
+            <button onclick="resetAnimation()">Reset</button>
+        </div>
+        
+        <div class="easing-test">
+            <h2>Easing Functions</h2>
+            <div id="easingGraph"></div>
+        </div>
+    </div>
+
+    <script>
+        // Animation configuration (same as in the React component)
+        const ANIMATION_CONFIG = {
+            TOTAL_DURATION: 5000,
+            ACCELERATION_PHASE: 0.15,
+            FAST_PHASE: 0.35,
+            DECELERATION_PHASE: 0.5,
+            FINAL_POSITION_TOLERANCE: 2
+        };
+
+        // Enhanced easing functions (same as in the React component)
+        const easingFunctions = {
+            accelerate: (t) => {
+                return t * t * t; // Cubic ease-in
+            },
+            
+            fast: (t) => {
+                const base = t;
+                const mechanicalVariation = Math.sin(t * Math.PI * 4) * 0.005;
+                return base + mechanicalVariation;
+            },
+            
+            decelerate: (t) => {
+                const decay = Math.exp(-t * 2.5);
+                const bounceFrequency = 6;
+                const bounceDecay = Math.exp(-t * 3);
+                const bounce = Math.sin(t * Math.PI * bounceFrequency) * bounceDecay * 0.08;
+                return 1 - decay + bounce;
+            },
+            
+            combined: (t) => {
+                if (t < ANIMATION_CONFIG.ACCELERATION_PHASE) {
+                    const phaseT = t / ANIMATION_CONFIG.ACCELERATION_PHASE;
+                    return easingFunctions.accelerate(phaseT) * 0.1;
+                } else if (t < ANIMATION_CONFIG.ACCELERATION_PHASE + ANIMATION_CONFIG.FAST_PHASE) {
+                    const phaseT = (t - ANIMATION_CONFIG.ACCELERATION_PHASE) / ANIMATION_CONFIG.FAST_PHASE;
+                    return 0.1 + easingFunctions.fast(phaseT) * 0.7;
+                } else {
+                    const phaseT = (t - ANIMATION_CONFIG.ACCELERATION_PHASE - ANIMATION_CONFIG.FAST_PHASE) / ANIMATION_CONFIG.DECELERATION_PHASE;
+                    return 0.8 + easingFunctions.decelerate(phaseT) * 0.2;
+                }
+            }
+        };
+
+        function startAnimation() {
+            const element = document.getElementById('demoElement');
+            const container = element.parentElement;
+            const containerWidth = container.offsetWidth;
+            const targetPosition = containerWidth - 50; // End at right edge
+            
+            const startTime = Date.now();
+            const startPosition = 0;
+            
+            function animate() {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min(elapsed / ANIMATION_CONFIG.TOTAL_DURATION, 1);
+                
+                const easedProgress = easingFunctions.combined(progress);
+                const currentPosition = startPosition + (targetPosition - startPosition) * easedProgress;
+                
+                element.style.left = currentPosition + 'px';
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    console.log('✅ Animation complete!');
+                    console.log('Final position:', currentPosition.toFixed(2) + 'px');
+                    console.log('Target position:', targetPosition + 'px');
+                    console.log('Accuracy:', Math.abs(currentPosition - targetPosition).toFixed(2) + 'px');
+                }
+            }
+            
+            requestAnimationFrame(animate);
+        }
+
+        function resetAnimation() {
+            const element = document.getElementById('demoElement');
+            element.style.left = '0px';
+        }
+
+        // Create easing function visualization
+        function createEasingGraph() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 600;
+            canvas.height = 200;
+            canvas.style.border = '1px solid #555';
+            canvas.style.borderRadius = '4px';
+            
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(0, 0, 600, 200);
+            
+            // Draw grid
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = (i / 10) * 600;
+                const y = (i / 10) * 200;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, 200);
+                ctx.moveTo(0, y);
+                ctx.lineTo(600, y);
+                ctx.stroke();
+            }
+            
+            // Draw easing curves
+            const colors = ['#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+            const functions = [
+                { name: 'Accelerate', func: easingFunctions.accelerate },
+                { name: 'Fast', func: easingFunctions.fast },
+                { name: 'Decelerate', func: easingFunctions.decelerate },
+                { name: 'Combined', func: easingFunctions.combined }
+            ];
+            
+            functions.forEach((funcObj, index) => {
+                ctx.strokeStyle = colors[index];
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                
+                for (let i = 0; i <= 100; i++) {
+                    const t = i / 100;
+                    const x = t * 600;
+                    const y = (1 - funcObj.func(t)) * 200;
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+                
+                // Add label
+                ctx.fillStyle = colors[index];
+                ctx.font = '12px Arial';
+                ctx.fillText(funcObj.name, 10, 20 + index * 20);
+            });
+            
+            document.getElementById('easingGraph').appendChild(canvas);
+        }
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            createEasingGraph();
+        });
+    </script>
+</body>
+</html>
