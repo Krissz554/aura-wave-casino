@@ -21,6 +21,7 @@ export interface UserProfile {
   gameStats: {
     coinflip: { wins: number; losses: number; profit: number }
     crash: { wins: number; losses: number; profit: number }
+    roulette: { wins: number; losses: number; profit: number }
     tower: { wins: number; losses: number; profit: number }
   }
 }
@@ -98,6 +99,11 @@ export function useUserProfile() {
               losses: Math.max(0, newLevelStats.crash_games - newLevelStats.crash_wins),
               profit: newLevelStats.crash_profit,
             },
+            roulette: {
+              wins: newLevelStats.roulette_wins,
+              losses: Math.max(0, newLevelStats.roulette_games - newLevelStats.roulette_wins),
+              profit: newLevelStats.roulette_profit,
+            },
             tower: {
               wins: newLevelStats.tower_wins,
               losses: Math.max(0, newLevelStats.tower_games - newLevelStats.tower_wins),
@@ -129,6 +135,11 @@ export function useUserProfile() {
             wins: levelStats.crash_wins,
             losses: Math.max(0, levelStats.crash_games - levelStats.crash_wins),
             profit: levelStats.crash_profit,
+          },
+          roulette: {
+            wins: levelStats.roulette_wins,
+            losses: Math.max(0, levelStats.roulette_games - levelStats.roulette_wins),
+            profit: levelStats.roulette_profit,
           },
           tower: {
             wins: levelStats.tower_wins,
@@ -197,6 +208,11 @@ export function useUserProfile() {
                     wins: newStats.crash_wins,
                     losses: Math.max(0, newStats.crash_games - newStats.crash_wins),
                     profit: newStats.crash_profit,
+                  },
+                  roulette: {
+                    wins: newStats.roulette_wins,
+                    losses: Math.max(0, newStats.roulette_games - newStats.roulette_wins),
+                    profit: newStats.roulette_profit,
                   },
                   tower: {
                     wins: newStats.tower_wins,

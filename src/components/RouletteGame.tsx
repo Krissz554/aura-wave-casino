@@ -612,6 +612,59 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         return;
       }
 
+      // Calculate total bet amount and profit for this round
+      const totalBetAmount = userBetsInRound.reduce((sum, [_, amount]) => sum + amount, 0);
+      let totalProfit = 0;
+      let isWin = false;
+
+      // Calculate profit for each bet
+      for (const [betColor, betAmount] of userBetsInRound) {
+        if (betColor === completedRound.result_color) {
+          // User won this bet
+          const multiplier = betColor === 'green' ? 14 : 2; // Green pays 14x, red/black pay 2x
+          const profit = (betAmount * multiplier) - betAmount;
+          totalProfit += profit;
+          isWin = true;
+        } else {
+          // User lost this bet
+          totalProfit -= betAmount;
+        }
+      }
+
+      console.log(`💰 Round results: Bet ${totalBetAmount}, Profit ${totalProfit}, Win: ${isWin}`);
+
+      // Update user statistics using the proper function
+      console.log('📊 Updating roulette statistics with:', {
+        user_id: user.id,
+        game_type: 'roulette',
+        bet_amount: totalBetAmount,
+        result: isWin ? 'win' : 'loss',
+        profit: totalProfit,
+        winning_color: completedRound.result_color,
+        bet_colors: userBetsInRound.map(([color, _]) => color)
+      });
+
+      const { data: statsResult, error: statsError } = await supabase.rpc('update_user_stats_and_level', {
+        p_user_id: user.id,
+        p_game_type: 'roulette',
+        p_bet_amount: totalBetAmount,
+        p_result: isWin ? 'win' : 'loss',
+        p_profit: totalProfit,
+        p_winning_color: completedRound.result_color,
+        p_bet_color: userBetsInRound.map(([color, _]) => color).join(',') // Multiple colors if user bet on multiple
+      });
+
+      if (statsError) {
+        console.error('❌ Error updating user stats:', statsError);
+      } else {
+        console.log('✅ User stats updated successfully:', statsResult);
+        
+        // Refresh user profile data to show updated statistics
+        await onUpdateUser({
+          balance: profile.balance, // This will trigger a refresh
+        });
+      }
+
       // Small delay to let backend finish processing payouts
       await new Promise(resolve => setTimeout(resolve, 500));
 

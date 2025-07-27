@@ -564,6 +564,39 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                         <span className="text-muted-foreground">Losses</span>
                         <span className="font-semibold text-red-400">{userData.gameStats.roulette?.losses || 0}</span>
                       </div>
+                      {/* Enhanced Roulette Stats */}
+                      {stats && (
+                        <>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Green Wins</span>
+                            <span className="font-semibold text-green-500">{stats.roulette_green_wins || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Red Wins</span>
+                            <span className="font-semibold text-red-500">{stats.roulette_red_wins || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Black Wins</span>
+                            <span className="font-semibold text-gray-400">{stats.roulette_black_wins || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Highest Win</span>
+                            <span className="font-semibold text-yellow-400">${(stats.roulette_highest_win || 0).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Biggest Bet</span>
+                            <span className="font-semibold text-purple-400">${(stats.roulette_biggest_bet || 0).toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Best Streak</span>
+                            <span className="font-semibold text-blue-400">{stats.roulette_best_streak || 0}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Favorite Color</span>
+                            <span className="font-semibold capitalize">{stats.roulette_favorite_color || 'none'}</span>
+                          </div>
+                        </>
+                      )}
                       <div className="pt-2 border-t border-white/10">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Profit</span>
@@ -801,7 +834,12 @@ function AchievementsSection({ isOwnProfile, userId, stats }: AchievementsSectio
       case 'roulette_games': currentValue = userStats.roulette_games || 0; break;
       case 'roulette_wins': currentValue = userStats.roulette_wins || 0; break;
       case 'roulette_green_wins': currentValue = userStats.roulette_green_wins || 0; break;
-      case 'roulette_biggest_win': currentValue = userStats.roulette_highest_win || 0; break;
+      case 'roulette_red_wins': currentValue = userStats.roulette_red_wins || 0; break;
+      case 'roulette_black_wins': currentValue = userStats.roulette_black_wins || 0; break;
+      case 'roulette_highest_win': currentValue = userStats.roulette_highest_win || 0; break;
+      case 'roulette_biggest_bet': currentValue = userStats.roulette_biggest_bet || 0; break;
+      case 'roulette_best_streak': currentValue = userStats.roulette_best_streak || 0; break;
+      case 'roulette_favorite_color': currentValue = userStats.roulette_favorite_color || 0; break;
       case 'tower_games': currentValue = userStats.tower_games || 0; break;
       case 'tower_highest_level': currentValue = userStats.tower_highest_level || 0; break;
       case 'tower_perfect_games': currentValue = userStats.tower_perfect_games || 0; break;
