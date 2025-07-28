@@ -1337,10 +1337,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-focus-within/cyber:translate-x-[100%] transition-transform duration-1000 ease-out"></div>
                               </div>
                               
-                              {/* Main Container */}
-                              <div className="relative bg-black/80 border border-primary/40 overflow-hidden" style={{
-                                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
-                              }}>
+                                                             {/* Main Container */}
+                               <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-primary/40 overflow-hidden" style={{
+                                 clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                               }}>
                                 {/* Inner Glow Effect */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 opacity-0 group-focus-within/cyber:opacity-100 transition-opacity duration-300"></div>
                                 
@@ -1349,10 +1349,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                 <div className="absolute bottom-0 left-0 w-2 h-2 bg-accent/60 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                                 
                                 <div className="flex items-center gap-3 px-4 py-3 relative z-10">
-                                  {/* Cyber Dollar Symbol */}
-                                  <div className="flex items-center justify-center min-w-[32px] h-8 bg-gradient-to-br from-primary/20 to-primary/40 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
-                                    clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
-                                  }}>
+                                                                     {/* Cyber Dollar Symbol */}
+                                   <div className="flex items-center justify-center min-w-[32px] h-8 bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
+                                     clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                                   }}>
                                     <div className="absolute inset-0 bg-primary/20 translate-x-[-100%] group-hover/cyber:translate-x-[100%] transition-transform duration-500"></div>
                                     <span className="relative z-10">$</span>
                                   </div>
@@ -1404,7 +1404,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount > maxBalance ? maxBalance : newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-6 h-5 flex items-center justify-center bg-black/60 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    className="w-6 h-5 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
                                     style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
                                     <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
@@ -1418,7 +1418,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-6 h-5 flex items-center justify-center bg-black/60 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    className="w-6 h-5 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
                                     style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
                                     <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
@@ -1431,7 +1431,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 border border-accent/40 relative overflow-hidden" style={{
+                          <div className="flex items-center gap-1.5 px-2 py-1 bg-gradient-to-br from-slate-800/70 to-slate-900/80 border border-accent/40 relative overflow-hidden" style={{
                             clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
                           }}>
                             <div className="w-1 h-1 bg-accent animate-pulse"></div>
