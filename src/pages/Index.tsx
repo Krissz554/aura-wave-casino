@@ -757,7 +757,7 @@ export default function Index({ initialGame }: IndexProps) {
                                         notificationModalOpen && "animate-notification-item-enter"
                                       )}
                                       style={{ 
-                                        animationDelay: isNew ? `${index * 100}ms` : `${index * 50 + 300}ms`
+                                        animationDelay: isNew ? `${index * 80}ms` : `${index * 30 + 200}ms`
                                       }}
                                       onMouseEnter={() => setHoveredNotification(notification.id)}
                                       onMouseLeave={() => setHoveredNotification(null)}

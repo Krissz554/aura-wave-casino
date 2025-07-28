@@ -942,21 +942,25 @@
     animation: cyber-button-press 0.2s ease-out;
   }
 
-  /* Notification Panel Animations */
+  /* Optimized Notification Panel Animations */
   .animate-notification-panel-open {
-    animation: notification-panel-open 1.8s cubic-bezier(0.23, 1, 0.32, 1);
+    animation: notification-panel-open 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity, filter;
   }
   
   .animate-notification-panel-close {
-    animation: notification-panel-close 1.2s cubic-bezier(0.76, 0, 0.24, 1);
+    animation: notification-panel-close 0.8s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+    will-change: transform, opacity, filter;
   }
   
   .animate-notification-list-stagger {
-    animation: notification-list-stagger 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+    animation: notification-list-stagger 1.0s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity, filter;
   }
   
   .animate-notification-item-enter {
-    animation: notification-item-enter 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    animation: notification-item-enter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform, opacity, filter;
   }
   
   @keyframes cyber-button-press {
@@ -1151,87 +1155,67 @@
     }
   }
 
-  /* Epic Notification Panel Keyframes */
+  /* Smooth Notification Panel Keyframes */
   @keyframes notification-panel-open {
     0% {
       opacity: 0;
-      transform: scale(0.4) translateY(100px) rotateX(45deg);
-      filter: blur(20px) brightness(0.3);
+      transform: scale(0.85) translateY(40px);
+      filter: blur(8px);
     }
-    15% {
-      opacity: 0.3;
-      transform: scale(0.6) translateY(60px) rotateX(30deg);
-      filter: blur(12px) brightness(0.6);
+    30% {
+      opacity: 0.6;
+      transform: scale(0.95) translateY(15px);
+      filter: blur(3px);
     }
-    35% {
-      opacity: 0.7;
-      transform: scale(0.85) translateY(20px) rotateX(10deg);
-      filter: blur(6px) brightness(0.9);
-    }
-    65% {
+    70% {
       opacity: 0.95;
-      transform: scale(1.05) translateY(-10px) rotateX(-2deg);
-      filter: blur(2px) brightness(1.1);
-    }
-    85% {
-      opacity: 1;
-      transform: scale(1.02) translateY(-5px) rotateX(-1deg);
-      filter: blur(1px) brightness(1.05);
+      transform: scale(1.02) translateY(-5px);
+      filter: blur(1px);
     }
     100% {
       opacity: 1;
-      transform: scale(1) translateY(0px) rotateX(0deg);
-      filter: blur(0px) brightness(1);
+      transform: scale(1) translateY(0px);
+      filter: blur(0px);
     }
   }
   
   @keyframes notification-panel-close {
     0% {
       opacity: 1;
-      transform: scale(1) translateY(0px) rotateX(0deg);
-      filter: blur(0px) brightness(1);
+      transform: scale(1) translateY(0px);
+      filter: blur(0px);
     }
-    20% {
-      opacity: 0.8;
-      transform: scale(0.95) translateY(10px) rotateX(5deg);
-      filter: blur(2px) brightness(0.9);
+    30% {
+      opacity: 0.7;
+      transform: scale(0.95) translateY(15px);
+      filter: blur(2px);
     }
-    50% {
-      opacity: 0.4;
-      transform: scale(0.7) translateY(50px) rotateX(25deg);
-      filter: blur(10px) brightness(0.6);
-    }
-    80% {
-      opacity: 0.1;
-      transform: scale(0.4) translateY(80px) rotateX(40deg);
-      filter: blur(18px) brightness(0.3);
+    70% {
+      opacity: 0.3;
+      transform: scale(0.85) translateY(35px);
+      filter: blur(6px);
     }
     100% {
       opacity: 0;
-      transform: scale(0.2) translateY(120px) rotateX(60deg);
-      filter: blur(25px) brightness(0);
+      transform: scale(0.75) translateY(50px);
+      filter: blur(10px);
     }
   }
   
   @keyframes notification-list-stagger {
     0% {
       opacity: 0;
-      transform: translateX(-100px) scale(0.8);
-      filter: blur(5px);
-    }
-    20% {
-      opacity: 0.3;
-      transform: translateX(-60px) scale(0.9);
+      transform: translateY(20px);
       filter: blur(3px);
     }
-    60% {
-      opacity: 0.8;
-      transform: translateX(-10px) scale(1.02);
+    50% {
+      opacity: 0.7;
+      transform: translateY(5px);
       filter: blur(1px);
     }
     100% {
       opacity: 1;
-      transform: translateX(0px) scale(1);
+      transform: translateY(0px);
       filter: blur(0px);
     }
   }
@@ -1239,22 +1223,17 @@
   @keyframes notification-item-enter {
     0% {
       opacity: 0;
-      transform: translateY(50px) scale(0.8) rotateX(30deg);
-      filter: blur(8px);
-    }
-    30% {
-      opacity: 0.5;
-      transform: translateY(20px) scale(0.95) rotateX(10deg);
+      transform: translateY(30px) scale(0.95);
       filter: blur(4px);
     }
-    70% {
-      opacity: 0.9;
-      transform: translateY(-5px) scale(1.03) rotateX(-2deg);
+    60% {
+      opacity: 0.8;
+      transform: translateY(-2px) scale(1.01);
       filter: blur(1px);
     }
     100% {
       opacity: 1;
-      transform: translateY(0px) scale(1) rotateX(0deg);
+      transform: translateY(0px) scale(1);
       filter: blur(0px);
     }
   }
