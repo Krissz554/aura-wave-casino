@@ -62,6 +62,7 @@ export default function Index({ initialGame }: IndexProps) {
   const [newNotificationIds, setNewNotificationIds] = useState<Set<string>>(new Set());
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -397,9 +398,14 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [userData?.balance, checkBalanceChange]);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    setShowLogoutConfirmation(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await signOut();
+      setShowLogoutConfirmation(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -1709,6 +1715,97 @@ export default function Index({ initialGame }: IndexProps) {
         isOpen={showAdminPanel}
         onClose={() => setShowAdminPanel(false)}
       />
+
+      {/* Cyberpunk Logout Confirmation Dialog */}
+      <Dialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
+        <DialogContent className="max-w-md p-0 border-none bg-transparent overflow-hidden">
+          {/* Multi-layered Background */}
+          <div className="relative overflow-hidden">
+            {/* Base gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-lg" />
+            
+            {/* Animated circuit board pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent)] bg-[22px_22px] animate-grid-move-slow" />
+            </div>
+            
+            {/* Animated border glow */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/30 via-red-400/40 to-red-500/30 blur-sm animate-pulse" />
+            
+            {/* Tech corner details */}
+            <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-red-400/60" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-red-400/60" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-red-400/60" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-red-400/60" />
+            
+            {/* Main content */}
+            <div className="relative z-10 p-6 space-y-6" style={{
+              clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+            }}>
+              {/* Header with icon */}
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-900/60 to-red-800/80 border border-red-500/50 rounded relative overflow-hidden" style={{
+                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                }}>
+                  <LogOut className="w-6 h-6 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                </div>
+                <div>
+                  <DialogTitle className="text-xl font-bold bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">
+                    Confirm Sign Out
+                  </DialogTitle>
+                  <p className="text-slate-400 text-sm font-mono">AUTHENTICATION_TERMINATION</p>
+                </div>
+              </div>
+              
+              {/* Message */}
+              <div className="space-y-3">
+                <p className="text-slate-200 leading-relaxed">
+                  Are you sure you want to sign out? You'll need to authenticate again to access your account.
+                </p>
+                <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
+                  <div className="w-2 h-2 bg-red-400/60 animate-pulse rounded-full"></div>
+                  <span>Session will be terminated immediately</span>
+                </div>
+              </div>
+              
+              {/* Action buttons */}
+              <div className="flex space-x-3">
+                {/* Cancel button */}
+                <div className="relative group/cancel flex-1">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowLogoutConfirmation(false)}
+                    className="w-full relative overflow-hidden border border-slate-500/40 bg-slate-900/50 hover:bg-slate-800/70 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    {/* Scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-400/20 to-transparent translate-x-[-100%] group-hover/cancel:translate-x-[100%] transition-transform duration-500" />
+                    <span className="relative z-10 font-semibold text-slate-200">Cancel</span>
+                  </Button>
+                </div>
+                
+                {/* Confirm button */}
+                <div className="relative group/confirm flex-1">
+                  <Button
+                    onClick={confirmLogout}
+                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    {/* Scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/confirm:translate-x-[100%] transition-transform duration-500" />
+                    <LogOut className="w-4 h-4 mr-2 text-red-300 relative z-10" />
+                    <span className="relative z-10 font-semibold text-red-200">Sign Out</span>
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
         {/* Live Level-Up Notifications - Only show for authenticated users */}
         {user && <LiveLevelUpNotification />}
