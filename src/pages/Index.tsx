@@ -1402,11 +1402,7 @@ export default function Index({ initialGame }: IndexProps) {
                       }`}>
                         COINFLIP
                       </span>
-                      {currentGame === 'coinflip' && (
-                        <div className="ml-auto">
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
-                        </div>
-                      )}
+
                     </div>
                     
                     {/* Tech corner indicators */}
@@ -1448,11 +1444,7 @@ export default function Index({ initialGame }: IndexProps) {
                       }`}>
                         ROULETTE
                       </span>
-                      {currentGame === 'roulette' && (
-                        <div className="ml-auto">
-                          <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
-                        </div>
-                      )}
+
                     </div>
                     
                     {/* Tech corner indicators */}
@@ -1494,11 +1486,7 @@ export default function Index({ initialGame }: IndexProps) {
                       }`}>
                         TOWER
                       </span>
-                      {currentGame === 'tower' && (
-                        <div className="ml-auto">
-                          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                        </div>
-                      )}
+
                     </div>
                     
                     {/* Tech corner indicators */}
