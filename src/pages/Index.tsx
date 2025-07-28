@@ -636,11 +636,16 @@ export default function Index({ initialGame }: IndexProps) {
                       }}
                         className={cn(
                           "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60 p-2 aspect-square",
-                          // Dynamic styling based on unread count and loading state
-                          unreadCount === 0 && !notificationLoading && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
-                          unreadCount > 0 && unreadCount <= 5 && !notificationLoading && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
-                          unreadCount > 5 && unreadCount <= 10 && !notificationLoading && "border border-red-500/40 bg-red-950/30 hover:bg-red-900/50",
-                          unreadCount > 10 && !notificationLoading && "border border-red-500/60 bg-red-950/40 hover:bg-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                          // Loading state styling - maintains appropriate background
+                          notificationLoading && unreadCount === 0 && "border border-primary/60 bg-slate-900/50",
+                          notificationLoading && unreadCount > 0 && unreadCount <= 5 && "border border-orange-500/60 bg-orange-950/50",
+                          notificationLoading && unreadCount > 5 && unreadCount <= 10 && "border border-red-500/60 bg-red-950/50",
+                          notificationLoading && unreadCount > 10 && "border border-red-500/80 bg-red-950/60",
+                          // Normal state styling based on unread count
+                          !notificationLoading && unreadCount === 0 && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
+                          !notificationLoading && unreadCount > 0 && unreadCount <= 5 && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
+                          !notificationLoading && unreadCount > 5 && unreadCount <= 10 && "border border-red-500/40 bg-red-950/30 hover:bg-red-900/50",
+                          !notificationLoading && unreadCount > 10 && "border border-red-500/60 bg-red-950/40 hover:bg-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
                         )}
                       >
                         {/* Cyberpunk scan line effect */}
