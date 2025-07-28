@@ -9,11 +9,11 @@ export interface UserProfile {
   registration_date: string
   balance: number
   level: number
-  xp: number // Legacy field - maps to current_xp
+  xp: number
   current_level: number
-  current_xp: number // PRIMARY XP field - used everywhere (3 decimal precision)
+  current_xp: number
   xp_to_next_level: number
-  lifetime_xp: number // 3 decimal precision
+  lifetime_xp: number
   total_wagered: number
   total_profit: number
   last_claim_time: string
@@ -50,28 +50,47 @@ export function useUserProfile() {
         {
           event: 'UPDATE',
           schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
+          table: 'user_level_stats',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('📊 PROFILE UPDATE RECEIVED:', payload);
+          console.log('📊 USER STATS UPDATE RECEIVED:', payload);
           
           if (payload.new) {
-            const newProfile = payload.new as any;
+            const newStats = payload.new as any;
             setUserData(prev => {
               if (!prev) return null;
               return {
                 ...prev,
-                // Update all level/XP data from profiles (single source of truth)
-                current_level: newProfile.current_level,
-                current_xp: newProfile.current_xp, // 3-decimal precision
-                xp_to_next_level: newProfile.xp_to_next_level,
-                lifetime_xp: newProfile.lifetime_xp, // 3-decimal precision
-                total_wagered: newProfile.total_wagered,
-                total_profit: newProfile.total_profit,
-                balance: newProfile.balance,
-                // Keep existing gameStats since profiles table doesn't have game statistics
-                // Game stats are handled separately by UserProfile component queries
+                // Update all level/XP/stats data from user_level_stats
+                current_level: newStats.current_level,
+                current_xp: newStats.current_level_xp,
+                xp_to_next_level: newStats.xp_to_next_level,
+                lifetime_xp: newStats.lifetime_xp,
+                total_wagered: newStats.total_wagered,
+                total_profit: newStats.total_profit,
+        gameStats: {
+          coinflip: {
+            wins: newStats.coinflip_wins || 0,
+            losses: Math.max(0, (newStats.coinflip_games || 0) - (newStats.coinflip_wins || 0)),
+            profit: newStats.coinflip_profit || 0,
+          },
+          crash: {
+            wins: newStats.crash_wins || 0,
+            losses: Math.max(0, (newStats.crash_games || 0) - (newStats.crash_wins || 0)),
+            profit: newStats.crash_profit || 0,
+          },
+          roulette: {
+            wins: newStats.roulette_wins || 0,
+            losses: Math.max(0, (newStats.roulette_games || 0) - (newStats.roulette_wins || 0)),
+            profit: newStats.roulette_profit || 0,
+          },
+          tower: {
+            wins: newStats.tower_wins || 0,
+            losses: Math.max(0, (newStats.tower_games || 0) - (newStats.tower_wins || 0)),
+            profit: newStats.tower_profit || 0,
+          },
+        },
               };
             });
           }
@@ -233,16 +252,9 @@ export function useUserProfile() {
           return;
         }
 
-        // Build user data with profiles as source of truth for XP data
         const combinedData = {
-          ...newLevelStats, // Game stats from user_level_stats
-          ...profile,       // Profile data overrides everything (including XP with 3-decimal precision)
-          // Explicitly use profiles table XP fields (3-decimal precision)
-          current_level: profile.current_level,
-          current_xp: profile.current_xp, // 3-decimal precision from profiles
-          xp_to_next_level: profile.xp_to_next_level,
-          lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-          xp: profile.current_xp, // Legacy field maps to current_xp
+          ...profile,
+          ...newLevelStats,
           gameStats: {
             coinflip: {
               wins: newLevelStats?.coinflip_wins || 0,
@@ -274,15 +286,8 @@ export function useUserProfile() {
 
       if (levelStatsError) {
         console.error('[useUserProfile] Error fetching level stats:', levelStatsError);
-        // Use profile data with explicit XP field mapping (3-decimal precision)
         const profileWithGameStats = {
           ...profile,
-          // Explicitly use profiles table XP fields (3-decimal precision)
-          current_level: profile.current_level,
-          current_xp: profile.current_xp, // 3-decimal precision from profiles
-          xp_to_next_level: profile.xp_to_next_level,
-          lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-          xp: profile.current_xp, // Legacy field maps to current_xp
           gameStats: {
             coinflip: { wins: 0, losses: 0, profit: 0 },
             crash: { wins: 0, losses: 0, profit: 0 },
@@ -296,16 +301,9 @@ export function useUserProfile() {
         return;
       }
 
-      // Build user data with profiles as source of truth for XP data
       const combinedData = {
-        ...levelStats, // Game stats from user_level_stats
-        ...profile,    // Profile data overrides everything (including XP with 3-decimal precision)
-        // Explicitly use profiles table XP fields (3-decimal precision)
-        current_level: profile.current_level,
-        current_xp: profile.current_xp, // 3-decimal precision from profiles
-        xp_to_next_level: profile.xp_to_next_level,
-        lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-        xp: profile.current_xp, // Legacy field maps to current_xp
+        ...profile,
+        ...levelStats,
         gameStats: {
           coinflip: {
             wins: levelStats?.coinflip_wins || 0,
