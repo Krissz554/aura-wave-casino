@@ -501,13 +501,15 @@ export default function Index({ initialGame }: IndexProps) {
   useEffect(() => {
     if (levelStats) {
       console.log('🎯 HEADER: levelStats updated (DECIMAL source):', {
-        lifetime_xp: levelStats.lifetime_xp,
-        current_level_xp: levelStats.current_level_xp,
-        current_level: levelStats.current_level,
-        effective_xp: effectiveStats.lifetime_xp,
-        formatted_profile_xp: formatXP(effectiveStats.lifetime_xp),
-        displayCurrentLevelXP: displayCurrentLevelXP,
-        formatted_progress_xp: formatXP(displayCurrentLevelXP),
+        'DB_lifetime_xp': levelStats.lifetime_xp,
+        'DB_current_level_xp': levelStats.current_level_xp,
+        'current_level': levelStats.current_level,
+        'effective_lifetime_xp': effectiveStats.lifetime_xp,
+        'effective_current_level_xp': effectiveStats.current_level_xp,
+        'displayCurrentLevelXP_calculated': displayCurrentLevelXP,
+        'formatted_profile_xp': formatXP(effectiveStats.lifetime_xp),
+        'formatted_progress_xp': formatXP(displayCurrentLevelXP),
+        'RAW_formatXP_test': formatXP(23.123),
         timestamp: new Date().toISOString()
       });
     }
@@ -524,28 +526,27 @@ export default function Index({ initialGame }: IndexProps) {
     xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
-  // For consistent decimal display, use the same decimal source as profile section
-  // The profile section correctly shows 3 decimals, so let's use the exact same data
+  // For consistent decimal display, derive from the SAME source as profile section
+  // Profile section uses effectiveStats.lifetime_xp and shows perfect 3 decimals
+  // Let's make progress bar derive its value from the same decimal source
   const displayCurrentLevelXP = useMemo(() => {
-    if (levelStats?.lifetime_xp !== undefined && levelStats?.current_level_xp !== undefined) {
-      // Use the current_level_xp from profiles but ensure it's treated as decimal
-      return Number(levelStats.current_level_xp);
-    }
-    // Fallback: calculate current level XP from lifetime XP with decimal precision
-    const lifetimeXP = levelStats?.lifetime_xp || userLevelStats?.lifetime_xp || 0;
-    const currentLevel = levelStats?.current_level || userLevelStats?.current_level || 1;
-    const xpToNext = levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100;
-    const currentLevelXP = levelStats?.current_level_xp || userLevelStats?.current_level_xp || 0;
+    // Use the same decimal source as profile (effectiveStats.lifetime_xp)
+    const lifetimeXP = effectiveStats.lifetime_xp;
+    const currentLevel = effectiveStats.current_level;
     
-    // Simple approximation to preserve decimals in progress bar
-    if (currentLevel === 1) {
-      return lifetimeXP; // Level 1: all XP is current level XP
-    } else {
-      // For higher levels, use modulo to get approximate current level progress with decimals
-      const xpPerLevel = xpToNext + currentLevelXP;
-      return lifetimeXP % xpPerLevel;
+    // For level 1, current level XP equals lifetime XP
+    if (currentLevel <= 1) {
+      return lifetimeXP;
     }
-  }, [levelStats?.lifetime_xp, levelStats?.current_level_xp, levelStats?.current_level, levelStats?.xp_to_next_level, userLevelStats?.lifetime_xp, userLevelStats?.current_level_xp, userLevelStats?.current_level, userLevelStats?.xp_to_next_level]);
+    
+    // For higher levels, calculate current level XP from decimal lifetime XP
+    // This preserves the exact decimal precision that the profile section shows
+    const baseXPForCurrentLevel = (currentLevel - 1) * 100; // Approximate base XP for current level
+    const currentLevelProgress = lifetimeXP - baseXPForCurrentLevel;
+    
+    // Ensure we don't go negative and preserve decimal precision
+    return Math.max(0, currentLevelProgress);
+  }, [effectiveStats.lifetime_xp, effectiveStats.current_level]);
 
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
