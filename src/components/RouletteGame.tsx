@@ -1318,7 +1318,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                     <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/50" />
                     <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-accent/50" />
                     
-                    <div className="relative z-10 px-4 py-3">
+                    <div className="relative z-10 px-4 py-2">
                       <div className="relative flex items-center justify-between gap-4">
                         {/* Left Side - Bet Amount Input with Floating Label */}
                         <div className="flex items-center gap-3 flex-1">
@@ -1348,9 +1348,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                 <div className="absolute top-0 right-0 w-2 h-2 bg-primary/60 animate-pulse"></div>
                                 <div className="absolute bottom-0 left-0 w-2 h-2 bg-accent/60 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                                 
-                                                                 <div className="flex items-center gap-3 px-4 py-4 relative z-10">
+                                                                 <div className="flex items-center gap-3 px-3 py-2 relative z-10">
                                                                      {/* Cyber Dollar Symbol */}
-                                   <div className="flex items-center justify-center min-w-[32px] h-8 bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
+                                   <div className="flex items-center justify-center min-w-[28px] h-7 bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
                                      clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
                                    }}>
                                     <div className="absolute inset-0 bg-primary/20 translate-x-[-100%] group-hover/cyber:translate-x-[100%] transition-transform duration-500"></div>
@@ -1394,7 +1394,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                     fontWeight: 'bold',
                                     letterSpacing: '0.1em'
                                   }}
-                                  className="w-full text-center bg-transparent border-none focus:ring-0 focus:outline-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 min-h-[50px]"
+                                  className="w-full text-center bg-transparent border-none focus:ring-0 focus:outline-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 min-h-[36px]"
                                   disabled={currentRound.status !== 'betting'}
                                   placeholder="[ 0.00 ]"
                                 />
@@ -1410,7 +1410,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount > maxBalance ? maxBalance : newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-6 h-5 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    className="w-5 h-4 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
                                     style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
                                     <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
@@ -1424,7 +1424,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-6 h-5 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    className="w-5 h-4 flex items-center justify-center bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
                                     style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
                                     <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
