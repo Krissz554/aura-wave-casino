@@ -1513,9 +1513,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                           Date.now() - lastBetTime < MIN_BET_INTERVAL
                         }
                         className={`w-full h-12 relative overflow-hidden border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
-                          color === 'red' ? 'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-red-500/50 hover:border-red-400 text-red-100 hover:text-white' :
-                          color === 'green' ? 'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-emerald-500/50 hover:border-emerald-400 text-emerald-100 hover:text-white' :
-                          'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-slate-500/50 hover:border-slate-400 text-slate-100 hover:text-white'
+                          color === 'red' ? 'bg-gradient-to-br from-red-900/80 via-red-800/60 to-red-900/80 border-red-500/70 hover:border-red-400 text-red-100 hover:text-white hover:from-red-800/90 hover:to-red-800/90' :
+                          color === 'green' ? 'bg-gradient-to-br from-emerald-900/80 via-emerald-800/60 to-emerald-900/80 border-emerald-500/70 hover:border-emerald-400 text-emerald-100 hover:text-white hover:from-emerald-800/90 hover:to-emerald-800/90' :
+                          'bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 border-slate-500/70 hover:border-slate-400 text-slate-100 hover:text-white hover:from-slate-800/90 hover:to-slate-800/90'
                         } ${isPlacingBet ? 'opacity-50 cursor-not-allowed' : ''}`}
                         style={{
                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
@@ -1537,9 +1537,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                       >
                         {/* Inner Glow Effect */}
                         <div className={`absolute inset-0 opacity-0 group-hover/bet:opacity-100 transition-opacity duration-300 ${
-                          color === 'red' ? 'bg-gradient-to-r from-red-500/10 via-transparent to-red-500/10' :
-                          color === 'green' ? 'bg-gradient-to-r from-emerald-500/10 via-transparent to-emerald-500/10' :
-                          'bg-gradient-to-r from-slate-500/10 via-transparent to-slate-500/10'
+                          color === 'red' ? 'bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20' :
+                          color === 'green' ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-emerald-500/20' :
+                          'bg-gradient-to-r from-slate-500/20 via-slate-400/30 to-slate-500/20'
                         }`}></div>
                         
                         {/* Tech Corner Indicators */}
