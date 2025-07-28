@@ -725,9 +725,9 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                                    <div className="relative">
                     <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl overflow-visible">
                     
-                                         {/* Notification Badge - Positioned Over Achievements Tab */}
+                                         {/* Notification Badge - Top Right Corner of Achievements Tab */}
                      {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                       <div className="absolute top-0 left-1/2 transform translate-x-1/4 -translate-y-2 group/badge z-[9999]">
+                       <div className="absolute top-0 left-3/4 transform translate-x-1/4 -translate-y-2 group/badge z-[9999]">
                         <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
                         <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                           <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
