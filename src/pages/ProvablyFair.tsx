@@ -278,8 +278,9 @@ export function ProvablyFair() {
                   proof for any round. No trust required - verify everything yourself!
                 </p>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
+        </div>
 
           {/* How to Verify */}
           <Card className="glass border-0">
