@@ -526,27 +526,16 @@ export default function Index({ initialGame }: IndexProps) {
     xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
-  // For consistent decimal display, derive from the SAME source as profile section
-  // Profile section uses effectiveStats.lifetime_xp and shows perfect 3 decimals
-  // Let's make progress bar derive its value from the same decimal source
+  // For consistent decimal display, use the database-calculated current_level_xp with decimal precision
+  // The database functions should calculate this correctly when leveling up
   const displayCurrentLevelXP = useMemo(() => {
-    // Use the same decimal source as profile (effectiveStats.lifetime_xp)
-    const lifetimeXP = effectiveStats.lifetime_xp;
-    const currentLevel = effectiveStats.current_level;
+    // Use current_level_xp from database (calculated by level functions)
+    // This should reset to 0 (or remainder) when leveling up and show decimal precision
+    const currentLevelXP = effectiveStats.current_level_xp;
     
-    // For level 1, current level XP equals lifetime XP
-    if (currentLevel <= 1) {
-      return lifetimeXP;
-    }
-    
-    // For higher levels, calculate current level XP from decimal lifetime XP
-    // This preserves the exact decimal precision that the profile section shows
-    const baseXPForCurrentLevel = (currentLevel - 1) * 100; // Approximate base XP for current level
-    const currentLevelProgress = lifetimeXP - baseXPForCurrentLevel;
-    
-    // Ensure we don't go negative and preserve decimal precision
-    return Math.max(0, currentLevelProgress);
-  }, [effectiveStats.lifetime_xp, effectiveStats.current_level]);
+    // Ensure it's treated as a decimal number for consistent precision
+    return Number(currentLevelXP);
+  }, [effectiveStats.current_level_xp]);
 
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
