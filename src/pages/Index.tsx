@@ -408,98 +408,19 @@ export default function Index({ initialGame }: IndexProps) {
       <div className="p-4 pb-32">
         {/* Header */}
         <header className="mb-6">
-        <div className="relative overflow-hidden group">
-          {/* Cyberpunk Background with Advanced Effects */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
-          
-          {/* Animated Circuit Board Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move" />
-          </div>
-          
-          {/* Animated Border Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-lg animate-cyber-glow" />
-          <div className="absolute inset-0 border border-primary/30 rounded-2xl" />
-          
-          {/* Corner Tech Details */}
-          <div className="absolute top-0 left-0 w-20 h-20">
-            <div className="absolute top-3 left-3 w-4 h-4 border-l-2 border-t-2 border-primary/60 animate-cyber-corner" />
-            <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-accent/40 animate-cyber-corner delay-150" />
-          </div>
-          <div className="absolute top-0 right-0 w-20 h-20">
-            <div className="absolute top-3 right-3 w-4 h-4 border-r-2 border-t-2 border-primary/60 animate-cyber-corner" />
-            <div className="absolute top-1 right-1 w-2 h-2 border-r border-t border-accent/40 animate-cyber-corner delay-150" />
-          </div>
-          <div className="absolute bottom-0 left-0 w-20 h-20">
-            <div className="absolute bottom-3 left-3 w-4 h-4 border-l-2 border-b-2 border-primary/60 animate-cyber-corner" />
-            <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-accent/40 animate-cyber-corner delay-150" />
-          </div>
-          <div className="absolute bottom-0 right-0 w-20 h-20">
-            <div className="absolute bottom-3 right-3 w-4 h-4 border-r-2 border-b-2 border-primary/60 animate-cyber-corner" />
-            <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-accent/40 animate-cyber-corner delay-150" />
-          </div>
-          
-          {/* Energy Flow Lines */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-primary/40 to-transparent animate-energy-flow" />
-            <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-accent/40 to-transparent animate-energy-flow delay-1000" />
-            <div className="absolute left-0 top-1/4 w-full h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent animate-energy-flow-horizontal" />
-            <div className="absolute left-0 bottom-1/3 w-full h-px bg-gradient-to-r from-transparent via-accent/40 to-transparent animate-energy-flow-horizontal delay-1500" />
-          </div>
-          
-          {/* Floating Orbs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {[...Array(6)].map((_, i) => (
-              <div
-                key={i}
-                className={cn(
-                  "absolute w-1 h-1 rounded-full",
-                  i % 2 === 0 ? "bg-primary/40" : "bg-accent/40",
-                  "animate-float-orb"
-                )}
-                style={{
-                  left: `${15 + (i * 15)}%`,
-                  top: `${20 + (i * 10)}%`,
-                  animationDelay: `${i * 1.2}s`,
-                  animationDuration: `${6 + Math.random() * 3}s`
-                }}
-              />
-            ))}
-          </div>
-          
-          {/* Main Header Content */}
-          <div className="relative z-10 p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-6">
-                {/* Logo Section with Advanced Effects */}
-                <div className="relative group/logo">
-                  <div className="absolute -inset-2 bg-gradient-to-r from-primary/20 to-accent/20 rounded-xl blur-md group-hover/logo:blur-lg transition-all duration-500" />
-                  <div className="relative">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-cyber-shine bg-clip-text text-transparent">
-                      ArcadeFinance
-                    </h1>
-                    <div className="absolute -bottom-1 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent animate-cyber-glow" />
-                  </div>
-                </div>
-                
-                {/* Tagline with Typing Effect */}
-                <div className="hidden lg:block relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-slate-700/50 to-slate-600/50 rounded-lg blur-sm" />
-                  <div className="relative bg-slate-800/80 px-4 py-2 rounded-lg border border-primary/20">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                      <span className="text-sm font-mono text-slate-300 font-medium">
-                        The Future of Digital Gaming
-                      </span>
-                      <div className="w-1 h-4 bg-primary animate-pulse ml-1" />
-                    </div>
-                  </div>
-                </div>
+        <div className="glass rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
+                ArcadeFinance
+              </h1>
+              <div className="hidden md:block text-sm text-muted-foreground">
+                The Future of Digital Gaming
               </div>
+            </div>
 
-              {/* Right Side Navigation */}
-              <div className="flex items-center space-x-3">
-                {/* Cyberpunk Notification System - Only show for authenticated users */}
+            <div className="flex items-center space-x-4">
+              {/* Cyberpunk Notification System - Only show for authenticated users */}
               {user && (
                 <Dialog open={notificationModalOpen} onOpenChange={setNotificationModalOpen}>
                   <DialogTrigger asChild>
@@ -990,333 +911,129 @@ export default function Index({ initialGame }: IndexProps) {
                 </Dialog>
               )}
 
-                {/* Cyberpunk Balance Display - Only show for authenticated users */}
-                {user && userData && (
-                  <div className="relative group/balance">
-                    {/* Background with animated glow */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-accent/20 to-primary/30 rounded-xl blur-md group-hover/balance:blur-lg transition-all duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/90 rounded-xl" />
-                    
-                    {/* Animated circuit pattern */}
-                    <div className="absolute inset-0 opacity-20 rounded-xl overflow-hidden">
-                      <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(99,102,241,0.1)_50%,transparent_60%)] bg-[length:20px_20px] animate-grid-move-slow" />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="relative flex items-center space-x-3 px-4 py-3 border border-primary/30 rounded-xl bg-slate-900/50">
-                      {/* Wallet Icon with Glow */}
-                      <div className="relative">
-                        <Wallet className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-                        <div className="absolute inset-0 bg-primary/20 rounded-full blur-md animate-pulse" />
-                      </div>
-                      
-                      {/* Balance with Enhanced Styling */}
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">BALANCE</span>
-                          <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
-                        </div>
-                        <AnimatedBalance
-                          balance={userData.balance}
-                          className="text-lg font-bold font-mono bg-gradient-to-r from-green-400 to-emerald-300 bg-clip-text text-transparent"
-                        />
-                      </div>
-                      
-                      {/* Tech Corner Accent */}
-                      <div className="absolute top-1 right-1 w-2 h-2 border-r border-t border-primary/40" />
-                      <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-accent/40" />
-                      
-                      <FloatingBalanceIncrease increases={increases} />
-                    </div>
-                  </div>
-                )}
+              {/* Balance Display - Only show for authenticated users */}
+              {user && userData && (
+                <div className="relative flex items-center space-x-2 glass px-3 py-1 rounded-lg">
+                  <Wallet className="w-4 h-4 text-primary" />
+                  <AnimatedBalance
+                    balance={userData.balance}
+                    className="font-semibold"
+                  />
+                  <FloatingBalanceIncrease increases={increases} />
+                </div>
+              )}
 
-                {/* Cyberpunk Navigation Buttons - Only show for authenticated users */}
-                {user && (
-                  <div className="flex items-center space-x-2">
-                    {/* Rewards Button */}
-                    <Button
-                      variant="ghost"
-                      onClick={() => navigate('/rewards')}
-                      className={cn(
-                        "relative px-4 py-2 overflow-hidden group/rewards transition-all duration-300",
-                        "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
-                        "border border-accent/30 rounded-xl",
-                        "hover:border-accent/60 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)]",
-                        "active:scale-95"
-                      )}
-                    >
-                      {/* Animated background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-accent/10 to-emerald-500/10 opacity-0 group-hover/rewards:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute inset-0 opacity-20">
-                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(34,197,94,0.1)_50%,transparent_60%)] bg-[length:200%_100%] group-hover/rewards:animate-cyber-shine" />
-                      </div>
-                      
-                      <div className="relative flex items-center gap-2">
-                        <Gift className="w-4 h-4 text-accent group-hover/rewards:drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
-                        <span className="text-sm font-medium">Rewards</span>
-                      </div>
-                      
-                      {/* Tech corners */}
-                      <div className="absolute top-1 right-1 w-1 h-1 bg-accent/60 group-hover/rewards:bg-accent" />
-                      <div className="absolute bottom-1 left-1 w-1 h-1 bg-accent/60 group-hover/rewards:bg-accent" />
-                    </Button>
+              {/* Rewards Button - Only show for authenticated users */}
+              {user && (
+                <Button
+                  variant="ghost"
+                  onClick={() => navigate('/rewards')}
+                  className="glass border-0 hover:glow-primary transition-smooth"
+                >
+                  <Gift className="w-4 h-4 mr-2" />
+                  Rewards
+                </Button>
+              )}
 
-                    {/* Admin Button */}
-                    <Button
-                      variant="ghost"
-                      onClick={() => setShowAdminPanel(true)}
-                      className={cn(
-                        "relative px-4 py-2 overflow-hidden group/admin transition-all duration-300",
-                        "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
-                        "border border-orange-400/30 rounded-xl",
-                        "hover:border-orange-400/60 hover:shadow-[0_0_20px_rgba(251,146,60,0.4)]",
-                        "active:scale-95"
-                      )}
-                    >
-                      {/* Animated background */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-500/10 opacity-0 group-hover/admin:opacity-100 transition-opacity duration-300" />
-                      <div className="absolute inset-0 opacity-20">
-                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(251,146,60,0.1)_50%,transparent_60%)] bg-[length:200%_100%] group-hover/admin:animate-cyber-shine" />
-                      </div>
-                      
-                      <div className="relative flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-orange-400 group-hover/admin:drop-shadow-[0_0_8px_rgba(251,146,60,0.8)]" />
-                        <span className="text-sm font-medium">Admin</span>
-                      </div>
-                      
-                      {/* Tech corners */}
-                      <div className="absolute top-1 right-1 w-1 h-1 bg-orange-400/60 group-hover/admin:bg-orange-400" />
-                      <div className="absolute bottom-1 left-1 w-1 h-1 bg-orange-400/60 group-hover/admin:bg-orange-400" />
-                    </Button>
-                  </div>
-                )}
+              {/* Admin Panel Button - Only show for authenticated users */}
+              {user && (
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowAdminPanel(true)}
+                  className="glass border-0 hover:glow-primary transition-smooth"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Admin
+                </Button>
+              )}
 
-                {/* Cyberpunk User Profile - Only show for authenticated users */}
-                {user && userData && (
-                  <div className="relative group/profile cursor-pointer" onClick={() => setShowProfile(true)}>
-                    {/* Background glow */}
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-purple-500/20 to-primary/20 rounded-xl blur-md group-hover/profile:blur-lg transition-all duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-slate-800/90 rounded-xl" />
-                    
-                    {/* Animated scan lines */}
-                    <div className="absolute inset-0 opacity-30 rounded-xl overflow-hidden">
-                      <div className="absolute inset-0 bg-[linear-gradient(0deg,transparent_48%,rgba(99,102,241,0.1)_50%,transparent_52%)] bg-[length:100%_20px] animate-cyber-scan" />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="relative flex items-center gap-3 px-4 py-3 border border-primary/30 rounded-xl bg-slate-900/50">
-                      {/* Avatar with enhanced effects */}
-                      <div className="relative">
-                        <ProfileBorder level={levelStats?.current_level || 1} size="md">
-                          <div className="w-10 h-10 rounded-full overflow-hidden relative">
-                            <img 
-                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
-                              alt={`${userData.username} avatar`}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                            <div className="absolute bottom-0 left-0 right-0 text-center">
-                              <span className="text-white text-xs font-bold bg-black/60 px-1 rounded">
-                                {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
-                              </span>
-                            </div>
-                          </div>
-                        </ProfileBorder>
-                        
-                        {/* Level indicator glow */}
-                        <div className="absolute -inset-1 bg-primary/20 rounded-full blur-sm animate-pulse" />
-                      </div>
-                      
-                      {/* User info */}
-                      <div className="hidden md:flex flex-col">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-slate-200">{userData.username}</span>
-                          <div className="w-1 h-1 bg-primary rounded-full animate-pulse" />
-                        </div>
-                        <div className="flex items-center gap-1 text-xs">
-                          <span className="text-slate-400 font-mono">LVL</span>
-                          <span className="text-primary font-bold">{levelStats?.current_level || 1}</span>
-                          <span className="text-slate-500">•</span>
-                          <span className="text-accent text-xs">{levelStats?.current_level_xp || 0} XP</span>
-                        </div>
-                      </div>
-                      
-                      {/* Mobile username */}
-                      <span className="md:hidden text-sm font-semibold text-slate-200">{userData.username}</span>
-                      
-                      {/* Status indicator */}
-                      <div className="absolute top-1 right-1 w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                    </div>
-                  </div>
-                )}
-
-                {/* Cyberpunk Authentication */}
-                {user && userData ? (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleLogout}
-                    className={cn(
-                      "relative px-3 py-2 overflow-hidden group/logout transition-all duration-300",
-                      "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
-                      "border border-red-500/30 rounded-xl",
-                      "hover:border-red-500/60 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)]",
-                      "active:scale-95"
-                    )}
+              {/* Enhanced Level Display - Only show for authenticated users */}
+              {user && userData && (
+                <>
+                  {/* Desktop Version */}
+                  <UserLevelDisplay 
+                    username={userData.username}
+                    showXP={true}
+                    size="md"
+                    className="hidden md:flex"
+                    clickable={true}
+                    onClick={() => setShowProfile(true)}
+                  />
+                  
+                  {/* Mobile Version */}
+                  <div 
+                    className="flex md:hidden items-center gap-2 cursor-pointer hover:bg-primary/10 rounded-lg p-2 -m-2 transition-all duration-200 hover:scale-[1.02]"
+                    onClick={() => setShowProfile(true)}
                   >
-                    {/* Animated background */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-600/10 opacity-0 group-hover/logout:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 opacity-20">
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(239,68,68,0.1)_50%,transparent_60%)] bg-[length:200%_100%] group-hover/logout:animate-cyber-shine" />
-                    </div>
-                    
                     <div className="relative">
-                      <LogOut className="w-4 h-4 text-red-400 group-hover/logout:drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                      <ProfileBorder level={levelStats?.current_level || 1} size="sm">
+                        <div className="w-8 h-8 rounded-full overflow-hidden relative">
+                          <img 
+                            src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
+                            alt={`${userData.username} avatar`}
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1 py-0.5">
+                            <span className="text-white text-xs font-bold block text-center leading-none">
+                              {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
+                            </span>
+                          </div>
+                        </div>
+                      </ProfileBorder>
                     </div>
-                    
-                    {/* Tech corners */}
-                    <div className="absolute top-1 right-1 w-1 h-1 bg-red-400/60 group-hover/logout:bg-red-400" />
-                    <div className="absolute bottom-1 left-1 w-1 h-1 bg-red-400/60 group-hover/logout:bg-red-400" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => setShowAuthModal(true)}
-                    className={cn(
-                      "relative px-4 py-2 overflow-hidden group/signin transition-all duration-300",
-                      "bg-gradient-to-r from-primary/20 via-accent/10 to-primary/20",
-                      "border border-primary/40 rounded-xl backdrop-blur-md",
-                      "hover:border-primary/60 hover:shadow-[0_0_25px_rgba(99,102,241,0.5)]",
-                      "active:scale-95"
-                    )}
-                  >
-                    {/* Animated background effects */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 opacity-0 group-hover/signin:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute inset-0 opacity-30">
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(99,102,241,0.2)_50%,transparent_60%)] bg-[length:200%_100%] group-hover/signin:animate-cyber-shine" />
-                    </div>
-                    
-                    {/* Pulse ring effect */}
-                    <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-md group-hover/signin:animate-pulse" />
-                    
-                    <div className="relative flex items-center gap-2">
-                      <LogIn className="w-4 h-4 text-primary group-hover/signin:drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
-                      <span className="font-medium bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                        Sign In
-                      </span>
-                    </div>
-                    
-                    {/* Tech accents */}
-                    <div className="absolute top-1 right-1 w-2 h-2 border-r border-t border-primary/60 group-hover/signin:border-primary" />
-                    <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-accent/60 group-hover/signin:border-accent" />
-                  </Button>
-                )}
+                    <span className="font-semibold text-sm">{userData.username}</span>
+                  </div>
+                </>
+              )}
+
+              {/* User Menu or Sign In Button */}
+              {user && userData ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="glass border-0 hover:text-destructive"
+                >
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setShowAuthModal(true)}
+                  className="glass border-0 hover:glow-primary transition-smooth"
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
 
-            {/* Cyberpunk XP Progress Bar - Only show for authenticated users */}
-            {user && levelStats && (
-              <div className="relative mt-4 p-4 rounded-xl bg-slate-900/50 border border-primary/20">
-                {/* Background effects */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl" />
-                <div className="absolute inset-0 opacity-20 rounded-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_70%,rgba(99,102,241,0.1)_85%,transparent_100%)] bg-[length:50px_100%] animate-cyber-scan-horizontal" />
-                </div>
-                
-                <div className="relative space-y-3">
-                  {/* XP Header */}
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                      <span className="text-sm font-mono text-slate-300 uppercase tracking-wider">
-                        Level {levelStats.current_level} Progress
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs font-mono">
-                      <span className="text-accent">{levelStats.current_level_xp}</span>
-                      <span className="text-slate-500">/</span>
-                      <span className="text-primary">{levelStats.current_level_xp + levelStats.xp_to_next_level}</span>
-                      <span className="text-slate-400">XP</span>
-                    </div>
-                  </div>
-                  
-                  {/* Enhanced Progress Bar */}
-                  <div className="relative">
-                    {/* Background track */}
-                    <div className="h-3 bg-slate-800/80 rounded-full border border-slate-700/50 overflow-hidden">
-                      {/* Animated background pattern */}
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(99,102,241,0.1)_50%,transparent_60%)] bg-[length:30px_100%] animate-grid-move-slow" />
-                      
-                      {/* Progress fill */}
-                      <div 
-                        className="h-full bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-cyber-shine rounded-full transition-all duration-1000 relative overflow-hidden"
-                        style={{ width: `${xpProgress}%` }}
-                      >
-                        {/* Glow effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
-                      </div>
-                    </div>
-                    
-                    {/* Progress percentage */}
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <span className="text-xs font-bold text-white drop-shadow-lg">
-                        {Math.round(xpProgress)}%
-                      </span>
-                    </div>
-                  </div>
-                  
-                  {/* Tech corners */}
-                  <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/40" />
-                  <div className="absolute top-1 right-1 w-2 h-2 border-r border-t border-accent/40" />
-                  <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-accent/40" />
-                  <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-primary/40" />
-                </div>
+          {/* XP Progress Bar - Only show for authenticated users */}
+          {user && levelStats && (
+            <div className="mt-3 space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Level {levelStats.current_level} Progress</span>
+                <span>{levelStats.current_level_xp} / {levelStats.current_level_xp + levelStats.xp_to_next_level} XP</span>
               </div>
-            )}
+              <Progress value={xpProgress} className="h-2" />
+            </div>
+          )}
 
-            {/* Cyberpunk Guest Notice */}
-            {!user && (
-              <div className="relative mt-4 overflow-hidden group">
-                {/* Background effects */}
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/90 rounded-xl" />
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-md group-hover:blur-lg transition-all duration-500" />
-                
-                {/* Animated circuit pattern */}
-                <div className="absolute inset-0 opacity-10 rounded-xl overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(99,102,241,0.3)_50%,transparent_60%)] bg-[length:30px_30px] animate-grid-move" />
-                </div>
-                
-                {/* Content */}
-                <div className="relative p-4 border border-primary/30 rounded-xl bg-slate-900/50 text-center">
-                  <div className="flex items-center justify-center gap-3">
-                    <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
-                    <span className="text-sm font-mono text-slate-300">
-                      🎮 Browsing as Guest
-                    </span>
-                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse delay-500" />
-                  </div>
-                  
-                  <div className="mt-2 flex items-center justify-center gap-1">
-                    <span className="text-sm text-slate-400">Unlock the future:</span>
-                    <button
-                      className="text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:from-accent hover:to-primary transition-all duration-300 cursor-pointer"
-                      onClick={() => setShowAuthModal(true)}
-                    >
-                      Sign In
-                    </button>
-                    <span className="text-sm text-slate-400">to play & earn!</span>
-                  </div>
-                  
-                  {/* Tech accent lines */}
-                  <div className="absolute top-2 left-2 w-4 h-px bg-gradient-to-r from-primary to-transparent" />
-                  <div className="absolute top-2 right-2 w-4 h-px bg-gradient-to-l from-accent to-transparent" />
-                  <div className="absolute bottom-2 left-2 w-4 h-px bg-gradient-to-r from-accent to-transparent" />
-                  <div className="absolute bottom-2 right-2 w-4 h-px bg-gradient-to-l from-primary to-transparent" />
-                </div>
-              </div>
-            )}
-          </div>
-        </header>
+          {/* Guest Notice */}
+          {!user && (
+            <div className="mt-3 p-3 glass rounded-lg text-center">
+              <p className="text-sm text-muted-foreground">
+                🎮 Browsing as Guest - <span 
+                  className="text-primary cursor-pointer hover:underline"
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  Sign in
+                </span> to play games and earn rewards!
+              </p>
+            </div>
+          )}
+        </div>
+      </header>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 pb-8">
