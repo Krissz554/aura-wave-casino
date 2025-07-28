@@ -1,189 +1,142 @@
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from './AuthContext';
+import { useState, useEffect, useContext, createContext } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
-// REBUILT FOR SINGLE XP SYSTEM
-// Only tracks total_xp from profiles table
 interface LevelStats {
   current_level: number;
-  total_xp: number;           // SINGLE SOURCE OF TRUTH
-  current_level_xp: number;   // Calculated from total_xp
-  xp_to_next_level: number;   // Calculated from total_xp
+  total_xp: number; // UNIFIED XP - single source of truth
+  current_level_xp: number; // XP within current level (calculated)
+  xp_to_next_level: number; // XP needed for next level (calculated)
   border_tier: number;
-  progress_percentage: number; // Calculated from total_xp
+  // Legacy fields for backward compatibility
+  lifetime_xp?: number;
 }
 
 interface LevelSyncContextType {
   levelStats: LevelStats | null;
-  isLoading: boolean;
-  error: string | null;
-  refreshStats: () => Promise<void>;
+  loading: boolean;
+  refreshStats: () => void;
 }
 
 const LevelSyncContext = createContext<LevelSyncContextType | undefined>(undefined);
 
-interface LevelSyncProviderProps {
-  children: ReactNode;
-}
-
-export const LevelSyncProvider: React.FC<LevelSyncProviderProps> = ({ children }) => {
-  const [levelStats, setLevelStats] = useState<LevelStats | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const [levelStats, setLevelStats] = useState<LevelStats | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchStats = async () => {
     if (!user) {
       setLevelStats(null);
+      setLoading(false);
       return;
     }
 
     try {
-      setIsLoading(true);
-      setError(null);
-
-      // Fetch ONLY from profiles table - single source of truth
+      // Get stats from profiles table (unified XP system)
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select(`
-          current_level,
-          total_xp,
-          border_tier
-        `)
+        .select('current_level, total_xp, current_xp, xp_to_next_level, border_tier, lifetime_xp')
         .eq('id', user.id)
         .single();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
+        // PGRST116 is "not found" which is expected for new users
         throw profileError;
       }
 
       if (profileData) {
-        // Use database function to get calculated level info
-        const { data: levelInfo, error: levelError } = await supabase
-          .rpc('get_level_info', { user_total_xp: profileData.total_xp || 0 });
-
-        if (levelError) {
-          console.warn('Could not fetch level info:', levelError);
-          // Fallback to basic info
-          setLevelStats({
-            current_level: profileData.current_level || 1,
-            total_xp: profileData.total_xp || 0,
-            current_level_xp: 0,
-            xp_to_next_level: 100,
-            border_tier: profileData.border_tier || 1,
-            progress_percentage: 0
-          });
-        } else if (levelInfo && levelInfo.length > 0) {
-          const info = levelInfo[0];
-          setLevelStats({
-            current_level: info.current_level,
-            total_xp: profileData.total_xp || 0,
-            current_level_xp: info.current_level_xp,
-            xp_to_next_level: info.xp_to_next_level,
-            border_tier: profileData.border_tier || 1,
-            progress_percentage: info.progress_percentage
-          });
-        }
+        setLevelStats({
+          current_level: profileData.current_level || 1,
+          total_xp: profileData.total_xp || 0, // UNIFIED XP - single source of truth
+          current_level_xp: profileData.current_xp || 0, // XP within current level
+          xp_to_next_level: profileData.xp_to_next_level || 100,
+          border_tier: profileData.border_tier || 1,
+          lifetime_xp: profileData.lifetime_xp || profileData.total_xp || 0, // Legacy compatibility
+        });
+      } else {
+        // Fallback to default stats for new users
+        setLevelStats({
+          current_level: 1,
+          lifetime_xp: 0,
+          current_level_xp: 0,
+          xp_to_next_level: 100,
+          border_tier: 1
+        });
       }
-    } catch (err) {
-      console.error('Error fetching level stats:', err);
-      setError('Failed to load level stats');
+    } catch (error) {
+      console.error('Error fetching level stats:', error);
+      // Set default stats on error
+      setLevelStats({
+        current_level: 1,
+        lifetime_xp: 0,
+        current_level_xp: 0,
+        xp_to_next_level: 100,
+        border_tier: 1
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    if (!user) {
+      setLevelStats(null);
+      setLoading(false);
+      return;
+    }
+
     fetchStats();
-  }, [user]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    // Subscribe to real-time updates on profiles table
-    const channel = supabase
-      .channel('profile_level_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
-        },
-        async (payload) => {
-          console.log('Profile XP change detected:', payload);
-          
-          if (payload.new && 'total_xp' in payload.new) {
-            const newTotalXP = payload.new.total_xp || 0;
-            
-            try {
-              // Get updated level info from database function
-              const { data: levelInfo, error: levelError } = await supabase
-                .rpc('get_level_info', { user_total_xp: newTotalXP });
-
-              if (levelError) {
-                console.warn('Could not fetch updated level info:', levelError);
-                // Fallback update
-                setLevelStats(prev => prev ? {
-                  ...prev,
-                  total_xp: newTotalXP,
-                  current_level: payload.new.current_level || prev.current_level,
-                  border_tier: payload.new.border_tier || prev.border_tier
-                } : null);
-              } else if (levelInfo && levelInfo.length > 0) {
-                const info = levelInfo[0];
-                setLevelStats({
-                  current_level: info.current_level,
-                  total_xp: newTotalXP,
-                  current_level_xp: info.current_level_xp,
-                  xp_to_next_level: info.xp_to_next_level,
-                  border_tier: payload.new.border_tier || 1,
-                  progress_percentage: info.progress_percentage
-                });
-              }
-            } catch (err) {
-              console.error('Error updating level stats:', err);
-              // Fallback to basic update
-              setLevelStats(prev => prev ? {
-                ...prev,
-                total_xp: newTotalXP,
-                current_level: payload.new.current_level || prev.current_level,
-                border_tier: payload.new.border_tier || prev.border_tier
-              } : null);
-            }
+    
+    // Set up real-time subscription for level stats (profiles table for 3-decimal precision)
+    console.log('📊 Setting up level stats subscription for user:', user.id);
+    const subscription = supabase
+      .channel(`level_stats_${user.id}_${Date.now()}`)
+              .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          },
+        (payload) => {
+          console.log('📊 UNIFIED XP STATS UPDATE:', payload);
+          if (payload.new) {
+            const newData = payload.new as any;
+            setLevelStats({
+              current_level: newData.current_level || 1,
+              total_xp: newData.total_xp || 0, // UNIFIED XP - single source of truth
+              current_level_xp: newData.current_xp || 0, // XP within current level
+              xp_to_next_level: newData.xp_to_next_level || 100,
+              border_tier: newData.border_tier || 1,
+              lifetime_xp: newData.lifetime_xp || newData.total_xp || 0, // Legacy compatibility
+            });
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('📊 Level stats subscription status:', status);
+        if (err) console.error('📊 Subscription error:', err);
+      });
 
     return () => {
-      supabase.removeChannel(channel);
+      console.log('📊 Cleaning up level stats subscription');
+      supabase.removeChannel(subscription);
     };
   }, [user]);
 
-  const refreshStats = async () => {
-    await fetchStats();
-  };
-
   return (
-    <LevelSyncContext.Provider
-      value={{
-        levelStats,
-        isLoading,
-        error,
-        refreshStats,
-      }}
-    >
+    <LevelSyncContext.Provider value={{ levelStats, loading, refreshStats: fetchStats }}>
       {children}
     </LevelSyncContext.Provider>
   );
-};
+}
 
-export const useLevelSync = () => {
+export function useLevelSync() {
   const context = useContext(LevelSyncContext);
   if (context === undefined) {
     throw new Error('useLevelSync must be used within a LevelSyncProvider');
   }
   return context;
-};
+}
