@@ -1201,15 +1201,55 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                 {recentResults.slice(0, isMobile ? 5 : 8).map((result, index) => (
                   <div
                     key={result.id}
-                    className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm cursor-pointer transition-all duration-200 hover:scale-110 hover:shadow-xl hover:shadow-current/50 ${getResultBubbleClass(result.result_color)} animate-in slide-in-from-right-5`}
+                    className="relative group/bubble cursor-pointer"
+                    onClick={() => openRoundDetails(result)}
+                    title={`Round #${result.round_number} - Click for details`}
                     style={{
                       animationDelay: `${index * 100}ms`,
                       animationFillMode: 'both'
                     }}
-                    onClick={() => openRoundDetails(result)}
-                    title={`Round #${result.round_number} - Click for details`}
                   >
-                    {result.result_slot}
+                    {/* Holographic Scan Lines */}
+                    <div className="absolute inset-0 overflow-hidden">
+                      <div className={`absolute inset-0 transition-transform duration-700 ease-out ${
+                        result.result_color === 'red' ? 'bg-gradient-to-r from-transparent via-red-400/30 to-transparent' :
+                        result.result_color === 'green' ? 'bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent' :
+                        'bg-gradient-to-r from-transparent via-slate-400/30 to-transparent'
+                      } translate-x-[-100%] group-hover/bubble:translate-x-[100%]`}></div>
+                    </div>
+                    
+                    {/* Cyberpunk Result Bubble */}
+                    <div
+                      className={`w-8 h-8 sm:w-10 sm:h-10 relative overflow-hidden border transition-all duration-300 hover:scale-110 flex items-center justify-center text-white font-bold text-xs sm:text-sm ${
+                        result.result_color === 'red' ? 'bg-gradient-to-br from-red-900/90 via-red-800/70 to-red-900/90 border-red-500/70 hover:border-red-400' :
+                        result.result_color === 'green' ? 'bg-gradient-to-br from-emerald-900/90 via-emerald-800/70 to-emerald-900/90 border-emerald-500/70 hover:border-emerald-400' :
+                        'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 hover:border-slate-400'
+                      } animate-in slide-in-from-right-5`}
+                      style={{
+                        clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                      }}
+                    >
+                      {/* Inner Glow Effect */}
+                      <div className={`absolute inset-0 opacity-0 group-hover/bubble:opacity-100 transition-opacity duration-300 ${
+                        result.result_color === 'red' ? 'bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20' :
+                        result.result_color === 'green' ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-emerald-500/20' :
+                        'bg-gradient-to-r from-slate-500/20 via-slate-400/30 to-slate-500/20'
+                      }`}></div>
+                      
+                      {/* Tech Corner Indicators */}
+                      <div className={`absolute top-0 right-0 w-1 h-1 animate-pulse ${
+                        result.result_color === 'red' ? 'bg-red-500/80' :
+                        result.result_color === 'green' ? 'bg-emerald-500/80' :
+                        'bg-slate-500/80'
+                      }`}></div>
+                      <div className={`absolute bottom-0 left-0 w-1 h-1 animate-pulse ${
+                        result.result_color === 'red' ? 'bg-red-500/80' :
+                        result.result_color === 'green' ? 'bg-emerald-500/80' :
+                        'bg-slate-500/80'
+                      }`} style={{ animationDelay: '0.3s' }}></div>
+                      
+                      <span className="relative z-10">{result.result_slot}</span>
+                    </div>
                   </div>
                 ))}
                 {recentResults.length === 0 && (
