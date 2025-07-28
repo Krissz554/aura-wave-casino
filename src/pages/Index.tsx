@@ -22,6 +22,7 @@ import { UserLevelDisplay } from '@/components/UserLevelDisplay';
 import { LiveLevelUpNotification } from '@/components/LiveLevelUpNotification';
 import { ProfileBorder } from '@/components/ProfileBorder';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
+import { useUserLevelStats } from '@/hooks/useUserLevelStats';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
 import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
@@ -479,14 +480,32 @@ export default function Index({ initialGame }: IndexProps) {
   };
 
   const { levelStats } = useLevelSync();
+  const { stats: userLevelStats } = useUserLevelStats(); // This is the working hook that profile uses
 
+  // Debug: Log when userLevelStats updates
+  useEffect(() => {
+    if (userLevelStats) {
+      console.log('🎯 HEADER: userLevelStats updated:', {
+        lifetime_xp: userLevelStats.lifetime_xp,
+        current_level_xp: userLevelStats.current_level_xp,
+        current_level: userLevelStats.current_level
+      });
+    }
+  }, [userLevelStats]);
 
+  // Use userLevelStats as primary source (working real-time updates), fallback to levelStats
+  const effectiveStats = userLevelStats || {
+    current_level: levelStats?.current_level || 1,
+    lifetime_xp: levelStats?.lifetime_xp || 0,
+    current_level_xp: levelStats?.current_level_xp || 0,
+    xp_to_next_level: levelStats?.xp_to_next_level || 100
+  };
 
   // Calculate XP progress using current_level_xp for progress bar
-  const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
+  const xpProgress = calculateXPProgress(effectiveStats.current_level_xp, effectiveStats.xp_to_next_level);
   
   // Display lifetime_xp (main XP tracker) in header with live animations
-  const displayXP = xpIncreaseAnimation ? animatedXP : (levelStats?.lifetime_xp || 0);
+  const displayXP = xpIncreaseAnimation ? animatedXP : effectiveStats.lifetime_xp;
   const displayProgress = xpIncreaseAnimation ? animatedProgress : xpProgress;
 
   // Smooth XP animation function
@@ -512,10 +531,10 @@ export default function Index({ initialGame }: IndexProps) {
     requestAnimationFrame(animate);
   }, []);
 
-  // Handle XP changes with animations
+  // Handle XP changes with animations  
   useEffect(() => {
-    if (levelStats) {
-      const currentXP = levelStats.lifetime_xp; // Use lifetime_xp for main tracking
+    if (effectiveStats) {
+      const currentXP = effectiveStats.lifetime_xp; // Use lifetime_xp for main tracking
       const currentProgress = xpProgress;
       
       // Initialize on first load
@@ -551,7 +570,7 @@ export default function Index({ initialGame }: IndexProps) {
       previousXP.current = currentXP;
       previousProgress.current = currentProgress;
     }
-  }, [levelStats, xpProgress, animateToValue, isInitialized]);
+  }, [effectiveStats, xpProgress, animateToValue, isInitialized]);
 
   if (authLoading) {
     return (
@@ -1353,7 +1372,7 @@ export default function Index({ initialGame }: IndexProps) {
                           {/* Enhanced Avatar */}
                           <div className="relative">
                             <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-sm animate-cyber-avatar-scan" />
-                            <ProfileBorder level={levelStats?.current_level || 1} size="md">
+                                                          <ProfileBorder level={effectiveStats.current_level} size="md">
                               <div className="w-12 h-12 rounded-full overflow-hidden relative">
                                 <img 
                                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
@@ -1378,15 +1397,15 @@ export default function Index({ initialGame }: IndexProps) {
                             </span>
                             <div className="flex items-center space-x-2 text-xs">
                               <span className="text-primary/80 font-mono">LVL</span>
-                              <span className="text-accent font-bold">{levelStats?.current_level || 1}</span>
-                              {levelStats && (
-                                <>
-                                  <span className="text-slate-500">•</span>
-                                  <span className={`text-slate-400 font-mono transition-all duration-300 ${xpIncreaseAnimation ? 'text-green-400 scale-105 drop-shadow-[0_0_4px_rgba(34,197,94,0.6)]' : ''}`}>
-                                    {formatXP(displayXP)} XP
-                                  </span>
-                                </>
-                              )}
+                              <span className="text-accent font-bold">{effectiveStats.current_level}</span>
+                                                              {effectiveStats && (
+                                  <>
+                                    <span className="text-slate-500">•</span>
+                                    <span className={`text-slate-400 font-mono transition-all duration-300 ${xpIncreaseAnimation ? 'text-green-400 scale-105 drop-shadow-[0_0_4px_rgba(34,197,94,0.6)]' : ''}`}>
+                                      {formatXP(displayXP)} XP
+                                    </span>
+                                  </>
+                                )}
                             </div>
                           </div>
                           
@@ -1415,7 +1434,7 @@ export default function Index({ initialGame }: IndexProps) {
                         }}
                       >
                         <div className="relative">
-                          <ProfileBorder level={levelStats?.current_level || 1} size="sm">
+                          <ProfileBorder level={effectiveStats.current_level} size="sm">
                             <div className="w-8 h-8 rounded-full overflow-hidden relative">
                               <img 
                                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
@@ -1424,7 +1443,7 @@ export default function Index({ initialGame }: IndexProps) {
                               />
                               <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent px-1 py-0.5">
                                 <span className="text-white text-xs font-bold block text-center leading-none">
-                                  {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
+                                  {effectiveStats.current_level >= 100 ? '👑' : effectiveStats.current_level}
                                 </span>
                               </div>
                               {/* Loading overlay */}
@@ -1517,15 +1536,15 @@ export default function Index({ initialGame }: IndexProps) {
                     <div className="flex items-center gap-2">
                       <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                       <span className="text-xs font-mono text-slate-300 uppercase tracking-wider">
-                        Level {levelStats.current_level} Progress
+                        Level {effectiveStats.current_level} Progress
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
                       <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
-                        {formatXP(levelStats.current_level_xp)}
+                        {formatXP(effectiveStats.current_level_xp)}
                       </span>
                       <span className="text-slate-500">/</span>
-                      <span className="text-primary">{formatXP(levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
+                      <span className="text-primary">{formatXP(effectiveStats.current_level_xp + effectiveStats.xp_to_next_level)}</span>
                       <span className="text-slate-400">XP</span>
                       {xpIncreaseAnimation && (
                         <span className="text-green-400 animate-bounce text-xs">+</span>
