@@ -1282,11 +1282,6 @@ export default function Index({ initialGame }: IndexProps) {
                                   className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20" />
-                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-1 py-0.5">
-                                  <span className="text-white text-xs font-bold block text-center leading-none drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
-                                    {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
-                                  </span>
-                                </div>
                                 {/* Loading overlay */}
                                 {profileModalLoading && (
                                   <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
