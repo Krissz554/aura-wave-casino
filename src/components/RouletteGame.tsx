@@ -1330,16 +1330,34 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                               </label>
                             </div>
                             
-                            {/* Container with Cyberpunk Border */}
-                            <div className="relative">
-                              {/* Cyberpunk Border */}
-                              <div className="absolute inset-0 rounded-lg border border-primary/30 group-hover:border-primary/50 transition-colors duration-300"></div>
-                              
-                              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 relative z-10">
-                              <div className="flex items-center justify-center w-6 h-6 rounded bg-gradient-to-br from-primary/20 to-accent/30 border border-primary/40 text-primary font-bold text-sm shadow-sm">
-                                $
+                            {/* Futuristic Input Container */}
+                            <div className="relative group/cyber">
+                              {/* Holographic Scan Lines */}
+                              <div className="absolute inset-0 overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-focus-within/cyber:translate-x-[100%] transition-transform duration-1000 ease-out"></div>
                               </div>
-                              <div className="relative flex-1">
+                              
+                              {/* Main Container */}
+                              <div className="relative bg-black/80 border border-primary/40 overflow-hidden" style={{
+                                clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                              }}>
+                                {/* Inner Glow Effect */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 opacity-0 group-focus-within/cyber:opacity-100 transition-opacity duration-300"></div>
+                                
+                                {/* Tech Corner Indicators */}
+                                <div className="absolute top-0 right-0 w-2 h-2 bg-primary/60 animate-pulse"></div>
+                                <div className="absolute bottom-0 left-0 w-2 h-2 bg-accent/60 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                                
+                                <div className="flex items-center gap-3 px-4 py-3 relative z-10">
+                                  {/* Cyber Dollar Symbol */}
+                                  <div className="flex items-center justify-center min-w-[32px] h-8 bg-gradient-to-br from-primary/20 to-primary/40 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
+                                    clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                                  }}>
+                                    <div className="absolute inset-0 bg-primary/20 translate-x-[-100%] group-hover/cyber:translate-x-[100%] transition-transform duration-500"></div>
+                                    <span className="relative z-10">$</span>
+                                  </div>
+                                  
+                                  <div className="relative flex-1">
                                 <Input
                                   type="text"
                                   value={betAmount}
@@ -1370,13 +1388,13 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(Number(Number(betAmount).toFixed(2)));
                                     }
                                   }}
-                                  className="w-full text-center text-lg font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-6 text-white focus:text-primary placeholder:text-slate-400 placeholder:font-normal placeholder:text-sm [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300"
+                                  className="w-full text-center text-lg font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-base [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider"
                                   disabled={currentRound.status !== 'betting'}
-                                  placeholder="0.00"
+                                  placeholder="[ 0.00 ]"
                                 />
                                 
-                                {/* Custom Spin Buttons */}
-                                <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex flex-col gap-0.5">
+                                {/* Cyber Control Buttons */}
+                                <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col gap-1">
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -1386,11 +1404,11 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount > maxBalance ? maxBalance : newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-5 h-4 flex items-center justify-center bg-gradient-to-br from-primary/15 to-accent/25 border border-primary/30 rounded text-primary hover:text-white hover:border-primary/50 hover:from-primary/25 hover:to-accent/35 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm"
+                                    className="w-6 h-5 flex items-center justify-center bg-black/60 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="drop-shadow-sm">
-                                      <path d="M5 0L9 6H1L5 0Z" fill="currentColor"/>
-                                    </svg>
+                                    <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
+                                    <div className="relative z-10 text-xs font-bold">▲</div>
                                   </button>
                                   <button
                                     type="button"
@@ -1400,22 +1418,27 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(newAmount);
                                     }}
                                     disabled={currentRound.status !== 'betting'}
-                                    className="w-5 h-4 flex items-center justify-center bg-gradient-to-br from-primary/15 to-accent/25 border border-primary/30 rounded text-primary hover:text-white hover:border-primary/50 hover:from-primary/25 hover:to-accent/35 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm"
+                                    className="w-6 h-5 flex items-center justify-center bg-black/60 border border-primary/50 text-primary hover:text-white hover:border-primary hover:bg-primary/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 active:scale-95 relative overflow-hidden group"
+                                    style={{ clipPath: 'polygon(0 0, calc(100% - 2px) 0, 100% 2px, 100% 100%, 2px 100%, 0 calc(100% - 2px))' }}
                                   >
-                                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" className="drop-shadow-sm">
-                                      <path d="M5 6L1 0H9L5 6Z" fill="currentColor"/>
-                                    </svg>
+                                    <div className="absolute inset-0 bg-primary/30 translate-y-full group-hover:translate-y-0 transition-transform duration-200"></div>
+                                    <div className="relative z-10 text-xs font-bold">▼</div>
                                   </button>
+                                </div>
                                 </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-1.5 h-1.5 rounded-full bg-primary/60 animate-pulse"></div>
-                          <span className="text-xs text-slate-300 whitespace-nowrap font-medium">
-                            MAX: <span className="text-primary font-bold">${profile?.balance?.toFixed(2) || '0.00'}</span>
-                          </span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5 px-2 py-1 bg-black/60 border border-accent/40 relative overflow-hidden" style={{
+                            clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                          }}>
+                            <div className="w-1 h-1 bg-accent animate-pulse"></div>
+                            <span className="text-xs text-slate-300 whitespace-nowrap font-mono tracking-wide">
+                              MAX: <span className="text-accent font-bold">${profile?.balance?.toFixed(2) || '0.00'}</span>
+                            </span>
+                          </div>
                         </div>
                       </div>
                       
