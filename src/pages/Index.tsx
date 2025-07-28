@@ -60,6 +60,8 @@ export default function Index({ initialGame }: IndexProps) {
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [hoveredNotification, setHoveredNotification] = useState<string | null>(null);
   const [newNotificationIds, setNewNotificationIds] = useState<Set<string>>(new Set());
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -150,6 +152,38 @@ export default function Index({ initialGame }: IndexProps) {
         };
     }
   };
+
+  // Admin status check
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) {
+        setIsAdmin(false);
+        setAdminLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking admin status:', error);
+        }
+
+        setIsAdmin(!!data);
+      } catch (err) {
+        console.error('Error checking admin status:', err);
+        setIsAdmin(false);
+      } finally {
+        setAdminLoading(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   // Notification functions
   const fetchNotifications = async () => {
@@ -1110,8 +1144,8 @@ export default function Index({ initialGame }: IndexProps) {
                     </div>
                   )}
 
-                  {/* Cyberpunk Admin Panel Button - Only show for authenticated users */}
-                  {user && userData?.is_admin && (
+                  {/* Cyberpunk Admin Panel Button - Only show for admin users */}
+                  {user && !adminLoading && isAdmin && (
                     <div className="relative group/admin">
                       <Button
                         variant="ghost"
