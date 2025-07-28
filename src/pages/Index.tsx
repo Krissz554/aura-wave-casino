@@ -453,7 +453,7 @@ export default function Index({ initialGame }: IndexProps) {
             </div>
             
             {/* Main Header Content */}
-            <div className="relative z-10 p-6">
+            <div className="relative z-10 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   {/* Logo Section with Advanced Effects */}
@@ -1197,19 +1197,19 @@ export default function Index({ initialGame }: IndexProps) {
 
             {/* Cyberpunk XP Progress Bar - Only show for authenticated users */}
             {user && levelStats && (
-              <div className="relative mt-4 p-4 rounded-xl bg-slate-900/50 border border-primary/20">
+              <div className="relative mt-3 p-3 rounded-lg bg-slate-900/50 border border-primary/20">
                 {/* Background effects */}
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-accent/5 to-primary/5 rounded-xl" />
                 <div className="absolute inset-0 opacity-20 rounded-xl overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_70%,rgba(99,102,241,0.1)_85%,transparent_100%)] bg-[length:50px_100%] animate-cyber-scan-horizontal" />
                 </div>
                 
-                <div className="relative space-y-3">
+                <div className="relative space-y-2">
                   {/* XP Header */}
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                      <span className="text-sm font-mono text-slate-300 uppercase tracking-wider">
+                      <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                      <span className="text-xs font-mono text-slate-300 uppercase tracking-wider">
                         Level {levelStats.current_level} Progress
                       </span>
                     </div>
@@ -1224,7 +1224,7 @@ export default function Index({ initialGame }: IndexProps) {
                   {/* Enhanced Progress Bar */}
                   <div className="relative">
                     {/* Background track */}
-                    <div className="h-3 bg-slate-800/80 rounded-full border border-slate-700/50 overflow-hidden">
+                    <div className="h-2 bg-slate-800/80 rounded-full border border-slate-700/50 overflow-hidden">
                       {/* Animated background pattern */}
                       <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(99,102,241,0.1)_50%,transparent_60%)] bg-[length:30px_100%] animate-grid-move-slow" />
                       
@@ -1239,25 +1239,25 @@ export default function Index({ initialGame }: IndexProps) {
                     </div>
                     
                     {/* Progress percentage */}
-                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                      <span className="text-xs font-bold text-white drop-shadow-lg">
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2">
+                      <span className="text-[10px] font-bold text-white drop-shadow-lg">
                         {Math.round(xpProgress)}%
                       </span>
                     </div>
                   </div>
                   
                   {/* Tech corners */}
-                  <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/40" />
-                  <div className="absolute top-1 right-1 w-2 h-2 border-r border-t border-accent/40" />
-                  <div className="absolute bottom-1 left-1 w-2 h-2 border-l border-b border-accent/40" />
-                  <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-primary/40" />
+                  <div className="absolute top-0.5 left-0.5 w-1.5 h-1.5 border-l border-t border-primary/40" />
+                  <div className="absolute top-0.5 right-0.5 w-1.5 h-1.5 border-r border-t border-accent/40" />
+                  <div className="absolute bottom-0.5 left-0.5 w-1.5 h-1.5 border-l border-b border-accent/40" />
+                  <div className="absolute bottom-0.5 right-0.5 w-1.5 h-1.5 border-r border-b border-primary/40" />
                 </div>
               </div>
             )}
 
             {/* Cyberpunk Guest Notice */}
             {!user && (
-              <div className="relative mt-4 overflow-hidden group">
+              <div className="relative mt-3 overflow-hidden group">
                 {/* Background effects */}
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/90 rounded-xl" />
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-md group-hover:blur-lg transition-all duration-500" />
@@ -1268,7 +1268,7 @@ export default function Index({ initialGame }: IndexProps) {
                 </div>
                 
                 {/* Content */}
-                <div className="relative p-4 border border-primary/30 rounded-xl bg-slate-900/50 text-center">
+                <div className="relative p-3 border border-primary/30 rounded-xl bg-slate-900/50 text-center">
                   <div className="flex items-center justify-center gap-3">
                     <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
                     <span className="text-sm font-mono text-slate-300">
