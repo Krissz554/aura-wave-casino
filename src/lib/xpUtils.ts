@@ -3,23 +3,27 @@
  */
 
 /**
- * Formats XP value to show 2 decimal places when needed
- * - Shows decimals for values < 10 XP
+ * Formats XP value to show up to 3 decimal places when needed
+ * - Shows 3 decimals for values < 0.01 (minimum bet $0.01 = 0.001 XP)
+ * - Shows 3 decimals for values < 1 XP
+ * - Shows 2 decimals for values 1-9.99 XP
  * - Shows 1 decimal for values 10-99.9 XP  
  * - Shows integers for values >= 100 XP
- * - Always shows at least 2 decimals for very small values
  */
 export function formatXP(xp: number): string {
-  if (xp < 0.01) {
-    return '0.00';
+  if (xp < 0.001) {
+    return '0.000';
+  } else if (xp < 0.01) {
+    // Show 3 decimal places for very small values (0.001-0.009)
+    return xp.toFixed(3);
   } else if (xp < 1) {
-    // Show 2 decimal places for values less than 1
-    return xp.toFixed(2);
+    // Show 3 decimal places for small values (0.01-0.999)
+    return xp.toFixed(3);
   } else if (xp < 10) {
-    // Show 2 decimal places for small values
+    // Show 2 decimal places for medium-small values (1.00-9.99)
     return xp.toFixed(2);
   } else if (xp < 100) {
-    // Show 1 decimal place for medium values
+    // Show 1 decimal place for medium values (10.0-99.9)
     return xp.toFixed(1);
   } else {
     // Show no decimals for large values, but use toLocaleString for thousands
