@@ -1317,8 +1317,6 @@ export default function Index({ initialGame }: IndexProps) {
             )}
           </div>
         </header>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 pb-8">
