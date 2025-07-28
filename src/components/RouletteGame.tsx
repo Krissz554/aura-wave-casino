@@ -1259,17 +1259,17 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             
             {/* Animated Circuit Board Pattern */}
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.3)_25%,rgba(34,197,94,0.3)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.3)_75%,rgba(34,197,94,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(34,197,94,0.3)_25%,rgba(34,197,94,0.3)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.3)_75%,rgba(34,197,94,0.3)_76%,transparent_77%,transparent)] bg-[22px_22px] animate-grid-move-slow" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent)] bg-[22px_22px] animate-grid-move-slow" />
             </div>
             
             {/* Animated Border Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-green-500/30 to-emerald-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
             
             {/* Corner Tech Details */}
-            <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-emerald-400/60" />
-            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-emerald-400/60" />
-            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-emerald-400/60" />
-            <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-emerald-400/60" />
+            <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/60" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-accent/60" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-accent/60" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-primary/60" />
             
             <Card className="relative z-10 bg-transparent border-0">
               <CardHeader className="pb-4">
@@ -1505,17 +1505,48 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                       </div>
                     </div>
 
-                    {/* Live Bet Feed (TowerGame pattern) */}
-                    <Card className="glass border-0">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-sm font-medium flex items-center justify-between">
-                          <span className="capitalize">{color} Bets</span>
-                          <Badge variant="outline" className="text-xs">
-                            {(color === 'green' ? greenBets : color === 'red' ? redBets : blackBets).length} live
-                          </Badge>
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-3 pt-0">
+                    {/* Live Bet Feed (Cyberpunk Design) */}
+                    <div className="relative overflow-hidden group">
+                      {/* Cyberpunk Background */}
+                      <div className={`absolute inset-0 backdrop-blur-md rounded-xl ${
+                        color === 'red' ? 'bg-gradient-to-br from-red-950/80 via-red-900/70 to-red-950/80' :
+                        color === 'green' ? 'bg-gradient-to-br from-emerald-950/80 via-emerald-900/70 to-emerald-950/80' :
+                        'bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80'
+                      }`} />
+                      
+                      {/* Animated Border Glow */}
+                      <div className={`absolute -inset-0.5 rounded-xl blur-sm group-hover:blur-md transition-all duration-300 ${
+                        color === 'red' ? 'bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20' :
+                        color === 'green' ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-emerald-500/20' :
+                        'bg-gradient-to-r from-slate-500/20 via-slate-400/30 to-slate-500/20'
+                      }`} />
+                      
+                      {/* Tech Corner Accents */}
+                      <div className={`absolute top-1 left-1 w-1.5 h-1.5 border-l border-t ${
+                        color === 'red' ? 'border-red-400/60' :
+                        color === 'green' ? 'border-emerald-400/60' :
+                        'border-slate-400/60'
+                      }`} />
+                      <div className={`absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b ${
+                        color === 'red' ? 'border-red-400/60' :
+                        color === 'green' ? 'border-emerald-400/60' :
+                        'border-slate-400/60'
+                      }`} />
+                      
+                      <Card className="relative z-10 bg-transparent border-0">
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm font-medium flex items-center justify-between">
+                            <span className="capitalize">{color} Bets</span>
+                            <Badge variant="outline" className={`text-xs ${
+                              color === 'red' ? 'border-red-400/50 text-red-400' :
+                              color === 'green' ? 'border-emerald-400/50 text-emerald-400' :
+                              'border-slate-400/50 text-slate-400'
+                            }`}>
+                              {(color === 'green' ? greenBets : color === 'red' ? redBets : blackBets).length} live
+                            </Badge>
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-3 pt-0">
                         <ScrollArea className="h-32">
                           {(color === 'green' ? greenBets : color === 'red' ? redBets : blackBets).length === 0 ? (
                             <div className="text-center py-6 text-muted-foreground">
@@ -1576,6 +1607,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                       </CardContent>
                     </Card>
                   </div>
+                </div>
                 ))}
               </div>
             </CardContent>
