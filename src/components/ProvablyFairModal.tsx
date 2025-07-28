@@ -225,29 +225,10 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 border-0 bg-transparent overflow-hidden">
-        {/* Main Cyberpunk Container */}
         <div className="relative">
-          {/* Multi-layer Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl" />
-          
-          {/* Circuit Pattern Overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-50" />
-          
-          {/* Angular Clipping */}
-          <div className="relative clip-path-[polygon(0_0,calc(100%-16px)_0,100%_16px,100%_100%,16px_100%,0_calc(100%-16px))] border border-indigo-500/30 shadow-2xl shadow-indigo-500/20">
-            
-            {/* Scan Line Animation */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite] clip-path-[polygon(0_0,calc(100%-16px)_0,100%_16px,100%_100%,16px_100%,0_calc(100%-16px))]" />
-            
-            {/* Tech Corners */}
-            <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-indigo-400/60" />
-            <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-400/60" />
-            <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-purple-400/60" />
-            <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-indigo-400/60" />
-            
-            {/* Content */}
+          <div className="relative border border-indigo-500/30 shadow-2xl shadow-indigo-500/20 rounded-lg">
             <div className="relative z-10 p-8 max-h-[90vh] overflow-y-auto cyberpunk-scrollbar">
-              {/* Cyberpunk Header */}
               <DialogHeader className="text-center mb-6">
                 <div className="flex items-center justify-center mb-4">
                   <div className="relative">
@@ -265,206 +246,164 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
                 </p>
               </DialogHeader>
 
-              {loading ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <div className="relative">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent border-t-indigo-400 border-r-purple-400"></div>
-                    <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse"></div>
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
+        ) : (
+          <div className={`space-y-6 transition-all duration-400 ease-out delay-200 ${
+            isModalVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+          }`}>
+            {/* Round Result Visualization */}
+            {roundData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    Round Result
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <Badge variant="outline" className="mb-2">
+                        Round #{roundData.round_number}
+                      </Badge>
+                      <div className="text-2xl font-bold">
+                        Result: <span className={`${roundData.result_color === 'green' ? 'text-emerald-400' : roundData.result_color === 'red' ? 'text-red-400' : 'text-gray-300'}`}>
+                          {roundData.result_color.toUpperCase()} {roundData.result_slot}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {renderReelVisualization()}
                   </div>
-                  <p className="text-xs text-slate-400 font-mono tracking-wider mt-3">ANALYZING_ROUND_DATA</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Guest User Notification */}
+            {!user && (
+              <Card className="relative overflow-hidden">
+                {/* Multi-layer cyberpunk background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-50" />
+                
+                {/* Angular clipping */}
+                <div className="relative border border-indigo-500/30">
+                  {/* Scan line animation */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite]" />
+                  
+                  {/* Tech corners */}
+                  <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-indigo-400/60" />
+                  <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-400/60" />
+                  <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-purple-400/60" />
+                  <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-indigo-400/60" />
+                  
+                  <CardHeader className="relative z-10">
+                    <CardTitle className="flex items-center gap-2 text-center justify-center">
+                      <div className="relative">
+                        <Shield className="w-6 h-6 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                        <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
+                      </div>
+                      <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-mono tracking-wider">
+                        AUTHENTICATION_REQUIRED
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="relative z-10 space-y-4 text-center">
+                    <div className="space-y-3">
+                      <p className="text-slate-300 font-mono text-sm leading-relaxed">
+                        Access to provably fair verification records requires system authentication.
+                      </p>
+                      
+                      <div className="bg-gradient-to-r from-slate-800/80 via-slate-700/60 to-slate-800/80 rounded-lg p-4 space-y-2 border border-indigo-500/30">
+                        <div className="text-sm text-indigo-300 font-mono tracking-wider">VERIFICATION_FEATURES:</div>
+                        <div className="grid grid-cols-1 gap-2 text-xs font-mono">
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Eye className="w-3 h-3" />
+                            » ROUND_HISTORY_ACCESS
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Calculator className="w-3 h-3" />
+                            » PERSONAL_BET_VERIFICATION
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Dice6 className="w-3 h-3" />
+                            » CRYPTOGRAPHIC_VALIDATION
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Shield className="w-3 h-3" />
+                            » FAIRNESS_TRANSPARENCY
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-slate-400 font-mono tracking-wide">
+                        ENGAGE_SYSTEM_TO_ACCESS_VERIFICATION_PROTOCOL
+                      </p>
+                    </div>
+                  </CardContent>
                 </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Cyberpunk Round Result Visualization */}
-                  {roundData && (
-                    <div className="relative">
-                      {/* Background Effects */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/15 to-cyan-500/20 rounded-lg" />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[length:8px_8px] opacity-40" />
-                      
-                      <div className="relative border border-indigo-500/30 rounded-lg p-6 clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="relative">
-                            <Eye className="w-5 h-5 text-indigo-400 drop-shadow-[0_0_6px_rgba(99,102,241,0.6)]" />
-                            <div className="absolute inset-0 border border-indigo-400/20 rounded animate-pulse" />
-                          </div>
-                          <h3 className="text-lg font-bold font-mono tracking-wider text-white">ROUND_RESULT_ANALYSIS</h3>
+              </Card>
+            )}
+
+            {/* User's Bets */}
+            {user && userBets.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Dice6 className="w-4 h-4" />
+                    Your Bets
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {userBets.map((bet, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 rounded-lg border bg-card/50">
+                        <div className="flex items-center gap-2">
+                          <Badge className={`${bet.bet_color === 'green' ? 'bg-emerald-500' : bet.bet_color === 'red' ? 'bg-red-500' : 'bg-gray-700'}`}>
+                            {bet.bet_color.toUpperCase()}
+                          </Badge>
+                          <span>Bet: ${bet.bet_amount}</span>
                         </div>
-                        
-                        <div className="space-y-4">
-                          <div className="text-center">
-                            <Badge className="mb-3 text-xs font-mono bg-indigo-500/20 text-indigo-300 border-indigo-500/40">
-                              ROUND #{roundData.round_number}
-                            </Badge>
-                            <div className="text-2xl font-bold font-mono tracking-wider">
-                              RESULT: <span className={`${roundData.result_color === 'green' ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]' : roundData.result_color === 'red' ? 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]' : 'text-slate-300 drop-shadow-[0_0_8px_rgba(148,163,184,0.6)]'}`}>
-                                {roundData.result_color.toUpperCase()} {roundData.result_slot}
-                              </span>
-                            </div>
-                          </div>
-                          
-                          {renderReelVisualization()}
+                        <div className="flex items-center gap-2">
+                          <Badge variant={bet.is_winner ? 'default' : 'destructive'}>
+                            {bet.is_winner ? 'WON' : 'LOST'}
+                          </Badge>
+                          <span className={bet.profit >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                            {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
+                          </span>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                  {/* Guest User Notification */}
-                  {!user && (
-                    <div className="relative overflow-hidden my-6">
-                      {/* Multi-layer cyberpunk background */}
-                      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95" />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-50" />
-                      
-                      {/* Angular clipping */}
-                      <div className="relative border border-indigo-500/30 rounded-lg">
-                        {/* Scan line animation */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite] rounded-lg" />
-                        
-                        {/* Tech corners */}
-                        <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-indigo-400/60" />
-                        <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-400/60" />
-                        <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-purple-400/60" />
-                        <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-indigo-400/60" />
-                        
-                        <div className="relative z-10 text-center py-8 px-6 space-y-4">
-                          {/* Header */}
-                          <div className="flex items-center justify-center gap-3 mb-4">
-                            <div className="relative">
-                              <Shield className="w-8 h-8 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                              <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
-                            </div>
-                            <h3 className="text-xl font-bold font-mono tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
-                              AUTHENTICATION_REQUIRED
-                            </h3>
-                          </div>
-                          
-                          {/* Description */}
-                          <p className="text-slate-300 font-mono text-sm leading-relaxed max-w-md mx-auto">
-                            Access to provably fair verification records requires system authentication.
-                          </p>
-                          
-                          {/* Features grid */}
-                          <div className="bg-gradient-to-r from-slate-800/80 via-slate-700/60 to-slate-800/80 rounded-lg p-4 space-y-3 border border-indigo-500/30 mx-auto max-w-md">
-                            <div className="text-sm text-indigo-300 font-mono tracking-wider">VERIFICATION_FEATURES:</div>
-                            <div className="grid grid-cols-1 gap-2 text-xs font-mono">
-                              <div className="text-cyan-300 flex items-center justify-center gap-2">
-                                <Eye className="w-3 h-3" />
-                                » ROUND_HISTORY_ACCESS
-                              </div>
-                              <div className="text-cyan-300 flex items-center justify-center gap-2">
-                                <Calculator className="w-3 h-3" />
-                                » PERSONAL_BET_VERIFICATION
-                              </div>
-                              <div className="text-cyan-300 flex items-center justify-center gap-2">
-                                <Dice6 className="w-3 h-3" />
-                                » CRYPTOGRAPHIC_VALIDATION
-                              </div>
-                              <div className="text-cyan-300 flex items-center justify-center gap-2">
-                                <Shield className="w-3 h-3" />
-                                » FAIRNESS_TRANSPARENCY
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Call to action */}
-                          <p className="text-xs text-slate-400 font-mono tracking-wide">
-                            ENGAGE_SYSTEM_TO_ACCESS_VERIFICATION_PROTOCOL
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+            {/* Error Display */}
+            {user && verificationData?.error && (
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="text-center text-red-500">
+                    <h4 className="font-semibold mb-2">Error Loading Round Details</h4>
+                    <p className="text-sm">{verificationData.error}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
-                  {/* Cyberpunk User's Bets */}
-                  {user && userBets.length > 0 && (
-                    <div className="relative">
-                      {/* Background Effects */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-green-500/15 to-emerald-500/20 rounded-lg" />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.1)_25%,rgba(34,197,94,0.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.1)_75%,rgba(34,197,94,0.1)_76%,transparent_77%,transparent)] bg-[length:8px_8px] opacity-40" />
-                      
-                      <div className="relative border border-emerald-500/30 rounded-lg p-6 clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <div className="relative">
-                            <Dice6 className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
-                            <div className="absolute inset-0 border border-emerald-400/20 rounded animate-pulse" />
-                          </div>
-                          <h3 className="text-lg font-bold font-mono tracking-wider text-white">USER_BET_ANALYSIS</h3>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          {userBets.map((bet, index) => (
-                            <div key={index} className="relative group">
-                              {/* Bet Item Background */}
-                              <div className="absolute inset-0 bg-gradient-to-r from-slate-800/60 via-slate-700/40 to-slate-800/60 rounded-lg" />
-                              
-                              <div className="relative border border-slate-600/40 group-hover:border-emerald-500/50 rounded-lg p-3 transition-all duration-300 clip-path-[polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    <Badge className={`text-xs font-mono ${bet.bet_color === 'green' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : bet.bet_color === 'red' ? 'bg-red-500/20 text-red-300 border-red-500/40' : 'bg-slate-500/20 text-slate-300 border-slate-500/40'}`}>
-                                      {bet.bet_color.toUpperCase()}
-                                    </Badge>
-                                    <span className="text-slate-300 font-mono text-sm">BET: ${bet.bet_amount}</span>
-                                  </div>
-                                  <div className="flex items-center gap-3">
-                                    <Badge className={`text-xs font-mono ${bet.is_winner ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-red-500/20 text-red-300 border-red-500/40'}`}>
-                                      {bet.is_winner ? 'VICTORY' : 'DEFEAT'}
-                                    </Badge>
-                                    <span className={`font-mono text-sm font-bold ${bet.profit >= 0 ? 'text-emerald-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'}`}>
-                                      {bet.profit >= 0 ? '+' : ''}${bet.profit.toFixed(2)}
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cyberpunk Error Display */}
-                  {user && verificationData?.error && (
-                    <div className="relative">
-                      {/* Background Effects */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-red-400/15 to-red-500/20 rounded-lg" />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.1)_25%,rgba(239,68,68,0.1)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.1)_75%,rgba(239,68,68,0.1)_76%,transparent_77%,transparent)] bg-[length:8px_8px] opacity-40" />
-                      
-                      <div className="relative border border-red-500/30 rounded-lg p-6 clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]">
-                        <div className="text-center">
-                          <div className="flex items-center justify-center gap-3 mb-4">
-                            <div className="relative">
-                              <AlertTriangle className="w-6 h-6 text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                              <div className="absolute inset-0 border border-red-400/30 rounded animate-pulse" />
-                            </div>
-                            <h4 className="text-lg font-bold font-mono tracking-wider text-red-300">SYSTEM_ERROR_DETECTED</h4>
-                          </div>
-                          <p className="text-sm font-mono text-slate-300">{verificationData.error}</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Cyberpunk Provably Fair Verification */}
-                  {user && verificationData && !verificationData.error && (
-                    <div className="relative">
-                      {/* Background Effects */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-blue-500/15 to-cyan-500/20 rounded-lg" />
-                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(6,182,212,0.1)_25%,rgba(6,182,212,0.1)_26%,transparent_27%,transparent_74%,rgba(6,182,212,0.1)_75%,rgba(6,182,212,0.1)_76%,transparent_77%,transparent)] bg-[length:8px_8px] opacity-40" />
-                      
-                      <div className="relative border border-cyan-500/30 rounded-lg p-6 clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]">
-                        {/* Header */}
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="relative">
-                            <Calculator className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
-                            <div className="absolute inset-0 border border-cyan-400/20 rounded animate-pulse" />
-                          </div>
-                          <h3 className="text-lg font-bold font-mono tracking-wider text-white">CRYPTOGRAPHIC_VERIFICATION</h3>
-                        </div>
-                        
-                        <div className="space-y-4">
+            {/* Provably Fair Verification */}
+            {user && verificationData && !verificationData.error && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="w-4 h-4" />
+                    Provably Fair Verification
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
                   {verificationData.is_completed === false && (
                     <div className="p-4 rounded-lg border bg-yellow-50">
                       <p className="text-sm text-yellow-800">
@@ -626,29 +565,27 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
                       </div>
                     </div>
                   )}
-                </div>
-              </div>
-            </div>
-          )}
-          
-          {/* Cyberpunk Footer */}
-          <div className="flex justify-center pt-6 mt-6 border-t border-indigo-500/20">
-            <Link 
-              to="/provably-fair" 
-              className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-400 transition-colors font-mono tracking-wider"
-              onClick={() => onClose()}
-            >
-              <div className="relative">
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* How it works link */}
+            <div className="flex justify-center pt-3 border-t border-border/40">
+              <Link 
+                to="/provably-fair" 
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
+                onClick={() => onClose()}
+              >
                 <HelpCircle className="w-4 h-4" />
-                <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
-              </div>
-              How does Provably Fair work?
-            </Link>
+                How does Provably Fair work?
+              </Link>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
-  </DialogContent>
+  </div>
+</DialogContent>
 </Dialog>
   );
 }
