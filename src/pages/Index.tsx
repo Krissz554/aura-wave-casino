@@ -593,13 +593,13 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [effectiveStats, xpProgress, animateToValue, isInitialized]);
 
-  // Simple solution: Auto-refresh every 3 seconds to ensure XP stays updated
+  // Auto-refresh every 5 seconds as backup (reduced from 3s)
   useEffect(() => {
     if (!user) return;
     
     const interval = setInterval(() => {
       refetchUserLevelStats();
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [user, refetchUserLevelStats]);
@@ -631,11 +631,20 @@ export default function Index({ initialGame }: IndexProps) {
           description: "Added 0.5 XP manually",
         });
         
-        // Force refresh both data sources
+        // Force refresh both data sources - IMMEDIATE + FOLLOW-UP
+        console.log('🔄 IMMEDIATE: Forcing refresh after manual XP test');
+        forceFullRefresh().catch(console.error);
+        
+        // Follow-up refreshes to ensure it catches
         setTimeout(() => {
-          console.log('🔄 Forcing refresh after manual XP test');
+          console.log('🔄 TEST: Follow-up XP refresh #1');
           forceFullRefresh().catch(console.error);
-        }, 500);
+        }, 200);
+        
+        setTimeout(() => {
+          console.log('🔄 TEST: Follow-up XP refresh #2');
+          forceFullRefresh().catch(console.error);
+        }, 1000);
       }
     } catch (error) {
       console.error('❌ XP TEST EXCEPTION:', error);

@@ -357,11 +357,22 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
           }
         });
 
-        // Force refresh XP data after tower game completion
-        console.log('🎯 TOWER GAME COMPLETED: Forcing comprehensive XP refresh after $' + game.bet_amount + ' bet');
+        // Force refresh XP data after tower game completion - IMMEDIATE + FOLLOW-UP
+        console.log('🎯 TOWER GAME COMPLETED: Forcing IMMEDIATE XP refresh after $' + game.bet_amount + ' bet');
+        
+        // Immediate refresh (no delay)
+        forceFullRefresh().catch(console.error);
+        
+        // Follow-up refreshes
         setTimeout(() => {
+          console.log('🔄 TOWER: Follow-up XP refresh #1');
           forceFullRefresh().catch(console.error);
-        }, 500);
+        }, 200);
+        
+        setTimeout(() => {
+          console.log('🔄 TOWER: Follow-up XP refresh #2');
+          forceFullRefresh().catch(console.error);
+        }, 1000);
 
         // Get current balance from database for accurate updates
         const { data: profileData, error: profileError } = await supabase
@@ -486,11 +497,22 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
         }
       });
 
-      // Force refresh XP data after tower cash out
-      console.log('🎯 TOWER CASH OUT: Forcing comprehensive XP refresh after $' + game.bet_amount + ' bet');
+      // Force refresh XP data after tower cash out - IMMEDIATE + FOLLOW-UP
+      console.log('🎯 TOWER CASH OUT: Forcing IMMEDIATE XP refresh after $' + game.bet_amount + ' bet');
+      
+      // Immediate refresh (no delay)
+      forceFullRefresh().catch(console.error);
+      
+      // Follow-up refreshes
       setTimeout(() => {
+        console.log('🔄 TOWER CASHOUT: Follow-up XP refresh #1');
         forceFullRefresh().catch(console.error);
-      }, 500);
+      }, 200);
+      
+      setTimeout(() => {
+        console.log('🔄 TOWER CASHOUT: Follow-up XP refresh #2');
+        forceFullRefresh().catch(console.error);
+      }, 1000);
 
       // Update user balance
       await onUpdateUser({

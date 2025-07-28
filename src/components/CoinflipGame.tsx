@@ -178,11 +178,22 @@ export default function CoinflipGame({ userData, onUpdateUser }: CoinflipGamePro
       const result = data.result;
       const won = data.won;
       
-      // Force refresh XP data after successful coinflip
-      console.log('🎯 COINFLIP COMPLETED: Forcing comprehensive XP refresh after $' + gameState.betAmount + ' bet');
+      // Force refresh XP data after successful coinflip - IMMEDIATE + FOLLOW-UP
+      console.log('🎯 COINFLIP COMPLETED: Forcing IMMEDIATE XP refresh after $' + gameState.betAmount + ' bet');
+      
+      // Immediate refresh (no delay)
+      forceFullRefresh().catch(console.error);
+      
+      // Follow-up refreshes
       setTimeout(() => {
+        console.log('🔄 COINFLIP: Follow-up XP refresh #1');
         forceFullRefresh().catch(console.error);
-      }, 500);
+      }, 200);
+      
+      setTimeout(() => {
+        console.log('🔄 COINFLIP: Follow-up XP refresh #2');
+        forceFullRefresh().catch(console.error);
+      }, 1000);
       
       // Wait for animation to complete
       setTimeout(async () => {

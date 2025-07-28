@@ -892,11 +892,22 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         variant: "success",
       });
 
-      // Force refresh XP data after successful bet
-      console.log('🎯 BET CONFIRMED: Forcing comprehensive XP refresh after $' + betAmount + ' bet');
+      // Force refresh XP data after successful bet - IMMEDIATE + FOLLOW-UP
+      console.log('🎯 BET CONFIRMED: Forcing IMMEDIATE XP refresh after $' + betAmount + ' bet');
+      
+      // Immediate refresh (no delay)
+      forceFullRefresh().catch(console.error);
+      
+      // Follow-up refreshes to ensure it catches (backend processing can take time)
       setTimeout(() => {
+        console.log('🔄 ROULETTE: Follow-up XP refresh #1');
         forceFullRefresh().catch(console.error);
-      }, 500); // Small delay to allow backend processing
+      }, 200);
+      
+      setTimeout(() => {
+        console.log('🔄 ROULETTE: Follow-up XP refresh #2');
+        forceFullRefresh().catch(console.error);
+      }, 1000);
 
       // Update local user bets immediately
       setUserBets(prev => {
