@@ -505,11 +505,13 @@ export default function Index({ initialGame }: IndexProps) {
         current_level_xp: levelStats.current_level_xp,
         current_level: levelStats.current_level,
         effective_xp: effectiveStats.lifetime_xp,
-        formatted_xp: formatXP(effectiveStats.lifetime_xp),
+        formatted_profile_xp: formatXP(effectiveStats.lifetime_xp),
+        displayCurrentLevelXP: displayCurrentLevelXP,
+        formatted_progress_xp: formatXP(displayCurrentLevelXP),
         timestamp: new Date().toISOString()
       });
     }
-  }, [levelStats]);
+  }, [levelStats, displayCurrentLevelXP]);
 
 
 
@@ -522,11 +524,26 @@ export default function Index({ initialGame }: IndexProps) {
     xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
-  // For consistent decimal display, calculate current level XP from lifetime XP if available
-  // This ensures both profile and progress bar show the same decimal precision
-  const displayCurrentLevelXP = levelStats?.lifetime_xp ? 
-    (levelStats.current_level_xp || 0) : // Use current_level_xp from profiles if available
-    effectiveStats.current_level_xp; // Fallback to calculated value
+  // For consistent decimal display, use the same decimal source as profile section
+  // The profile section correctly shows 3 decimals, so let's use the exact same data
+  const displayCurrentLevelXP = (() => {
+    if (levelStats?.lifetime_xp !== undefined && levelStats?.current_level_xp !== undefined) {
+      // Use the current_level_xp from profiles but ensure it's treated as decimal
+      return Number(levelStats.current_level_xp);
+    }
+    // Fallback: calculate current level XP from lifetime XP with decimal precision
+    const lifetimeXP = effectiveStats.lifetime_xp;
+    const currentLevel = effectiveStats.current_level || 1;
+    
+    // Simple approximation to preserve decimals in progress bar
+    if (currentLevel === 1) {
+      return lifetimeXP; // Level 1: all XP is current level XP
+    } else {
+      // For higher levels, use modulo to get approximate current level progress with decimals
+      const xpPerLevel = effectiveStats.xp_to_next_level + (effectiveStats.current_level_xp || 0);
+      return lifetimeXP % xpPerLevel;
+    }
+  })();
 
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
