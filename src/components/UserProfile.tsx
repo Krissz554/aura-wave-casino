@@ -2114,131 +2114,341 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         </div>
       )}
 
-      {/* Unlocked Achievements */}
+      {/* Cyberpunk Unlocked Achievements */}
       {unlockedAchievements.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-400" />
-            Unlocked Achievements ({unlockedAchievements.length})
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Star className="w-6 h-6 text-yellow-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]" />
+            <h3 className="text-xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent font-mono tracking-wider">
+              UNLOCKED ACHIEVEMENTS ({unlockedAchievements.length})
+            </h3>
+            <div className="flex-1 h-px bg-gradient-to-r from-yellow-500/50 via-orange-400/30 to-transparent" />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {unlockedAchievements.map((achievement) => {
               const IconComponent = getIconComponent(achievement.icon);
               const unlockDate = getUnlockDate(achievement.id);
               
               return (
-                <Card key={achievement.id} className={`glass border-0 bg-gradient-to-br ${rarityGradients[achievement.rarity]} opacity-90 hover:opacity-100 transition-all duration-500 hover:scale-105 border ${rarityColors[achievement.rarity]} ${newlyClaimed.includes(achievement.id) ? 'animate-pulse bg-gradient-to-br from-green-500/30 to-emerald-500/30' : ''}`} style={newlyClaimed.includes(achievement.id) ? { animationDuration: '1s' } : {}}>
-                  <CardContent className="p-4 text-center">
-                    <div className="mb-3">
-                      <div className="w-8 h-8 mx-auto bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                        <IconComponent className="w-4 h-4 text-white" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold mb-1 text-white text-sm">{achievement.name}</h3>
-                    <p className="text-xs opacity-90 text-white mb-2 line-clamp-2">{achievement.description}</p>
+                <div key={achievement.id} className="relative group/unlocked">
+                  <div className={`absolute -inset-1 blur-sm animate-pulse ${
+                    achievement.rarity === 'legendary' ? 'bg-gradient-to-r from-orange-500/50 to-yellow-500/70' :
+                    achievement.rarity === 'epic' ? 'bg-gradient-to-r from-purple-500/50 to-purple-600/70' :
+                    achievement.rarity === 'rare' ? 'bg-gradient-to-r from-blue-500/50 to-blue-600/70' :
+                    'bg-gradient-to-r from-slate-500/30 to-slate-600/50'
+                  } ${newlyClaimed.includes(achievement.id) ? 'bg-gradient-to-r from-emerald-500/60 to-green-500/80' : ''}`}
+                       style={{
+                         clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                       }} />
+                  
+                  <div className={`relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm overflow-hidden transition-all duration-500 hover:scale-105 ${
+                    achievement.rarity === 'legendary' ? 'border border-orange-500/60 shadow-[0_0_15px_rgba(251,146,60,0.3)]' :
+                    achievement.rarity === 'epic' ? 'border border-purple-500/60 shadow-[0_0_15px_rgba(168,85,247,0.3)]' :
+                    achievement.rarity === 'rare' ? 'border border-blue-500/60 shadow-[0_0_15px_rgba(59,130,246,0.3)]' :
+                    'border border-slate-500/60'
+                  } ${newlyClaimed.includes(achievement.id) ? 'border-emerald-500/70 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : ''}`}
+                       style={{
+                         clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                       }}>
                     
-                    <div className="flex justify-between items-center mb-3">
-                      <Badge variant="secondary" className={`capitalize text-xs ${difficultyColors[achievement.difficulty]}`}>
-                        {achievement.difficulty}
-                      </Badge>
-                      <Badge variant="secondary" className={`capitalize text-xs ${rarityColors[achievement.rarity]} bg-white/10`}>
-                        {achievement.rarity}
-                      </Badge>
+                    {/* Circuit Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className={`absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,${
+                        achievement.rarity === 'legendary' ? 'rgba(251,146,60,0.4)' :
+                        achievement.rarity === 'epic' ? 'rgba(168,85,247,0.4)' :
+                        achievement.rarity === 'rare' ? 'rgba(59,130,246,0.4)' :
+                        'rgba(100,116,139,0.3)'
+                      }_25%,${
+                        achievement.rarity === 'legendary' ? 'rgba(251,146,60,0.4)' :
+                        achievement.rarity === 'epic' ? 'rgba(168,85,247,0.4)' :
+                        achievement.rarity === 'rare' ? 'rgba(59,130,246,0.4)' :
+                        'rgba(100,116,139,0.3)'
+                      }_26%,transparent_27%,transparent_74%,${
+                        achievement.rarity === 'legendary' ? 'rgba(251,146,60,0.4)' :
+                        achievement.rarity === 'epic' ? 'rgba(168,85,247,0.4)' :
+                        achievement.rarity === 'rare' ? 'rgba(59,130,246,0.4)' :
+                        'rgba(100,116,139,0.3)'
+                      }_75%,${
+                        achievement.rarity === 'legendary' ? 'rgba(251,146,60,0.4)' :
+                        achievement.rarity === 'epic' ? 'rgba(168,85,247,0.4)' :
+                        achievement.rarity === 'rare' ? 'rgba(59,130,246,0.4)' :
+                        'rgba(100,116,139,0.3)'
+                      }_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow`} />
                     </div>
                     
-                    <div className="text-sm space-y-1">
-                      <div className="flex items-center justify-center gap-1 text-green-400">
-                        <DollarSign className="w-3 h-3" />
-                        <span>+${achievement.reward_amount}</span>
-                      </div>
-                      {unlockDate && (
-                        <div className="text-xs text-white/70">
-                          Unlocked: {new Date(unlockDate).toLocaleDateString()}
+                    <div className="relative z-10 p-4 text-center">
+                      <div className="mb-3">
+                        <div className={`w-10 h-10 mx-auto border backdrop-blur-sm flex items-center justify-center ${
+                          achievement.rarity === 'legendary' ? 'bg-orange-500/30 border-orange-400/50' :
+                          achievement.rarity === 'epic' ? 'bg-purple-500/30 border-purple-400/50' :
+                          achievement.rarity === 'rare' ? 'bg-blue-500/30 border-blue-400/50' :
+                          'bg-slate-600/30 border-slate-400/50'
+                        }`}
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                             }}>
+                          <IconComponent className={`w-5 h-5 ${
+                            achievement.rarity === 'legendary' ? 'text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.8)]' :
+                            achievement.rarity === 'epic' ? 'text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]' :
+                            achievement.rarity === 'rare' ? 'text-blue-400 drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]' :
+                            'text-slate-300'
+                          }`} />
                         </div>
-                      )}
+                      </div>
+                      
+                      <h3 className={`font-bold mb-2 text-sm font-mono tracking-wider ${
+                        achievement.rarity === 'legendary' ? 'text-orange-400' :
+                        achievement.rarity === 'epic' ? 'text-purple-400' :
+                        achievement.rarity === 'rare' ? 'text-blue-400' :
+                        'text-slate-300'
+                      }`}>
+                        {achievement.name}
+                      </h3>
+                      <p className={`text-xs mb-3 line-clamp-2 font-mono ${
+                        achievement.rarity === 'legendary' ? 'text-orange-300/80' :
+                        achievement.rarity === 'epic' ? 'text-purple-300/80' :
+                        achievement.rarity === 'rare' ? 'text-blue-300/80' :
+                        'text-slate-400'
+                      }`}>
+                        {achievement.description}
+                      </p>
+                      
+                      <div className="flex justify-between items-center mb-3">
+                        <div className={`text-xs px-2 py-1 rounded border font-mono ${difficultyColors[achievement.difficulty]}`}>
+                          {achievement.difficulty}
+                        </div>
+                        <div className={`text-xs px-2 py-1 rounded border font-mono ${rarityColors[achievement.rarity]} bg-white/10`}>
+                          {achievement.rarity}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-center gap-1 text-green-400 font-bold text-sm font-mono">
+                          <DollarSign className="w-4 h-4" />
+                          <span>+${achievement.reward_amount}</span>
+                        </div>
+                        {unlockDate && (
+                          <div className="text-xs text-slate-400 font-mono">
+                            UNLOCKED: {new Date(unlockDate).toLocaleDateString()}
+                          </div>
+                        )}
+                        {newlyClaimed.includes(achievement.id) && (
+                          <div className="text-xs text-emerald-400 font-bold font-mono animate-pulse">
+                            JUST CLAIMED!
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {/* Tech corners */}
+                    <div className={`absolute top-1 left-1 w-2 h-2 border-l border-t ${
+                      achievement.rarity === 'legendary' ? 'border-orange-400/80' :
+                      achievement.rarity === 'epic' ? 'border-purple-400/80' :
+                      achievement.rarity === 'rare' ? 'border-blue-400/80' :
+                      'border-slate-400/60'
+                    }`} />
+                    <div className={`absolute bottom-1 right-1 w-2 h-2 border-r border-b ${
+                      achievement.rarity === 'legendary' ? 'border-orange-400/80' :
+                      achievement.rarity === 'epic' ? 'border-purple-400/80' :
+                      achievement.rarity === 'rare' ? 'border-blue-400/80' :
+                      'border-slate-400/60'
+                    }`} />
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* Locked Achievements (Only for Own Profile) */}
+      {/* Cyberpunk Locked Achievements (Only for Own Profile) */}
       {isOwnProfile && lockedAchievements.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Target className="w-5 h-5 text-muted-foreground" />
-            Locked Achievements ({lockedAchievements.length})
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <Target className="w-6 h-6 text-slate-400 drop-shadow-[0_0_8px_rgba(100,116,139,0.6)]" />
+            <h3 className="text-xl font-bold bg-gradient-to-r from-slate-400 to-slate-300 bg-clip-text text-transparent font-mono tracking-wider">
+              LOCKED ACHIEVEMENTS ({lockedAchievements.length})
+            </h3>
+            <div className="flex-1 h-px bg-gradient-to-r from-slate-500/50 via-slate-400/30 to-transparent" />
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {lockedAchievements.map((achievement) => {
               const IconComponent = getIconComponent(achievement.icon);
               const progress = calculateProgress(achievement);
               const isNearlyComplete = progress >= 75;
               
               return (
-                <Card key={achievement.id} className={`glass border-0 bg-gradient-to-br from-gray-800/30 to-gray-900/30 border border-gray-600/30 opacity-60 hover:opacity-80 transition-all duration-300 ${isNearlyComplete ? 'hover:scale-105 border-yellow-500/30' : ''}`}>
-                  <CardContent className="p-4 text-center">
-                    <div className="mb-3">
-                      <div className="w-8 h-8 mx-auto bg-gray-700/50 rounded-full flex items-center justify-center backdrop-blur-sm">
-                        <IconComponent className="w-4 h-4 text-gray-400" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold mb-1 text-gray-300 text-sm">{achievement.name}</h3>
-                    <p className="text-xs text-gray-400 mb-2 line-clamp-2">{achievement.description}</p>
+                <div key={achievement.id} className="relative group/locked">
+                  <div className={`absolute -inset-1 blur-sm ${
+                    isNearlyComplete 
+                      ? 'bg-gradient-to-r from-yellow-500/40 to-orange-500/60 animate-pulse' 
+                      : 'bg-gradient-to-r from-slate-600/20 to-slate-700/30'
+                  }`}
+                       style={{
+                         clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                       }} />
+                  
+                  <div className={`relative bg-gradient-to-br from-slate-800/60 to-slate-900/70 backdrop-blur-sm overflow-hidden transition-all duration-300 ${
+                    isNearlyComplete 
+                      ? 'border border-yellow-500/40 hover:scale-105 opacity-80 hover:opacity-100' 
+                      : 'border border-slate-600/30 opacity-50 hover:opacity-70'
+                  }`}
+                       style={{
+                         clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                       }}>
                     
-                    <div className="flex justify-between items-center mb-3">
-                      <Badge variant="secondary" className={`capitalize text-xs ${difficultyColors[achievement.difficulty]} opacity-70`}>
-                        {achievement.difficulty}
-                      </Badge>
-                      <Badge variant="secondary" className={`capitalize text-xs ${rarityColors[achievement.rarity]} bg-gray-700/30 opacity-70`}>
-                        {achievement.rarity}
-                      </Badge>
+                    {/* Circuit Pattern */}
+                    <div className="absolute inset-0 opacity-10">
+                      <div className={`absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,${
+                        isNearlyComplete ? 'rgba(245,158,11,0.4)' : 'rgba(100,116,139,0.3)'
+                      }_25%,${
+                        isNearlyComplete ? 'rgba(245,158,11,0.4)' : 'rgba(100,116,139,0.3)'
+                      }_26%,transparent_27%,transparent_74%,${
+                        isNearlyComplete ? 'rgba(245,158,11,0.4)' : 'rgba(100,116,139,0.3)'
+                      }_75%,${
+                        isNearlyComplete ? 'rgba(245,158,11,0.4)' : 'rgba(100,116,139,0.3)'
+                      }_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow`} />
                     </div>
                     
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-center gap-1 text-green-400/70">
-                        <DollarSign className="w-3 h-3" />
-                        <span>+${achievement.reward_amount}</span>
+                    <div className="relative z-10 p-4 text-center">
+                      <div className="mb-3">
+                        <div className={`w-10 h-10 mx-auto border backdrop-blur-sm flex items-center justify-center ${
+                          isNearlyComplete 
+                            ? 'bg-yellow-500/20 border-yellow-400/40' 
+                            : 'bg-slate-700/30 border-slate-500/40'
+                        }`}
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                             }}>
+                          <IconComponent className={`w-5 h-5 ${
+                            isNearlyComplete ? 'text-yellow-400' : 'text-slate-400'
+                          }`} />
+                        </div>
                       </div>
                       
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs">
-                          <span className="text-gray-400">Progress</span>
-                          <span className={progress >= 100 ? 'text-green-400' : 'text-gray-400'}>
-                            {progress.toFixed(0)}%
-                          </span>
+                      <h3 className={`font-bold mb-2 text-sm font-mono tracking-wider ${
+                        isNearlyComplete ? 'text-yellow-300' : 'text-slate-300'
+                      }`}>
+                        {achievement.name}
+                      </h3>
+                      <p className={`text-xs mb-3 line-clamp-2 font-mono ${
+                        isNearlyComplete ? 'text-yellow-300/70' : 'text-slate-400'
+                      }`}>
+                        {achievement.description}
+                      </p>
+                      
+                      <div className="flex justify-between items-center mb-3">
+                        <div className={`text-xs px-2 py-1 rounded border font-mono opacity-70 ${difficultyColors[achievement.difficulty]}`}>
+                          {achievement.difficulty}
                         </div>
-                        <Progress 
-                          value={progress} 
-                          className={`h-2 ${isNearlyComplete ? 'bg-yellow-500/20' : 'bg-gray-700/50'}`} 
-                        />
+                        <div className={`text-xs px-2 py-1 rounded border font-mono opacity-70 ${rarityColors[achievement.rarity]} bg-slate-700/30`}>
+                          {achievement.rarity}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-center gap-1 text-green-400/60 font-bold text-sm font-mono">
+                          <DollarSign className="w-4 h-4" />
+                          <span>+${achievement.reward_amount}</span>
+                        </div>
+                        
+                        {/* Cyberpunk Progress Bar */}
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-xs font-mono">
+                            <span className={isNearlyComplete ? 'text-yellow-400' : 'text-slate-400'}>PROGRESS</span>
+                            <span className={progress >= 100 ? 'text-green-400' : isNearlyComplete ? 'text-yellow-400' : 'text-slate-400'}>
+                              {progress.toFixed(0)}%
+                            </span>
+                          </div>
+                          
+                          <div className="relative">
+                            <div className={`h-3 border backdrop-blur-sm overflow-hidden ${
+                              isNearlyComplete 
+                                ? 'bg-yellow-900/30 border-yellow-500/30' 
+                                : 'bg-slate-800/40 border-slate-600/30'
+                            }`}
+                                 style={{
+                                   clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'
+                                 }}>
+                              
+                              {/* Progress Fill */}
+                              <div 
+                                className={`h-full relative transition-all duration-1000 ease-out ${
+                                  progress >= 100 
+                                    ? 'bg-gradient-to-r from-green-500 via-emerald-500 to-green-500' 
+                                    : isNearlyComplete 
+                                    ? 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500' 
+                                    : 'bg-gradient-to-r from-slate-500 via-slate-400 to-slate-500'
+                                }`}
+                                style={{ width: `${Math.min(100, progress)}%` }}
+                              >
+                                {/* Animated Glow */}
+                                <div className="absolute inset-0 bg-gradient-to-r from-white/20 via-white/5 to-white/20 animate-pulse" />
+                                
+                                {/* Moving Scan Line */}
+                                {progress > 0 && (
+                                  <div className="absolute top-0 right-0 w-0.5 h-full bg-white/60 shadow-[0_0_4px_rgba(255,255,255,0.6)] animate-pulse" />
+                                )}
+                              </div>
+                              
+                              {/* Grid Pattern Overlay */}
+                              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_50%,rgba(255,255,255,0.1)_51%,rgba(255,255,255,0.1)_52%,transparent_53%)] bg-[4px_4px] opacity-30" />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                    
+                    {/* Tech corners */}
+                    <div className={`absolute top-1 left-1 w-2 h-2 border-l border-t ${
+                      isNearlyComplete ? 'border-yellow-400/60' : 'border-slate-500/40'
+                    }`} />
+                    <div className={`absolute bottom-1 right-1 w-2 h-2 border-r border-b ${
+                      isNearlyComplete ? 'border-yellow-400/60' : 'border-slate-500/40'
+                    }`} />
+                  </div>
+                </div>
               );
             })}
           </div>
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Cyberpunk Empty States */}
       {unlockedAchievements.length === 0 && !isOwnProfile && (
-        <div className="text-center py-12">
-          <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">No Achievements Yet</h3>
-          <p className="text-muted-foreground">This player hasn't unlocked any achievements yet.</p>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-2xl" />
+          <div className="absolute inset-0 opacity-[0.08] rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(100,116,139,0.4)_25%,rgba(100,116,139,0.4)_26%,transparent_27%,transparent_74%,rgba(100,116,139,0.4)_75%,rgba(100,116,139,0.4)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+          </div>
+          
+          <div className="relative z-10 text-center py-16 px-8">
+            <Trophy className="w-20 h-20 mx-auto mb-6 text-slate-400 opacity-50 drop-shadow-[0_0_10px_rgba(100,116,139,0.3)]" />
+            <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-slate-400 to-slate-300 bg-clip-text text-transparent font-mono tracking-wider">
+              NO ACHIEVEMENTS YET
+            </h3>
+            <p className="text-slate-400 font-mono">This player hasn't unlocked any achievements yet.</p>
+          </div>
         </div>
       )}
 
       {unlockedAchievements.length === 0 && isOwnProfile && (
-        <div className="text-center py-12">
-          <Trophy className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <h3 className="text-lg font-semibold mb-2">Start Your Journey!</h3>
-          <p className="text-muted-foreground">Play games to unlock your first achievements and earn rewards!</p>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/50 to-slate-800/30 rounded-2xl" />
+          <div className="absolute inset-0 opacity-[0.08] rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+          </div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-sm animate-pulse" />
+          
+          <div className="relative z-10 text-center py-16 px-8">
+            <Trophy className="w-20 h-20 mx-auto mb-6 text-primary drop-shadow-[0_0_15px_rgba(99,102,241,0.6)] animate-pulse" />
+            <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-mono tracking-wider">
+              START YOUR JOURNEY!
+            </h3>
+            <p className="text-primary/80 font-mono">Play games to unlock your first achievements and earn rewards!</p>
+          </div>
         </div>
       )}
     </div>
