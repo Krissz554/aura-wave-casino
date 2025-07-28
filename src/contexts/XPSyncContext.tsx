@@ -14,18 +14,21 @@ export function XPSyncProvider({ children }: { children: React.ReactNode }) {
   const { forceRefresh: levelSyncRefresh } = useLevelSync();
   const { refetch: userLevelStatsRefresh } = useUserLevelStats();
 
-  // Force refresh both data sources
+  // Force refresh both data sources - PRIORITIZE profiles (levelSync) for decimal precision
   const forceFullRefresh = useCallback(async () => {
     if (!user) return;
     
-    console.log('🔄 XP SYNC: Force refreshing all XP data sources');
+    console.log('🔄 XP SYNC: Force refreshing all XP data sources (prioritizing profiles/decimals)');
     
     try {
-      // Refresh both data sources simultaneously
-      await Promise.all([
-        levelSyncRefresh(),
-        userLevelStatsRefresh()
-      ]);
+      // Refresh profiles table first (has decimal precision), then user_level_stats
+      await levelSyncRefresh(); // profiles table with decimal XP
+      console.log('✅ XP SYNC: Profiles (decimal) refreshed');
+      
+      // Then refresh user_level_stats as backup
+      await userLevelStatsRefresh(); // user_level_stats table with integer XP
+      console.log('✅ XP SYNC: User level stats refreshed');
+      
       console.log('✅ XP SYNC: All data sources refreshed successfully');
     } catch (error) {
       console.error('❌ XP SYNC: Error refreshing data sources:', error);

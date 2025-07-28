@@ -486,10 +486,10 @@ export default function Index({ initialGame }: IndexProps) {
   const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats();
   const { forceFullRefresh } = useXPSync();
 
-  // Debug: Log when userLevelStats updates
+  // Debug: Log when data sources update
   useEffect(() => {
     if (userLevelStats) {
-      console.log('🎯 HEADER: userLevelStats updated:', {
+      console.log('🎯 HEADER: userLevelStats updated (integer source):', {
         lifetime_xp: userLevelStats.lifetime_xp,
         current_level_xp: userLevelStats.current_level_xp,
         current_level: userLevelStats.current_level,
@@ -498,14 +498,28 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [userLevelStats]);
 
+  useEffect(() => {
+    if (levelStats) {
+      console.log('🎯 HEADER: levelStats updated (DECIMAL source):', {
+        lifetime_xp: levelStats.lifetime_xp,
+        current_level_xp: levelStats.current_level_xp,
+        current_level: levelStats.current_level,
+        effective_xp: effectiveStats.lifetime_xp,
+        formatted_xp: formatXP(effectiveStats.lifetime_xp),
+        timestamp: new Date().toISOString()
+      });
+    }
+  }, [levelStats]);
 
 
-  // Use userLevelStats as primary source, fallback to levelStats
-  const effectiveStats = userLevelStats || {
-    current_level: levelStats?.current_level || 1,
-    lifetime_xp: levelStats?.lifetime_xp || 0,
-    current_level_xp: levelStats?.current_level_xp || 0,
-    xp_to_next_level: levelStats?.xp_to_next_level || 100
+
+  // Use levelStats (profiles table with decimals) as primary source for XP display
+  // userLevelStats (user_level_stats table) has integers, levelStats has precise decimals
+  const effectiveStats = {
+    current_level: levelStats?.current_level || userLevelStats?.current_level || 1,
+    lifetime_xp: levelStats?.lifetime_xp || userLevelStats?.lifetime_xp || 0, // Prioritize decimal XP from profiles
+    current_level_xp: levelStats?.current_level_xp || userLevelStats?.current_level_xp || 0, // Prioritize decimal XP
+    xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
   // Calculate XP progress using current_level_xp for progress bar
@@ -557,8 +571,9 @@ export default function Index({ initialGame }: IndexProps) {
         return;
       }
       
-      // Check if XP increased
-      if (currentXP > previousXP.current) {
+      // Check if XP increased (with decimal precision handling)
+      const xpDifference = Math.round((currentXP - previousXP.current) * 1000) / 1000; // Round to 3 decimals
+      if (xpDifference > 0) {
         console.log('🎯 HEADER: XP INCREASED! Animating:', {
           lifetimeXP: `${previousXP.current} → ${currentXP}`,
           currentLevelXP: `${previousCurrentLevelXP.current} → ${currentLevelXP}`,

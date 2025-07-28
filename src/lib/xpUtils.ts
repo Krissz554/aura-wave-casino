@@ -4,36 +4,19 @@
  */
 
 /**
- * Formats XP value to show appropriate decimal places based on value
- * Ensures 10% wager calculation is always visible
+ * Formats XP value to ALWAYS show 3 decimal places for consistent decimal tracking
+ * Ensures all XP values display with full precision
  */
 export function formatXP(xp: number): string {
   if (xp < 0.001) {
     return '0.000';
-  } else if (xp < 0.01) {
-    // Show 3 decimal places for very small values (0.001-0.009)
-    // This covers $0.01 bet = 0.001 XP
+  } else if (xp < 1000) {
+    // Always show 3 decimal places for values under 1000
+    // This ensures $0.01 bet = 0.001 XP, $1 bet = 0.100 XP, etc. are all visible
     return xp.toFixed(3);
-  } else if (xp < 0.1) {
-    // Show 3 decimal places for small values (0.01-0.099)
-    // This covers $0.10 bet = 0.010 XP
-    return xp.toFixed(3);
-  } else if (xp < 1) {
-    // Show 3 decimal places for values (0.1-0.999)
-    // This covers $1 bet = 0.100 XP
-    return xp.toFixed(3);
-  } else if (xp < 10) {
-    // Show 2 decimal places for medium-small values (1.00-9.99)
-    // This covers $10 bet = 1.00 XP
-    return xp.toFixed(2);
-  } else if (xp < 100) {
-    // Show 1 decimal place for medium values (10.0-99.9)
-    // This covers $100 bet = 10.0 XP
-    return xp.toFixed(1);
   } else {
-    // Show no decimals for large values, but use toLocaleString for thousands
-    // This covers $1000+ bets
-    return Math.floor(xp).toLocaleString();
+    // For very large values (1000+), show 1 decimal place to save space
+    return xp.toFixed(1);
   }
 }
 
