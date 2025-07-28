@@ -576,7 +576,7 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
                   <HelpCircle className="w-4 h-4" />
                   <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
                 </div>
-                SYSTEM_DOCUMENTATION
+                How does Provably Fair work?
               </Link>
               
               <Button 
