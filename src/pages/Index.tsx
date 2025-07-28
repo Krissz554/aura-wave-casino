@@ -241,8 +241,9 @@ export default function Index({ initialGame }: IndexProps) {
       );
       
       toast({
-        title: "✅ All notifications marked as read",
-        description: "Your notification center is now clear",
+        title: "NOTIFICATIONS CLEARED",
+        description: "All messages marked as read",
+        variant: "success",
       });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -259,8 +260,9 @@ export default function Index({ initialGame }: IndexProps) {
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
       
       toast({
-        title: "🗑️ Notification deleted",
-        description: "Notification has been removed",
+        title: "MESSAGE DELETED",
+        description: "Notification removed from system",
+        variant: "info",
         duration: 2000,
       });
     } catch (error) {

@@ -1656,3 +1656,64 @@
 .cyberpunk-scrollbar::-webkit-scrollbar-thumb {
   animation: scrollbar-glow 3s ease-in-out infinite;
 }
+
+/* ==================== CYBERPUNK TOAST ANIMATIONS ==================== */
+
+/* Cyber scan animation for toast notifications */
+@keyframes cyber-scan {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Toast slide-in enhancement */
+@keyframes cyber-toast-in {
+  0% {
+    transform: translateX(100%) scale(0.95);
+    opacity: 0;
+  }
+  20% {
+    transform: translateX(0) scale(1.02);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Toast slide-out enhancement */
+@keyframes cyber-toast-out {
+  0% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+  80% {
+    transform: translateX(20%) scale(0.98);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateX(100%) scale(0.95);
+    opacity: 0;
+  }
+}
+
+/* Cyberpunk toast utilities */
+.animate-cyber-toast-in {
+  animation: cyber-toast-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-cyber-toast-out {
+  animation: cyber-toast-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}

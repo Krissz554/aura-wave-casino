@@ -256,8 +256,8 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
     } catch (error: any) {
       console.error('Failed to fetch current round:', error);
       toast({
-        title: "Connection Error",
-        description: "Failed to connect to the game server",
+        title: "CONNECTION LOST",
+        description: "Unable to reach game servers",
         variant: "destructive",
       });
     }
@@ -720,8 +720,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
           const winningBets = userBetsInRound.filter(([betColor]) => betColor === completedRound.result_color);
           
           toast({
-            title: "🎉 You Won!",
-            description: `Won $${balanceDifference.toFixed(2)} on ${completedRound.result_color}!`,
+            title: "VICTORY ACHIEVED",
+            description: `+$${balanceDifference.toFixed(2)} • ${completedRound.result_color.toUpperCase()}`,
+            variant: "success",
           });
           
           console.log(`🎯 User won $${balanceDifference} on ${completedRound.result_color}`);
@@ -740,9 +741,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
     // MAINTENANCE CHECK: Prevent betting during maintenance
     if (isMaintenanceMode) {
       toast({
-        title: "Game Paused",
-        description: "This game is temporarily unavailable during maintenance.",
-        variant: "destructive",
+        title: "SYSTEM MAINTENANCE",
+        description: "Game temporarily offline for upgrades",
+        variant: "warning",
       });
       return;
     }
@@ -882,8 +883,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
       // SECURITY 11: Success handling with optimistic updates
       toast({
-        title: "Bet Placed!",
-        description: `$${betAmount} on ${color}`,
+        title: "BET CONFIRMED",
+        description: `$${betAmount} • ${color.toUpperCase()}`,
+        variant: "success",
       });
 
       // Update local user bets immediately
