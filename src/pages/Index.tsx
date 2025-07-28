@@ -404,13 +404,7 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [userData?.balance, checkBalanceChange]);
 
-  // Handle notification modal loading state
-  useEffect(() => {
-    if (notificationModalOpen) {
-      // Modal has opened, stop loading
-      setNotificationLoading(false);
-    }
-  }, [notificationModalOpen]);
+
 
   const handleLogout = async () => {
     setLogoutLoading(true);
@@ -613,27 +607,33 @@ export default function Index({ initialGame }: IndexProps) {
               {/* Cyberpunk Notification System - Only show for authenticated users */}
               {user && (
                 <Dialog open={notificationModalOpen} onOpenChange={setNotificationModalOpen}>
-                  <DialogTrigger asChild>
-                    <div className={cn(
-                      "relative group/notifications",
-                      // Dynamic grouping based on unread count
-                      unreadCount > 0 && "animate-pulse"
-                    )}>
-                      <Button
-                        variant="ghost"
-                        disabled={notificationLoading}
-                        data-notification-button="true"
-                        onClick={() => {
-                          // Show loading state immediately for instant feedback
-                          setNotificationLoading(true);
-                          
-                          // Add button press animation class temporarily
-                          const button = document.activeElement as HTMLElement;
-                          if (button) {
-                            button.classList.add('animate-cyber-button-press');
-                            setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
-                          }
-                        }}
+                  <div className={cn(
+                    "relative group/notifications",
+                    // Dynamic grouping based on unread count
+                    unreadCount > 0 && "animate-pulse"
+                  )}>
+                    <Button
+                      variant="ghost"
+                      disabled={notificationLoading}
+                      data-notification-button="true"
+                      onClick={async () => {
+                        // Show loading state immediately for instant feedback
+                        setNotificationLoading(true);
+                        
+                        // Add button press animation class temporarily
+                        const button = document.activeElement as HTMLElement;
+                        if (button) {
+                          button.classList.add('animate-cyber-button-press');
+                          setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
+                        }
+                        
+                        // Brief delay to show loading animation
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        
+                        // Open the modal
+                        setNotificationModalOpen(true);
+                        setNotificationLoading(false);
+                      }}
                         className={cn(
                           "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60 p-2 aspect-square",
                           // Dynamic styling based on unread count and loading state
@@ -711,7 +711,6 @@ export default function Index({ initialGame }: IndexProps) {
                         )} />
                       </Button>
                     </div>
-                  </DialogTrigger>
                   
                   <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 border-0 bg-transparent overflow-hidden">
                     {/* Animated backdrop with cyberpunk effects */}
