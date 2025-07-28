@@ -1119,8 +1119,26 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
   return (
     <div className="space-y-6">
       {/* Game Header */}
-      <Card className="glass border-0">
-        <CardHeader className="pb-4">
+      <div className="relative overflow-hidden group">
+        {/* Cyberpunk Background with Advanced Effects */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl animate-cyber-header-pulse" />
+        
+        {/* Animated Circuit Board Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+        </div>
+        
+        {/* Animated Border Glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-orange-500/30 to-red-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+        
+        {/* Corner Tech Details */}
+        <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-red-400/60" />
+        <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-orange-400/60" />
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-orange-400/60" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-red-400/60" />
+        
+        <Card className="relative z-10 bg-transparent border-0">
+          <CardHeader className="pb-4">
           <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="flex items-center gap-2">
               <svg 
@@ -1160,13 +1178,23 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
           </CardTitle>
         </CardHeader>
       </Card>
+    </div>
 
       <div className="w-full">
         {/* Main Game Area */}
         <div className="space-y-6">
           {/* Recent Results Bubbles */}
           <div className="flex justify-end mb-4">
-            <div className="glass border-0 rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
+            <div className="relative overflow-hidden group">
+              {/* Cyberpunk Background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/85 to-slate-900/90 backdrop-blur-md rounded-xl" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-400/20 via-orange-400/30 to-red-400/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300" />
+              
+              {/* Tech corner accents */}
+              <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-red-400/60" />
+              <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-orange-400/60" />
+              
+              <div className="relative z-10 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
               <span className="text-xs sm:text-sm text-muted-foreground font-medium hidden sm:inline">Recent Results:</span>
               <span className="text-xs text-muted-foreground font-medium sm:hidden">Recent:</span>
               <div className="flex items-center gap-1 sm:gap-2">
@@ -1190,23 +1218,61 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
               </div>
             </div>
           </div>
+        </div>
 
           {/* Roulette Reel */}
-          <Card className="glass border-0">
-            <CardContent className="p-6">
-              <RouletteReel 
-                isSpinning={currentRound.status === 'spinning'}
-                winningSlot={currentRound.result_slot !== undefined ? currentRound.result_slot : null}
-                showWinAnimation={currentRound.status === 'completed'}
-                extendedWinAnimation={extendedWinAnimation}
-                serverReelPosition={currentRound.reel_position}
-              />
-            </CardContent>
-          </Card>
+          <div className="relative overflow-hidden group">
+            {/* Cyberpunk Background with Roulette Theme */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
+            
+            {/* Animated Circuit Board Pattern with Red Theme */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent)] bg-[24px_24px] animate-grid-move-slow" />
+            </div>
+            
+            {/* Animated Border Glow with Casino Colors */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 via-orange-500/40 to-red-500/30 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+            
+            {/* Enhanced Corner Tech Details */}
+            <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-red-400/70" />
+            <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-orange-400/70" />
+            <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-orange-400/70" />
+            <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-red-400/70" />
+            
+            <Card className="relative z-10 bg-transparent border-0">
+              <CardContent className="p-6">
+                <RouletteReel 
+                  isSpinning={currentRound.status === 'spinning'}
+                  winningSlot={currentRound.result_slot !== undefined ? currentRound.result_slot : null}
+                  showWinAnimation={currentRound.status === 'completed'}
+                  extendedWinAnimation={extendedWinAnimation}
+                  serverReelPosition={currentRound.reel_position}
+                />
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Betting Interface */}
-          <Card className="glass border-0">
-            <CardHeader className="pb-4">
+          <div className="relative overflow-hidden group">
+            {/* Cyberpunk Background with Betting Theme */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
+            
+            {/* Animated Circuit Board Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.3)_25%,rgba(34,197,94,0.3)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.3)_75%,rgba(34,197,94,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(34,197,94,0.3)_25%,rgba(34,197,94,0.3)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.3)_75%,rgba(34,197,94,0.3)_76%,transparent_77%,transparent)] bg-[22px_22px] animate-grid-move-slow" />
+            </div>
+            
+            {/* Animated Border Glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-green-500/30 to-emerald-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+            
+            {/* Corner Tech Details */}
+            <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-emerald-400/60" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-green-400/60" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-green-400/60" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-emerald-400/60" />
+            
+            <Card className="relative z-10 bg-transparent border-0">
+              <CardHeader className="pb-4">
               <CardTitle className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <span>Place Your Bets</span>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -1516,6 +1582,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
           </Card>
         </div>
       </div>
+    </div>
 
       {/* Provably Fair Modal */}
       <ProvablyFairModal
