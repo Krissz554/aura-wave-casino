@@ -1098,12 +1098,12 @@ $$;
 -- Recalculate levels for all users based on their current lifetime_xp
 DO $$
 DECLARE
-    user_record RECORD;
+    user_rec RECORD;
     level_calc RECORD;
 BEGIN
-    FOR user_record IN SELECT id, lifetime_xp FROM public.profiles WHERE lifetime_xp > 0 LOOP
+    FOR user_rec IN SELECT id, lifetime_xp FROM public.profiles WHERE lifetime_xp > 0 LOOP
         -- Calculate new level information
-        SELECT * INTO level_calc FROM public.calculate_level_from_xp_new(FLOOR(user_record.lifetime_xp)::integer);
+        SELECT * INTO level_calc FROM public.calculate_level_from_xp_new(FLOOR(user_rec.lifetime_xp)::integer);
         
         -- Update user's level information
         UPDATE public.profiles 
@@ -1113,10 +1113,10 @@ BEGIN
             current_xp = level_calc.current_level_xp,
             xp_to_next_level = level_calc.xp_to_next,
             updated_at = now()
-        WHERE id = user_record.id;
+        WHERE id = user_rec.id;
         
         RAISE NOTICE 'Updated user % - Level: %, Current XP: %, XP to Next: %', 
-            user_record.id, level_calc.level, level_calc.current_level_xp, level_calc.xp_to_next;
+            user_rec.id, level_calc.level, level_calc.current_level_xp, level_calc.xp_to_next;
     END LOOP;
 END;
 $$;
@@ -1128,12 +1128,12 @@ $$;
 -- Recalculate levels for all users in user_level_stats table
 DO $$
 DECLARE
-    user_record RECORD;
+    user_stats_rec RECORD;
     level_calc RECORD;
 BEGIN
-    FOR user_record IN SELECT user_id, lifetime_xp FROM public.user_level_stats WHERE lifetime_xp > 0 LOOP
+    FOR user_stats_rec IN SELECT user_id, lifetime_xp FROM public.user_level_stats WHERE lifetime_xp > 0 LOOP
         -- Calculate new level information
-        SELECT * INTO level_calc FROM public.calculate_level_from_xp_new(user_record.lifetime_xp);
+        SELECT * INTO level_calc FROM public.calculate_level_from_xp_new(user_stats_rec.lifetime_xp);
         
         -- Update user's level information
         UPDATE public.user_level_stats 
@@ -1142,10 +1142,10 @@ BEGIN
             current_level_xp = level_calc.current_level_xp,
             xp_to_next_level = level_calc.xp_to_next,
             updated_at = now()
-        WHERE user_id = user_record.user_id;
+        WHERE user_id = user_stats_rec.user_id;
         
         RAISE NOTICE 'Updated user_level_stats % - Level: %, Current XP: %, XP to Next: %', 
-            user_record.user_id, level_calc.level, level_calc.current_level_xp, level_calc.xp_to_next;
+            user_stats_rec.user_id, level_calc.level, level_calc.current_level_xp, level_calc.xp_to_next;
     END LOOP;
 END;
 $$;
