@@ -803,70 +803,211 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
               </div>
               </div>
 
-              {/* Overview Tab */}
-              <TabsContent value="overview" className="space-y-6">
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card className="glass border-0 bg-gradient-to-br from-blue-500/10 to-blue-600/10 border border-blue-500/20">
-                    <CardContent className="p-4 text-center">
-                      <Gamepad2 className="w-6 h-6 mx-auto mb-2 text-blue-400" />
-                      <div className="text-2xl font-bold text-blue-400">{totalGames}</div>
-                      <div className="text-xs text-muted-foreground">Games Played</div>
-                    </CardContent>
-                  </Card>
+              {/* Cyberpunk Overview Tab */}
+              <TabsContent value="overview" className="space-y-8">
+                {/* Cyberpunk Quick Stats Grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {/* Games Played Stat */}
+                  <div className="relative group/stat">
+                    {/* Outer Glow */}
+                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500/40 to-blue-600/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }} />
+                    
+                    {/* Main Container */}
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-blue-500/60 backdrop-blur-sm p-4 text-center overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }}>
+                      
+                      {/* Circuit Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(59,130,246,0.4)_25%,rgba(59,130,246,0.4)_26%,transparent_27%,transparent_74%,rgba(59,130,246,0.4)_75%,rgba(59,130,246,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
+                      </div>
+                      
+                      <Gamepad2 className="w-8 h-8 mx-auto mb-3 text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)] relative z-10" />
+                      <div className="text-3xl font-bold text-blue-400 drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] font-mono relative z-10">
+                        {totalGames}
+                      </div>
+                      <div className="text-sm text-blue-300/80 font-mono tracking-wider relative z-10">GAMES PLAYED</div>
+                      
+                      {/* Tech Corner Indicators */}
+                      <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-blue-400/80" />
+                      <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-blue-400/80" />
+                    </div>
+                  </div>
                   
-                  <Card className="glass border-0 bg-gradient-to-br from-green-500/10 to-green-600/10 border border-green-500/20">
-                    <CardContent className="p-4 text-center">
-                      <Trophy className="w-6 h-6 mx-auto mb-2 text-green-400" />
-                      <div className="text-2xl font-bold text-green-400">{totalWins}</div>
-                      <div className="text-xs text-muted-foreground">Total Wins</div>
-                    </CardContent>
-                  </Card>
+                  {/* Total Wins Stat */}
+                  <div className="relative group/stat">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-green-500/40 to-green-600/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-green-500/60 backdrop-blur-sm p-4 text-center overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.4)_25%,rgba(34,197,94,0.4)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.4)_75%,rgba(34,197,94,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
+                      </div>
+                      
+                      <Trophy className="w-8 h-8 mx-auto mb-3 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)] relative z-10" />
+                      <div className="text-3xl font-bold text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)] font-mono relative z-10">
+                        {totalWins}
+                      </div>
+                      <div className="text-sm text-green-300/80 font-mono tracking-wider relative z-10">TOTAL WINS</div>
+                      
+                      <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-green-400/80" />
+                      <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-green-400/80" />
+                    </div>
+                  </div>
                   
-                  <Card className="glass border-0 bg-gradient-to-br from-purple-500/10 to-purple-600/10 border border-purple-500/20">
-                    <CardContent className="p-4 text-center">
-                      <Target className="w-6 h-6 mx-auto mb-2 text-purple-400" />
-                      <div className="text-2xl font-bold text-purple-400">{winRate.toFixed(1)}%</div>
-                      <div className="text-xs text-muted-foreground">Win Rate</div>
-                    </CardContent>
-                  </Card>
+                  {/* Win Rate Stat */}
+                  <div className="relative group/stat">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/40 to-purple-600/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-purple-500/60 backdrop-blur-sm p-4 text-center overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(168,85,247,0.4)_25%,rgba(168,85,247,0.4)_26%,transparent_27%,transparent_74%,rgba(168,85,247,0.4)_75%,rgba(168,85,247,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
+                      </div>
+                      
+                      <Target className="w-8 h-8 mx-auto mb-3 text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] relative z-10" />
+                      <div className="text-3xl font-bold text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)] font-mono relative z-10">
+                        {winRate.toFixed(1)}%
+                      </div>
+                      <div className="text-sm text-purple-300/80 font-mono tracking-wider relative z-10">WIN RATE</div>
+                      
+                      <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-purple-400/80" />
+                      <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-purple-400/80" />
+                    </div>
+                  </div>
                   
-                  <Card className={`glass border-0 bg-gradient-to-br ${totalProfit >= 0 ? 'from-green-500/10 to-green-600/10 border-green-500/20' : 'from-red-500/10 to-red-600/10 border-red-500/20'}`}>
-                    <CardContent className="p-4 text-center">
-                      <DollarSign className={`w-6 h-6 mx-auto mb-2 ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`} />
-                      <div className={`text-2xl font-bold ${totalProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {/* Profit/Loss Stat */}
+                  <div className="relative group/stat">
+                    <div className={`absolute -inset-1 blur-sm animate-pulse ${totalProfit >= 0 ? 'bg-gradient-to-r from-green-500/40 to-green-600/60' : 'bg-gradient-to-r from-red-500/40 to-red-600/60'}`}
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }} />
+                    
+                    <div className={`relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 backdrop-blur-sm p-4 text-center overflow-hidden ${totalProfit >= 0 ? 'border border-green-500/60' : 'border border-red-500/60'}`}
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className={`absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,${totalProfit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}%_25%,${totalProfit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}%_26%,transparent_27%,transparent_74%,${totalProfit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}%_75%,${totalProfit >= 0 ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}%_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow`} />
+                      </div>
+                      
+                      <DollarSign className={`w-8 h-8 mx-auto mb-3 relative z-10 ${totalProfit >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]'}`} />
+                      <div className={`text-3xl font-bold font-mono relative z-10 ${totalProfit >= 0 ? 'text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_10px_rgba(239,68,68,0.6)]'}`}>
                         ${Math.abs(totalProfit).toFixed(2)}
                       </div>
-                      <div className="text-xs text-muted-foreground">
-                        {totalProfit >= 0 ? 'Total Profit' : 'Total Loss'}
+                      <div className={`text-sm font-mono tracking-wider relative z-10 ${totalProfit >= 0 ? 'text-green-300/80' : 'text-red-300/80'}`}>
+                        {totalProfit >= 0 ? 'TOTAL PROFIT' : 'TOTAL LOSS'}
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className={`absolute top-1 left-1 w-2 h-2 border-l border-t ${totalProfit >= 0 ? 'border-green-400/80' : 'border-red-400/80'}`} />
+                      <div className={`absolute bottom-1 right-1 w-2 h-2 border-r border-b ${totalProfit >= 0 ? 'border-green-400/80' : 'border-red-400/80'}`} />
+                    </div>
+                  </div>
                 </div>
 
-                {/* Recent Activity Preview */}
-                <Card className="glass border-0">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-primary" />
-                      Player Highlights
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20">
-                        <h4 className="font-semibold mb-2 text-primary">Best Streak</h4>
-                        <p className="text-2xl font-bold">12 wins</p>
-                        <p className="text-sm text-muted-foreground">in Coinflip</p>
+                {/* Cyberpunk Player Highlights */}
+                <div className="relative group/highlights">
+                  {/* Multi-layered Background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 rounded-2xl" />
+                  
+                  {/* Circuit Pattern */}
+                  <div className="absolute inset-0 opacity-[0.12] rounded-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.5)_25%,rgba(99,102,241,0.5)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.5)_75%,rgba(99,102,241,0.5)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.5)_25%,rgba(99,102,241,0.5)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.5)_75%,rgba(99,102,241,0.5)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+                  </div>
+                  
+                  {/* Border Glow */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-sm" />
+                  
+                  {/* Tech Corner Details */}
+                  <div className="absolute top-3 left-3 w-5 h-5 border-l-2 border-t-2 border-primary/70 rounded-tl-sm" />
+                  <div className="absolute top-3 right-3 w-5 h-5 border-r-2 border-t-2 border-accent/70 rounded-tr-sm" />
+                  <div className="absolute bottom-3 left-3 w-5 h-5 border-l-2 border-b-2 border-accent/70 rounded-bl-sm" />
+                  <div className="absolute bottom-3 right-3 w-5 h-5 border-r-2 border-b-2 border-primary/70 rounded-br-sm" />
+                  
+                  <div className="relative z-10 p-8">
+                    {/* Header */}
+                    <div className="flex items-center gap-3 mb-6">
+                      <Zap className="w-7 h-7 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-pulse" />
+                      <h3 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-mono tracking-wider">
+                        PLAYER HIGHLIGHTS
+                      </h3>
+                      <div className="flex-1 h-px bg-gradient-to-r from-primary/50 via-accent/30 to-transparent" />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Best Streak Highlight */}
+                      <div className="relative group/streak">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-accent/60 blur-sm animate-pulse"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                             }} />
+                        
+                        <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-primary/60 backdrop-blur-sm p-6 overflow-hidden"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                             }}>
+                          
+                          {/* Circuit Pattern */}
+                          <div className="absolute inset-0 opacity-10">
+                            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+                          </div>
+                          
+                          <h4 className="font-bold mb-3 text-primary font-mono tracking-wider text-lg relative z-10">BEST STREAK</h4>
+                          <p className="text-4xl font-bold font-mono text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] relative z-10 mb-2">12</p>
+                          <p className="text-sm text-primary/80 font-mono tracking-wide relative z-10">CONSECUTIVE WINS IN COINFLIP</p>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-2 left-2 w-3 h-3 border-l border-t border-primary/80" />
+                          <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-primary/80" />
+                        </div>
                       </div>
-                      <div className="p-4 rounded-lg bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                        <h4 className="font-semibold mb-2 text-green-400">Biggest Win</h4>
-                        <p className="text-2xl font-bold text-green-400">$2,450.00</p>
-                        <p className="text-sm text-muted-foreground">in Roulette</p>
+                      
+                      {/* Biggest Win Highlight */}
+                      <div className="relative group/bigwin">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-green-500/40 to-emerald-500/60 blur-sm animate-pulse"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                             }} />
+                        
+                        <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-green-500/60 backdrop-blur-sm p-6 overflow-hidden"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                             }}>
+                          
+                          {/* Circuit Pattern */}
+                          <div className="absolute inset-0 opacity-10">
+                            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.4)_25%,rgba(34,197,94,0.4)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.4)_75%,rgba(34,197,94,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+                          </div>
+                          
+                          <h4 className="font-bold mb-3 text-green-400 font-mono tracking-wider text-lg relative z-10">BIGGEST WIN</h4>
+                          <p className="text-4xl font-bold text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)] font-mono relative z-10 mb-2">$2,450.00</p>
+                          <p className="text-sm text-green-300/80 font-mono tracking-wide relative z-10">JACKPOT IN ROULETTE</p>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-2 left-2 w-3 h-3 border-l border-t border-green-400/80" />
+                          <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-green-400/80" />
+                        </div>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               </TabsContent>
 
               {/* Games Tab */}
