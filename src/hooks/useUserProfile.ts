@@ -9,15 +9,17 @@ export interface UserProfile {
   registration_date: string
   balance: number
   level: number
-  xp: number // Legacy field - maps to current_xp
+  total_xp: number // UNIFIED XP - single source of truth (3 decimal precision)
   current_level: number
-  current_xp: number // PRIMARY XP field - used everywhere (3 decimal precision)
-  xp_to_next_level: number
-  lifetime_xp: number // 3 decimal precision
+  current_xp: number // XP within current level (calculated from total_xp)
+  xp_to_next_level: number // XP needed for next level (calculated)
   total_wagered: number
   total_profit: number
   last_claim_time: string
   badges: string[]
+  // Legacy fields for backward compatibility
+  xp?: number // Legacy field - maps to total_xp
+  lifetime_xp?: number // Legacy field - maps to total_xp
   gameStats: {
     coinflip: { wins: number; losses: number; profit: number }
     crash: { wins: number; losses: number; profit: number }
@@ -62,14 +64,17 @@ export function useUserProfile() {
               if (!prev) return null;
               return {
                 ...prev,
-                // Update all level/XP data from profiles (single source of truth)
+                // Update all level/XP data from profiles (unified XP system)
+                total_xp: newProfile.total_xp || 0, // UNIFIED XP - single source of truth
                 current_level: newProfile.current_level,
-                current_xp: newProfile.current_xp, // 3-decimal precision
+                current_xp: newProfile.current_xp, // XP within current level
                 xp_to_next_level: newProfile.xp_to_next_level,
-                lifetime_xp: newProfile.lifetime_xp, // 3-decimal precision
                 total_wagered: newProfile.total_wagered,
                 total_profit: newProfile.total_profit,
                 balance: newProfile.balance,
+                // Legacy field compatibility
+                xp: newProfile.total_xp || 0, // Legacy field maps to total_xp
+                lifetime_xp: newProfile.total_xp || 0, // Legacy field maps to total_xp
                 // Keep existing gameStats since profiles table doesn't have game statistics
                 // Game stats are handled separately by UserProfile component queries
               };
@@ -233,16 +238,18 @@ export function useUserProfile() {
           return;
         }
 
-        // Build user data with profiles as source of truth for XP data
+        // Build user data with unified XP system
         const combinedData = {
           ...newLevelStats, // Game stats from user_level_stats
-          ...profile,       // Profile data overrides everything (including XP with 3-decimal precision)
-          // Explicitly use profiles table XP fields (3-decimal precision)
+          ...profile,       // Profile data overrides everything
+          // Explicitly use unified XP system from profiles table
+          total_xp: profile.total_xp || 0, // UNIFIED XP - single source of truth
           current_level: profile.current_level,
-          current_xp: profile.current_xp, // 3-decimal precision from profiles
+          current_xp: profile.current_xp, // XP within current level
           xp_to_next_level: profile.xp_to_next_level,
-          lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-          xp: profile.current_xp, // Legacy field maps to current_xp
+          // Legacy field compatibility
+          xp: profile.total_xp || 0, // Legacy field maps to total_xp
+          lifetime_xp: profile.total_xp || 0, // Legacy field maps to total_xp
           gameStats: {
             coinflip: {
               wins: newLevelStats?.coinflip_wins || 0,
@@ -274,15 +281,17 @@ export function useUserProfile() {
 
       if (levelStatsError) {
         console.error('[useUserProfile] Error fetching level stats:', levelStatsError);
-        // Use profile data with explicit XP field mapping (3-decimal precision)
+        // Use profile data with unified XP system
         const profileWithGameStats = {
           ...profile,
-          // Explicitly use profiles table XP fields (3-decimal precision)
+          // Explicitly use unified XP system from profiles table
+          total_xp: profile.total_xp || 0, // UNIFIED XP - single source of truth
           current_level: profile.current_level,
-          current_xp: profile.current_xp, // 3-decimal precision from profiles
+          current_xp: profile.current_xp, // XP within current level
           xp_to_next_level: profile.xp_to_next_level,
-          lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-          xp: profile.current_xp, // Legacy field maps to current_xp
+          // Legacy field compatibility
+          xp: profile.total_xp || 0, // Legacy field maps to total_xp
+          lifetime_xp: profile.total_xp || 0, // Legacy field maps to total_xp
           gameStats: {
             coinflip: { wins: 0, losses: 0, profit: 0 },
             crash: { wins: 0, losses: 0, profit: 0 },
@@ -296,16 +305,18 @@ export function useUserProfile() {
         return;
       }
 
-      // Build user data with profiles as source of truth for XP data
+      // Build user data with unified XP system
       const combinedData = {
         ...levelStats, // Game stats from user_level_stats
-        ...profile,    // Profile data overrides everything (including XP with 3-decimal precision)
-        // Explicitly use profiles table XP fields (3-decimal precision)
+        ...profile,    // Profile data overrides everything
+        // Explicitly use unified XP system from profiles table
+        total_xp: profile.total_xp || 0, // UNIFIED XP - single source of truth
         current_level: profile.current_level,
-        current_xp: profile.current_xp, // 3-decimal precision from profiles
+        current_xp: profile.current_xp, // XP within current level
         xp_to_next_level: profile.xp_to_next_level,
-        lifetime_xp: profile.lifetime_xp, // 3-decimal precision from profiles
-        xp: profile.current_xp, // Legacy field maps to current_xp
+        // Legacy field compatibility
+        xp: profile.total_xp || 0, // Legacy field maps to total_xp
+        lifetime_xp: profile.total_xp || 0, // Legacy field maps to total_xp
         gameStats: {
           coinflip: {
             wins: levelStats?.coinflip_wins || 0,

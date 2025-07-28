@@ -4,10 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface LevelStats {
   current_level: number;
-  lifetime_xp: number;
-  current_level_xp: number;
-  xp_to_next_level: number;
+  total_xp: number; // UNIFIED XP - single source of truth
+  current_level_xp: number; // XP within current level (calculated)
+  xp_to_next_level: number; // XP needed for next level (calculated)
   border_tier: number;
+  // Legacy fields for backward compatibility
+  lifetime_xp?: number;
 }
 
 interface LevelSyncContextType {
@@ -31,10 +33,10 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Get stats from profiles table (has 3-decimal precision for lifetime_xp)
+      // Get stats from profiles table (unified XP system)
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('current_level, lifetime_xp, current_xp, xp_to_next_level, border_tier')
+        .select('current_level, total_xp, current_xp, xp_to_next_level, border_tier, lifetime_xp')
         .eq('id', user.id)
         .single();
 
@@ -46,10 +48,11 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         setLevelStats({
           current_level: profileData.current_level || 1,
-          lifetime_xp: profileData.lifetime_xp || 0, // This has 3 decimal precision
-          current_level_xp: profileData.current_xp || 0, // Map current_xp to current_level_xp
+          total_xp: profileData.total_xp || 0, // UNIFIED XP - single source of truth
+          current_level_xp: profileData.current_xp || 0, // XP within current level
           xp_to_next_level: profileData.xp_to_next_level || 100,
-          border_tier: profileData.border_tier || 1
+          border_tier: profileData.border_tier || 1,
+          lifetime_xp: profileData.lifetime_xp || profileData.total_xp || 0, // Legacy compatibility
         });
       } else {
         // Fallback to default stats for new users
@@ -98,15 +101,16 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
             filter: `id=eq.${user.id}`
           },
         (payload) => {
-          console.log('📊 LEVEL STATS UPDATE:', payload);
+          console.log('📊 UNIFIED XP STATS UPDATE:', payload);
           if (payload.new) {
             const newData = payload.new as any;
             setLevelStats({
               current_level: newData.current_level || 1,
-              lifetime_xp: newData.lifetime_xp || 0, // This has 3 decimal precision
-              current_level_xp: newData.current_xp || 0, // Map current_xp to current_level_xp
+              total_xp: newData.total_xp || 0, // UNIFIED XP - single source of truth
+              current_level_xp: newData.current_xp || 0, // XP within current level
               xp_to_next_level: newData.xp_to_next_level || 100,
-              border_tier: newData.border_tier || 1
+              border_tier: newData.border_tier || 1,
+              lifetime_xp: newData.lifetime_xp || newData.total_xp || 0, // Legacy compatibility
             });
           }
         }
