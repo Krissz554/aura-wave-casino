@@ -623,16 +623,16 @@ export default function Index({ initialGame }: IndexProps) {
                         variant="ghost"
                         disabled={notificationLoading}
                         data-notification-button="true"
-                        onClick={async () => {
+                        onClick={() => {
+                          // Show loading state immediately for instant feedback
+                          setNotificationLoading(true);
+                          
                           // Add button press animation class temporarily
                           const button = document.activeElement as HTMLElement;
                           if (button) {
                             button.classList.add('animate-cyber-button-press');
                             setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
                           }
-                          
-                          // Show loading state until modal opens
-                          setNotificationLoading(true);
                         }}
                         className={cn(
                           "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60 p-2 aspect-square",
