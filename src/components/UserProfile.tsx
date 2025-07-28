@@ -1010,144 +1010,262 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                 </div>
               </TabsContent>
 
-              {/* Games Tab */}
-              <TabsContent value="games" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Cyberpunk Games Tab */}
+              <TabsContent value="games" className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                   {/* Coinflip Stats */}
-                  <Card className="glass border-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-2 text-amber-400">
-                        <Coins className="w-5 h-5" />
-                        Coinflip
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Games</span>
-                        <span className="font-semibold">{(userData.gameStats.coinflip?.wins || 0) + (userData.gameStats.coinflip?.losses || 0)}</span>
+                  <div className="relative group/game">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-amber-500/40 to-orange-500/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-amber-500/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      {/* Circuit Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(245,158,11,0.4)_25%,rgba(245,158,11,0.4)_26%,transparent_27%,transparent_74%,rgba(245,158,11,0.4)_75%,rgba(245,158,11,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Wins</span>
-                        <span className="font-semibold text-green-400">{userData.gameStats.coinflip?.wins || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Losses</span>
-                        <span className="font-semibold text-red-400">{userData.gameStats.coinflip?.losses || 0}</span>
-                      </div>
-                      <div className="pt-2 border-t border-white/10">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Profit</span>
-                          <span className={`font-bold ${(userData.gameStats.coinflip?.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(userData.gameStats.coinflip?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.coinflip?.profit || 0).toFixed(2)}
-                          </span>
+                      
+                      {/* Header */}
+                      <div className="relative z-10 p-6 border-b border-amber-500/30">
+                        <div className="flex items-center gap-3">
+                          <Coins className="w-8 h-8 text-amber-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                          <h3 className="text-2xl font-bold text-amber-400 font-mono tracking-wider">COINFLIP</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-amber-500/50 to-transparent" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      {/* Stats */}
+                      <div className="relative z-10 p-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-white font-mono drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
+                              {(userData.gameStats.coinflip?.wins || 0) + (userData.gameStats.coinflip?.losses || 0)}
+                            </div>
+                            <div className="text-sm text-amber-300/80 font-mono">GAMES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-green-400 font-mono drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                              {userData.gameStats.coinflip?.wins || 0}
+                            </div>
+                            <div className="text-sm text-green-300/80 font-mono">WINS</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-red-400 font-mono drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                              {userData.gameStats.coinflip?.losses || 0}
+                            </div>
+                            <div className="text-sm text-red-300/80 font-mono">LOSSES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-2xl font-bold font-mono ${(userData.gameStats.coinflip?.profit || 0) >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`}>
+                              {(userData.gameStats.coinflip?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.coinflip?.profit || 0).toFixed(2)}
+                            </div>
+                            <div className={`text-sm font-mono ${(userData.gameStats.coinflip?.profit || 0) >= 0 ? 'text-green-300/80' : 'text-red-300/80'}`}>PROFIT</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Tech corners */}
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-amber-400/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-amber-400/80" />
+                    </div>
+                  </div>
 
                   {/* Roulette Stats */}
-                  <Card className="glass border-0 bg-gradient-to-br from-red-500/10 to-pink-500/10 border border-red-500/20">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-2 text-red-400">
-                        <div className="w-5 h-5 rounded-full bg-gradient-to-r from-red-500 to-black border-2 border-white" />
-                        Roulette
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Games</span>
-                        <span className="font-semibold">{(userData.gameStats.roulette?.wins || 0) + (userData.gameStats.roulette?.losses || 0)}</span>
+                  <div className="relative group/game">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-red-500/40 to-pink-500/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-red-500/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Wins</span>
-                        <span className="font-semibold text-green-400">{userData.gameStats.roulette?.wins || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Losses</span>
-                        <span className="font-semibold text-red-400">{userData.gameStats.roulette?.losses || 0}</span>
-                      </div>
-                      <div className="pt-2 border-t border-white/10">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Profit</span>
-                          <span className={`font-bold ${(userData.gameStats.roulette?.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(userData.gameStats.roulette?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.roulette?.profit || 0).toFixed(2)}
-                          </span>
+                      
+                      <div className="relative z-10 p-6 border-b border-red-500/30">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-black border-2 border-white drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
+                          <h3 className="text-2xl font-bold text-red-400 font-mono tracking-wider">ROULETTE</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-red-500/50 to-transparent" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className="relative z-10 p-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-white font-mono drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
+                              {(userData.gameStats.roulette?.wins || 0) + (userData.gameStats.roulette?.losses || 0)}
+                            </div>
+                            <div className="text-sm text-red-300/80 font-mono">GAMES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-green-400 font-mono drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                              {userData.gameStats.roulette?.wins || 0}
+                            </div>
+                            <div className="text-sm text-green-300/80 font-mono">WINS</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-red-400 font-mono drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                              {userData.gameStats.roulette?.losses || 0}
+                            </div>
+                            <div className="text-sm text-red-300/80 font-mono">LOSSES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-2xl font-bold font-mono ${(userData.gameStats.roulette?.profit || 0) >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`}>
+                              {(userData.gameStats.roulette?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.roulette?.profit || 0).toFixed(2)}
+                            </div>
+                            <div className={`text-sm font-mono ${(userData.gameStats.roulette?.profit || 0) >= 0 ? 'text-green-300/80' : 'text-red-300/80'}`}>PROFIT</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-red-400/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-red-400/80" />
+                    </div>
+                  </div>
 
                   {/* Tower Stats */}
-                  <Card className="glass border-0 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-2 text-amber-400">
-                        <Building className="w-5 h-5" />
-                        Tower
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Games</span>
-                        <span className="font-semibold">{(userData.gameStats.tower?.wins || 0) + (userData.gameStats.tower?.losses || 0)}</span>
+                  <div className="relative group/game">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/40 to-teal-500/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-emerald-500/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(16,185,129,0.4)_25%,rgba(16,185,129,0.4)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.4)_75%,rgba(16,185,129,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Wins</span>
-                        <span className="font-semibold text-green-400">{userData.gameStats.tower?.wins || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Losses</span>
-                        <span className="font-semibold text-red-400">{userData.gameStats.tower?.losses || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Highest Level</span>
-                        <span className="font-semibold text-amber-400">{stats?.tower_highest_level || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Perfect Games</span>
-                        <span className="font-semibold text-purple-400">{stats?.tower_perfect_games || 0}</span>
-                      </div>
-                      <div className="pt-2 border-t border-white/10">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Profit</span>
-                          <span className={`font-bold ${(userData.gameStats.tower?.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(userData.gameStats.tower?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.tower?.profit || 0).toFixed(2)}
-                          </span>
+                      
+                      <div className="relative z-10 p-6 border-b border-emerald-500/30">
+                        <div className="flex items-center gap-3">
+                          <Building className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                          <h3 className="text-2xl font-bold text-emerald-400 font-mono tracking-wider">TOWER</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/50 to-transparent" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className="relative z-10 p-6 space-y-4">
+                        <div className="grid grid-cols-3 gap-4 mb-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-white font-mono drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
+                              {(userData.gameStats.tower?.wins || 0) + (userData.gameStats.tower?.losses || 0)}
+                            </div>
+                            <div className="text-xs text-emerald-300/80 font-mono">GAMES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-green-400 font-mono drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                              {userData.gameStats.tower?.wins || 0}
+                            </div>
+                            <div className="text-xs text-green-300/80 font-mono">WINS</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-emerald-400 font-mono drop-shadow-[0_0_8px_rgba(16,185,129,0.6)]">
+                              {stats?.tower_highest_level || 0}
+                            </div>
+                            <div className="text-xs text-emerald-300/80 font-mono">MAX LVL</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-purple-400 font-mono drop-shadow-[0_0_8px_rgba(168,85,247,0.6)]">
+                              {stats?.tower_perfect_games || 0}
+                            </div>
+                            <div className="text-sm text-purple-300/80 font-mono">PERFECT</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-2xl font-bold font-mono ${(userData.gameStats.tower?.profit || 0) >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`}>
+                              {(userData.gameStats.tower?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.tower?.profit || 0).toFixed(2)}
+                            </div>
+                            <div className={`text-sm font-mono ${(userData.gameStats.tower?.profit || 0) >= 0 ? 'text-green-300/80' : 'text-red-300/80'}`}>PROFIT</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-emerald-400/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-emerald-400/80" />
+                    </div>
+                  </div>
 
                   {/* Crash Stats */}
-                  <Card className="glass border-0 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20">
-                    <CardHeader className="pb-4">
-                      <CardTitle className="flex items-center gap-2 text-emerald-400">
-                        <TrendingUp className="w-5 h-5" />
-                        Crash
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Games</span>
-                        <span className="font-semibold">{(userData.gameStats.crash?.wins || 0) + (userData.gameStats.crash?.losses || 0)}</span>
+                  <div className="relative group/game">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/40 to-blue-500/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-cyan-500/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(6,182,212,0.4)_25%,rgba(6,182,212,0.4)_26%,transparent_27%,transparent_74%,rgba(6,182,212,0.4)_75%,rgba(6,182,212,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Wins</span>
-                        <span className="font-semibold text-green-400">{userData.gameStats.crash?.wins || 0}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Losses</span>
-                        <span className="font-semibold text-red-400">{userData.gameStats.crash?.losses || 0}</span>
-                      </div>
-                      <div className="pt-2 border-t border-white/10">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Profit</span>
-                          <span className={`font-bold ${(userData.gameStats.crash?.profit || 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {(userData.gameStats.crash?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.crash?.profit || 0).toFixed(2)}
-                          </span>
+                      
+                      <div className="relative z-10 p-6 border-b border-cyan-500/30">
+                        <div className="flex items-center gap-3">
+                          <TrendingUp className="w-8 h-8 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
+                          <h3 className="text-2xl font-bold text-cyan-400 font-mono tracking-wider">CRASH</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-cyan-500/50 to-transparent" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      <div className="relative z-10 p-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-white font-mono drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]">
+                              {(userData.gameStats.crash?.wins || 0) + (userData.gameStats.crash?.losses || 0)}
+                            </div>
+                            <div className="text-sm text-cyan-300/80 font-mono">GAMES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-3xl font-bold text-green-400 font-mono drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]">
+                              {userData.gameStats.crash?.wins || 0}
+                            </div>
+                            <div className="text-sm text-green-300/80 font-mono">WINS</div>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className="text-2xl font-bold text-red-400 font-mono drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]">
+                              {userData.gameStats.crash?.losses || 0}
+                            </div>
+                            <div className="text-sm text-red-300/80 font-mono">LOSSES</div>
+                          </div>
+                          <div className="text-center">
+                            <div className={`text-2xl font-bold font-mono ${(userData.gameStats.crash?.profit || 0) >= 0 ? 'text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.6)]'}`}>
+                              {(userData.gameStats.crash?.profit || 0) >= 0 ? '+' : ''}${(userData.gameStats.crash?.profit || 0).toFixed(2)}
+                            </div>
+                            <div className={`text-sm font-mono ${(userData.gameStats.crash?.profit || 0) >= 0 ? 'text-green-300/80' : 'text-red-300/80'}`}>PROFIT</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-cyan-400/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-cyan-400/80" />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -1171,61 +1289,160 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                 )}
               </TabsContent>
 
-              {/* Statistics Tab */}
-              <TabsContent value="stats" className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Cyberpunk Statistics Tab */}
+              <TabsContent value="stats" className="space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                   {/* Level Progress Chart */}
-                  <Card className="glass border-0">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="w-5 h-5 text-primary" />
-                        Level Progress
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="text-center p-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-lg border border-primary/20">
-                        <div className="text-4xl font-bold text-primary mb-2">{currentLevel}</div>
-                        <div className="text-muted-foreground mb-4">Current Level</div>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Progress to Level {currentLevel + 1}</span>
-                            <span>{Math.round(xpProgress)}%</span>
-                          </div>
-                          <Progress value={xpProgress} className="h-2" />
+                  <div className="relative group/levelchart">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-accent/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-primary/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      {/* Circuit Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+                      </div>
+                      
+                      {/* Header */}
+                      <div className="relative z-10 p-6 border-b border-primary/30">
+                        <div className="flex items-center gap-3">
+                          <BarChart3 className="w-8 h-8 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                          <h3 className="text-2xl font-bold text-primary font-mono tracking-wider">LEVEL PROGRESS</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent" />
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      {/* Content */}
+                      <div className="relative z-10 p-8">
+                        <div className="text-center mb-8">
+                          <div className="text-6xl font-bold text-primary drop-shadow-[0_0_15px_rgba(99,102,241,0.8)] font-mono mb-3">
+                            {currentLevel}
+                          </div>
+                          <div className="text-lg text-primary/80 font-mono tracking-wider mb-6">CURRENT LEVEL</div>
+                          
+                          {/* Enhanced Progress Section */}
+                          <div className="space-y-4">
+                            <div className="flex justify-between text-base font-mono">
+                              <span className="text-primary">PROGRESS TO LEVEL {currentLevel + 1}</span>
+                              <span className="text-accent">{Math.round(xpProgress)}% COMPLETE</span>
+                            </div>
+                            
+                            {/* Cyberpunk Progress Bar */}
+                            <div className="relative">
+                              <div className="h-6 bg-slate-800/60 border border-slate-600/50 backdrop-blur-sm overflow-hidden"
+                                   style={{
+                                     clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                                   }}>
+                                
+                                {/* Progress Fill */}
+                                <div 
+                                  className="h-full bg-gradient-to-r from-primary via-accent to-primary relative transition-all duration-1000 ease-out"
+                                  style={{ width: `${xpProgress}%` }}
+                                >
+                                  {/* Animated Glow */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/10 to-white/30 animate-pulse" />
+                                  
+                                  {/* Moving Scan Line */}
+                                  <div className="absolute top-0 right-0 w-1 h-full bg-white/80 shadow-[0_0_10px_rgba(255,255,255,0.8)] animate-pulse" />
+                                </div>
+                                
+                                {/* Grid Pattern Overlay */}
+                                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1)_76%,transparent_77%,transparent)] bg-[8px_8px] opacity-20" />
+                              </div>
+                              
+                              {/* Progress Percentage Indicator */}
+                              <div 
+                                className="absolute top-1/2 transform -translate-y-1/2 text-sm font-mono font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-1000 ease-out"
+                                style={{ left: `${Math.max(5, Math.min(90, xpProgress))}%` }}
+                              >
+                                {Math.round(xpProgress)}%
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Tech corners */}
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-accent/80" />
+                    </div>
+                  </div>
 
                   {/* Border Tier Info */}
-                  <Card className="glass border-0">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Crown className="w-5 h-5 text-yellow-400" />
-                        Border Tier
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="text-center p-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/20">
-                        <div className="text-4xl font-bold text-yellow-400 mb-2">Tier {getBorderTier(currentLevel)}</div>
-                        <div className="text-muted-foreground mb-4">Profile Border</div>
-                        <div className="text-sm space-y-1">
-                          <div>Tier 1: Level 1-9 (Basic)</div>
-                          <div>Tier 2: Level 10-24 (Bronze)</div>
-                          <div>Tier 3: Level 25-49 (Silver)</div>
-                          <div className={currentLevel >= 50 ? 'text-yellow-400 font-semibold' : ''}>
-                            Tier 4: Level 50-74 (Gold)
+                  <div className="relative group/bordertier">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/40 to-orange-500/60 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }} />
+                    
+                    <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-yellow-500/60 backdrop-blur-sm overflow-hidden"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                         }}>
+                      
+                      {/* Circuit Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(245,158,11,0.4)_25%,rgba(245,158,11,0.4)_26%,transparent_27%,transparent_74%,rgba(245,158,11,0.4)_75%,rgba(245,158,11,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+                      </div>
+                      
+                      {/* Header */}
+                      <div className="relative z-10 p-6 border-b border-yellow-500/30">
+                        <div className="flex items-center gap-3">
+                          <Crown className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                          <h3 className="text-2xl font-bold text-yellow-400 font-mono tracking-wider">BORDER TIER</h3>
+                          <div className="flex-1 h-px bg-gradient-to-r from-yellow-500/50 to-transparent" />
+                        </div>
+                      </div>
+                      
+                      {/* Content */}
+                      <div className="relative z-10 p-8">
+                        <div className="text-center mb-8">
+                          <div className="text-6xl font-bold text-yellow-400 drop-shadow-[0_0_15px_rgba(245,158,11,0.8)] font-mono mb-3">
+                            TIER {getBorderTier(currentLevel)}
                           </div>
-                          <div className={currentLevel >= 75 ? 'text-purple-400 font-semibold' : ''}>
-                            Tier 5: Level 75-99 (Platinum)
+                          <div className="text-lg text-yellow-300/80 font-mono tracking-wider mb-6">PROFILE BORDER</div>
+                        </div>
+                        
+                        {/* Tier List */}
+                        <div className="space-y-3">
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 1 && currentLevel <= 9 ? 'bg-slate-700/50 border-slate-500/50 text-slate-300' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 1: LEVEL 1-9</span>
+                            <span className="text-slate-400">(BASIC)</span>
                           </div>
-                          <div className={currentLevel >= 100 ? 'text-pink-400 font-semibold' : ''}>
-                            Tier 6: Level 100+ (Diamond)
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 10 && currentLevel <= 24 ? 'bg-orange-900/50 border-orange-500/50 text-orange-300' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 2: LEVEL 10-24</span>
+                            <span className="text-orange-400">(BRONZE)</span>
+                          </div>
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 25 && currentLevel <= 49 ? 'bg-slate-600/50 border-slate-400/50 text-slate-200' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 3: LEVEL 25-49</span>
+                            <span className="text-slate-300">(SILVER)</span>
+                          </div>
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 50 && currentLevel <= 74 ? 'bg-yellow-900/50 border-yellow-500/50 text-yellow-300' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 4: LEVEL 50-74</span>
+                            <span className="text-yellow-400">(GOLD)</span>
+                          </div>
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 75 && currentLevel <= 99 ? 'bg-purple-900/50 border-purple-500/50 text-purple-300' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 5: LEVEL 75-99</span>
+                            <span className="text-purple-400">(PLATINUM)</span>
+                          </div>
+                          <div className={`flex justify-between p-3 rounded border font-mono text-sm ${currentLevel >= 100 ? 'bg-pink-900/50 border-pink-500/50 text-pink-300' : 'bg-slate-800/30 border-slate-600/30 text-slate-400'}`}>
+                            <span>TIER 6: LEVEL 100+</span>
+                            <span className="text-pink-400">(DIAMOND)</span>
                           </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+                      
+                      {/* Tech corners */}
+                      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-yellow-400/80" />
+                      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-yellow-400/80" />
+                    </div>
+                  </div>
                 </div>
               </TabsContent>
             </Tabs>
@@ -1714,97 +1931,185 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
   const lockedAchievements = achievements.filter(a => !isUnlocked(a.id));
 
   return (
-    <div className="space-y-6">
-      {/* Achievement Stats */}
-      <Card className="glass border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-primary" />
-            Achievement Progress
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{unlockedAchievements.length}</div>
-              <div className="text-sm text-muted-foreground">Unlocked</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-muted-foreground">{achievements.length}</div>
-              <div className="text-sm text-muted-foreground">Total</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-400">
-                {unlockedAchievements.filter(a => a.rarity === 'legendary').length}
-              </div>
-              <div className="text-sm text-muted-foreground">Legendary</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-green-400">
-                ${unlockedAchievements.reduce((sum, a) => sum + (a.reward_amount || 0), 0).toFixed(2)}
-              </div>
-              <div className="text-sm text-muted-foreground">Earned Rewards</div>
+    <div className="space-y-8">
+      {/* Cyberpunk Achievement Stats */}
+      <div className="relative group/achievestats">
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-accent/60 blur-sm animate-pulse"
+             style={{
+               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+             }} />
+        
+        <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-primary/60 backdrop-blur-sm overflow-hidden"
+             style={{
+               clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+             }}>
+          
+          {/* Circuit Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+          </div>
+          
+          {/* Header */}
+          <div className="relative z-10 p-6 border-b border-primary/30">
+            <div className="flex items-center gap-3">
+              <Trophy className="w-8 h-8 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+              <h3 className="text-2xl font-bold text-primary font-mono tracking-wider">ACHIEVEMENT PROGRESS</h3>
+              <div className="flex-1 h-px bg-gradient-to-r from-primary/50 to-transparent" />
             </div>
           </div>
-        </CardContent>
-      </Card>
+          
+          {/* Stats Grid */}
+          <div className="relative z-10 p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-4xl font-bold text-primary drop-shadow-[0_0_10px_rgba(99,102,241,0.6)] font-mono mb-2">
+                  {unlockedAchievements.length}
+                </div>
+                <div className="text-sm text-primary/80 font-mono tracking-wider">UNLOCKED</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] font-mono mb-2">
+                  {achievements.length}
+                </div>
+                <div className="text-sm text-slate-300 font-mono tracking-wider">TOTAL</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-orange-400 drop-shadow-[0_0_10px_rgba(251,146,60,0.6)] font-mono mb-2">
+                  {unlockedAchievements.filter(a => a.rarity === 'legendary').length}
+                </div>
+                <div className="text-sm text-orange-300/80 font-mono tracking-wider">LEGENDARY</div>
+              </div>
+              <div className="text-center">
+                <div className="text-4xl font-bold text-green-400 drop-shadow-[0_0_10px_rgba(34,197,94,0.6)] font-mono mb-2">
+                  ${unlockedAchievements.reduce((sum, a) => sum + (a.reward_amount || 0), 0).toFixed(2)}
+                </div>
+                <div className="text-sm text-green-300/80 font-mono tracking-wider">EARNED REWARDS</div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Tech corners */}
+          <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/80" />
+          <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-accent/80" />
+        </div>
+      </div>
 
-      {/* Claimable Achievements */}
+      {/* Cyberpunk Claimable Achievements */}
       {isOwnProfile && claimableAchievements.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold flex items-center gap-2">
-            <Gift className="w-5 h-5 text-green-400 animate-pulse" />
-            Ready to Claim ({claimableAchievements.length})
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {claimableAchievements.map((achievement) => {
-              const IconComponent = getIconComponent(achievement.icon);
-              
-              return (
-                <Card key={achievement.id} className={`glass border-0 bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 hover:border-green-400/50 transition-all duration-300 hover:scale-105 animate-pulse`} style={{ animationDuration: '2s' }}>
-                  <CardContent className="p-4 text-center">
-                    <div className="mb-3">
-                      <div className="w-8 h-8 mx-auto bg-green-500/20 rounded-full flex items-center justify-center backdrop-blur-sm animate-pulse" style={{ animationDuration: '3s' }}>
-                        <IconComponent className="w-4 h-4 text-green-400" />
-                      </div>
-                    </div>
-                    <h3 className="font-bold mb-1 text-green-400 text-sm">{achievement.name}</h3>
-                    <p className="text-xs text-green-300/80 mb-2 line-clamp-2">{achievement.description}</p>
+        <div className="relative group/claimable">
+          {/* Multi-layered Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 rounded-2xl" />
+          
+          {/* Circuit Pattern */}
+          <div className="absolute inset-0 opacity-[0.15] rounded-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(16,185,129,0.5)_25%,rgba(16,185,129,0.5)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.5)_75%,rgba(16,185,129,0.5)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(16,185,129,0.5)_25%,rgba(16,185,129,0.5)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.5)_75%,rgba(16,185,129,0.5)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+          </div>
+          
+          {/* Border Glow */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/30 via-green-500/40 to-emerald-500/30 rounded-2xl blur-sm animate-pulse" />
+          
+          {/* Tech Corner Details */}
+          <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-emerald-400/80 rounded-tl-sm" />
+          <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-green-400/80 rounded-tr-sm" />
+          <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-green-400/80 rounded-bl-sm" />
+          <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-emerald-400/80 rounded-br-sm" />
+          
+          <div className="relative z-10 p-8">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <Gift className="w-8 h-8 text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.8)] animate-pulse" />
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent font-mono tracking-wider">
+                READY TO CLAIM ({claimableAchievements.length})
+              </h3>
+              <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/50 via-green-400/30 to-transparent" />
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {claimableAchievements.map((achievement, index) => {
+                const IconComponent = getIconComponent(achievement.icon);
+                
+                return (
+                  <div key={achievement.id} className="relative group/claimcard">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/50 to-green-500/70 blur-sm animate-pulse"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }} />
                     
-                    <div className="flex justify-between items-center mb-2">
-                      <Badge variant="secondary" className={`capitalize text-xs ${difficultyColors[achievement.difficulty]} text-xs`}>
-                        {achievement.difficulty}
-                      </Badge>
-                      <Badge variant="secondary" className={`capitalize text-xs ${rarityColors[achievement.rarity]} bg-white/10 text-xs`}>
-                        {achievement.rarity}
-                      </Badge>
-                    </div>
-                    
-                    <div className="text-xs space-y-2">
-                      <div className="flex items-center justify-center gap-1 text-green-400 font-semibold">
-                        <DollarSign className="w-3 h-3" />
-                        <span>+${achievement.reward_amount}</span>
+                    <div className="relative bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-emerald-500/70 backdrop-blur-sm overflow-hidden group-hover/claimcard:scale-105 transition-all duration-300"
+                         style={{
+                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                         }}>
+                      
+                      {/* Circuit Pattern */}
+                      <div className="absolute inset-0 opacity-10">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(16,185,129,0.4)_25%,rgba(16,185,129,0.4)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.4)_75%,rgba(16,185,129,0.4)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
                       </div>
                       
-                      <Button
-                        onClick={() => {
-                          console.log('🎯 Claim button clicked for:', achievement.name);
-                          claimAchievement(achievement);
-                        }}
-                        disabled={claiming === achievement.id}
-                        className="w-full h-7 text-xs bg-green-500 hover:bg-green-400 text-white border-0 transition-all duration-300 hover:scale-105"
-                      >
-                        {claiming === achievement.id ? (
-                          <Loader2 className="w-3 h-3 animate-spin" />
-                        ) : (
-                          'Claim Reward'
-                        )}
-                      </Button>
+                      <div className="relative z-10 p-4 text-center">
+                        <div className="mb-3">
+                          <div className="w-10 h-10 mx-auto bg-emerald-500/30 border border-emerald-400/50 backdrop-blur-sm flex items-center justify-center animate-pulse"
+                               style={{
+                                 clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                               }}>
+                            <IconComponent className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.8)]" />
+                          </div>
+                        </div>
+                        
+                        <h3 className="font-bold mb-2 text-emerald-400 text-sm font-mono tracking-wider">{achievement.name}</h3>
+                        <p className="text-xs text-emerald-300/80 mb-3 line-clamp-2 font-mono">{achievement.description}</p>
+                        
+                        <div className="flex justify-between items-center mb-3">
+                          <div className={`text-xs px-2 py-1 rounded border font-mono ${difficultyColors[achievement.difficulty]}`}>
+                            {achievement.difficulty}
+                          </div>
+                          <div className={`text-xs px-2 py-1 rounded border font-mono ${rarityColors[achievement.rarity]} bg-white/10`}>
+                            {achievement.rarity}
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-center gap-1 text-emerald-400 font-bold text-sm font-mono">
+                            <DollarSign className="w-4 h-4" />
+                            <span>+${achievement.reward_amount}</span>
+                          </div>
+                          
+                          <div className="relative overflow-hidden backdrop-blur-sm transition-all duration-300 group/claimBtn"
+                               style={{
+                                 clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                               }}>
+                            
+                            {/* Scan Line Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent translate-x-[-100%] group-hover/claimBtn:translate-x-[100%] transition-transform duration-700 ease-out" />
+                            
+                            <button
+                              onClick={() => {
+                                console.log('🎯 Claim button clicked for:', achievement.name);
+                                claimAchievement(achievement);
+                              }}
+                              disabled={claiming === achievement.id}
+                              className="w-full relative bg-gradient-to-br from-emerald-600/80 to-green-600/80 hover:from-emerald-500/90 hover:to-green-500/90 text-white border border-emerald-500/60 py-2 px-3 transition-all duration-300 font-mono font-bold tracking-wider text-xs hover:scale-105 active:scale-95 disabled:opacity-60"
+                            >
+                              {claiming === achievement.id ? (
+                                <Loader2 className="w-3 h-3 animate-spin mx-auto" />
+                              ) : (
+                                'CLAIM REWARD'
+                              )}
+                            </button>
+                            
+                            {/* Inner Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/claimBtn:opacity-100 transition-opacity duration-300" />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Tech corners */}
+                      <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-emerald-400/80" />
+                      <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-emerald-400/80" />
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
