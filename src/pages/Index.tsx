@@ -484,8 +484,7 @@ export default function Index({ initialGame }: IndexProps) {
   const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
   
   // Use current values when not animating, animated values when animating
-  // Display total XP (unified system) instead of just current level XP
-  const displayXP = xpIncreaseAnimation ? animatedXP : (levelStats?.total_xp || 0);
+  const displayXP = xpIncreaseAnimation ? animatedXP : (levelStats?.current_level_xp || 0);
   const displayProgress = xpIncreaseAnimation ? animatedProgress : xpProgress;
 
   // Smooth XP animation function
@@ -514,7 +513,7 @@ export default function Index({ initialGame }: IndexProps) {
   // Handle XP changes with animations
   useEffect(() => {
     if (levelStats) {
-      const currentXP = levelStats.total_xp; // Use total XP for unified system
+      const currentXP = levelStats.current_level_xp;
       const currentProgress = xpProgress;
       
       // Initialize on first load
@@ -1523,6 +1522,8 @@ export default function Index({ initialGame }: IndexProps) {
                       <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
                         {formatXP(displayXP)}
                       </span>
+                      <span className="text-slate-500">/</span>
+                      <span className="text-primary">{formatXP(levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
                       <span className="text-slate-400">XP</span>
                       {xpIncreaseAnimation && (
                         <span className="text-green-400 animate-bounce text-xs">+</span>

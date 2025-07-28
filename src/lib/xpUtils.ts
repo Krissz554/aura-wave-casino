@@ -1,11 +1,9 @@
 /**
- * Utility functions for unified XP formatting and display
- * All functions work with the new unified XP system where users have one total_xp value
+ * Utility functions for XP formatting and display
  */
 
 /**
  * Formats XP value to show up to 3 decimal places when needed
- * Works with unified total_xp system
  * - Shows 3 decimals for values < 0.01 (minimum bet $0.01 = 0.001 XP)
  * - Shows 3 decimals for values < 1 XP
  * - Shows 2 decimals for values 1-9.99 XP

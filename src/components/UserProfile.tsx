@@ -233,14 +233,14 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
         requestAnimationFrame(animate);
       };
 
-      // Use unified XP system (prioritize stats for own profile, userData for others)
+      // Use the correct XP source (prioritize stats for own profile, userData for others)
       const currentLevel = stats?.current_level || userData.current_level;
-      const totalXP = stats?.total_xp || userData.total_xp || 0; // UNIFIED XP - total accumulated
+      const currentXP = stats?.current_level_xp || userData.current_xp;
 
       animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
       );
-      animateValue(0, totalXP, 1000, (val) => 
+      animateValue(0, currentXP, 1000, (val) => 
         setAnimatedStats(prev => ({ ...prev, xp: val }))
       );
       animateValue(0, userData.balance, 1200, (val) => 
@@ -270,10 +270,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   if (!userData) return null;
 
   const currentLevel = stats?.current_level || userData.current_level;
-  const totalXP = stats?.total_xp || userData.total_xp || 0; // UNIFIED XP - total accumulated
-  const currentLevelXP = stats?.current_level_xp || userData.current_xp; // XP within current level
+  const currentXP = stats?.current_level_xp || userData.current_xp;
   const xpToNext = stats?.xp_to_next_level || userData.xp_to_next_level;
-      const xpProgress = calculateXPProgress(currentLevelXP, xpToNext);
+  const totalXP = currentXP + xpToNext;
+  const xpProgress = calculateXPProgress(currentXP, xpToNext);
 
   const registrationDate = new Date(userData.registration_date).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -533,7 +533,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                           <div className="text-2xl font-bold text-accent drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]">
                             {formatXP(animatedStats.xp)}
                           </div>
-                          <div className="text-sm text-accent/80 font-mono tracking-wider">TOTAL XP</div>
+                          <div className="text-sm text-accent/80 font-mono tracking-wider">CURRENT XP</div>
                           
                           {/* Tech corners */}
                           <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-accent/60" />
