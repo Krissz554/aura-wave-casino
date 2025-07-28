@@ -1389,7 +1389,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                     }
                                   }}
                                   style={{
-                                    fontSize: '36px',
+                                    fontSize: '30px',
                                     fontFamily: 'monospace',
                                     fontWeight: 'bold',
                                     letterSpacing: '0.1em'
