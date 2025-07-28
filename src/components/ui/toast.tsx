@@ -23,15 +23,15 @@ const ToastViewport = React.forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full will-change-transform",
+  "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden border p-3 pr-6 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full will-change-transform",
   {
     variants: {
       variant: {
         default: [
           // Base cyberpunk container
           "relative",
-          // Angular clipping
-          "clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          // Angular clipping with less height
+          "clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Multi-layer background
           "bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95",
           // Border and glow
@@ -46,18 +46,18 @@ const toastVariants = cva(
           "before:bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)]",
           "before:bg-[length:8px_8px]",
           "before:opacity-30",
-          "before:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          "before:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // After pseudo-element for scan line
           "after:absolute after:inset-0",
           "after:bg-gradient-to-r after:from-transparent after:via-indigo-400/20 after:to-transparent",
           "after:translate-x-[-100%] after:animate-[cyber-scan_2s_ease-in-out_infinite]",
-          "after:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]"
+          "after:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
         ],
         success: [
           // Base cyberpunk container
           "relative",
-          // Angular clipping
-          "clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          // Angular clipping with less height
+          "clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Green-themed background
           "bg-gradient-to-br from-emerald-900/95 via-emerald-800/90 to-slate-900/95",
           // Green border and glow
@@ -72,18 +72,18 @@ const toastVariants = cva(
           "before:bg-[linear-gradient(90deg,transparent_24%,rgba(16,185,129,0.15)_25%,rgba(16,185,129,0.15)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.15)_75%,rgba(16,185,129,0.15)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(16,185,129,0.15)_25%,rgba(16,185,129,0.15)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.15)_75%,rgba(16,185,129,0.15)_76%,transparent_77%,transparent)]",
           "before:bg-[length:8px_8px]",
           "before:opacity-40",
-          "before:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          "before:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Green scan line
           "after:absolute after:inset-0",
           "after:bg-gradient-to-r after:from-transparent after:via-emerald-400/30 after:to-transparent",
           "after:translate-x-[-100%] after:animate-[cyber-scan_2s_ease-in-out_infinite]",
-          "after:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]"
+          "after:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
         ],
         destructive: [
           // Base cyberpunk container
           "relative",
-          // Angular clipping
-          "clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          // Angular clipping with less height
+          "clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Red-themed background
           "bg-gradient-to-br from-red-900/95 via-red-800/90 to-slate-900/95",
           // Red border and glow
@@ -98,18 +98,18 @@ const toastVariants = cva(
           "before:bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.15)_25%,rgba(239,68,68,0.15)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.15)_75%,rgba(239,68,68,0.15)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.15)_25%,rgba(239,68,68,0.15)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.15)_75%,rgba(239,68,68,0.15)_76%,transparent_77%,transparent)]",
           "before:bg-[length:8px_8px]",
           "before:opacity-40",
-          "before:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          "before:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Red scan line
           "after:absolute after:inset-0",
           "after:bg-gradient-to-r after:from-transparent after:via-red-400/30 after:to-transparent",
           "after:translate-x-[-100%] after:animate-[cyber-scan_2s_ease-in-out_infinite]",
-          "after:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]"
+          "after:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
         ],
         warning: [
           // Base cyberpunk container
           "relative",
-          // Angular clipping
-          "clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          // Angular clipping with less height
+          "clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Orange-themed background
           "bg-gradient-to-br from-orange-900/95 via-orange-800/90 to-slate-900/95",
           // Orange border and glow
@@ -124,18 +124,18 @@ const toastVariants = cva(
           "before:bg-[linear-gradient(90deg,transparent_24%,rgba(251,146,60,0.15)_25%,rgba(251,146,60,0.15)_26%,transparent_27%,transparent_74%,rgba(251,146,60,0.15)_75%,rgba(251,146,60,0.15)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(251,146,60,0.15)_25%,rgba(251,146,60,0.15)_26%,transparent_27%,transparent_74%,rgba(251,146,60,0.15)_75%,rgba(251,146,60,0.15)_76%,transparent_77%,transparent)]",
           "before:bg-[length:8px_8px]",
           "before:opacity-40",
-          "before:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          "before:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Orange scan line
           "after:absolute after:inset-0",
           "after:bg-gradient-to-r after:from-transparent after:via-orange-400/30 after:to-transparent",
           "after:translate-x-[-100%] after:animate-[cyber-scan_2s_ease-in-out_infinite]",
-          "after:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]"
+          "after:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
         ],
         info: [
           // Base cyberpunk container
           "relative",
-          // Angular clipping
-          "clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          // Angular clipping with less height
+          "clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Blue-themed background
           "bg-gradient-to-br from-cyan-900/95 via-cyan-800/90 to-slate-900/95",
           // Blue border and glow
@@ -150,12 +150,12 @@ const toastVariants = cva(
           "before:bg-[linear-gradient(90deg,transparent_24%,rgba(6,182,212,0.15)_25%,rgba(6,182,212,0.15)_26%,transparent_27%,transparent_74%,rgba(6,182,212,0.15)_75%,rgba(6,182,212,0.15)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(6,182,212,0.15)_25%,rgba(6,182,212,0.15)_26%,transparent_27%,transparent_74%,rgba(6,182,212,0.15)_75%,rgba(6,182,212,0.15)_76%,transparent_77%,transparent)]",
           "before:bg-[length:8px_8px]",
           "before:opacity-40",
-          "before:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]",
+          "before:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]",
           // Blue scan line
           "after:absolute after:inset-0",
           "after:bg-gradient-to-r after:from-transparent after:via-cyan-400/30 after:to-transparent",
           "after:translate-x-[-100%] after:animate-[cyber-scan_2s_ease-in-out_infinite]",
-          "after:clip-path-[polygon(0_0,calc(100%-12px)_0,100%_12px,100%_100%,12px_100%,0_calc(100%-12px))]"
+          "after:clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
         ],
       },
     },
@@ -242,7 +242,7 @@ const ToastTitle = React.forwardRef<
   <ToastPrimitives.Title
     ref={ref}
     className={cn(
-      "relative z-10 text-sm font-bold font-mono tracking-wider text-white drop-shadow-sm",
+      "relative z-10 text-xs font-bold font-mono tracking-wider text-white drop-shadow-sm leading-tight",
       className
     )}
     {...props}
@@ -257,7 +257,7 @@ const ToastDescription = React.forwardRef<
   <ToastPrimitives.Description
     ref={ref}
     className={cn(
-      "relative z-10 text-sm text-slate-200 font-mono tracking-wide opacity-90",
+      "relative z-10 text-xs text-slate-200 font-mono tracking-wide opacity-90 leading-tight",
       className
     )}
     {...props}
@@ -273,11 +273,11 @@ const ToastIcon = React.forwardRef<
   }
 >(({ className, variant = "default", ...props }, ref) => {
   const iconMap = {
-    default: <Info className="w-5 h-5" />,
-    success: <Check className="w-5 h-5" />,
-    destructive: <AlertTriangle className="w-5 h-5" />,
-    warning: <AlertTriangle className="w-5 h-5" />,
-    info: <Info className="w-5 h-5" />
+    default: <Info />,
+    success: <Check />,
+    destructive: <AlertTriangle />,
+    warning: <AlertTriangle />,
+    info: <Info />
   }
 
   const colorMap = {
@@ -292,8 +292,8 @@ const ToastIcon = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative z-10 flex-shrink-0 w-8 h-8 flex items-center justify-center",
-        "rounded-md border backdrop-blur-sm",
+        "relative z-10 flex-shrink-0 w-6 h-6 flex items-center justify-center",
+        "rounded-sm border backdrop-blur-sm",
         // Variant-specific styling
         variant === "default" && "bg-indigo-500/20 border-indigo-500/30",
         variant === "success" && "bg-emerald-500/20 border-emerald-500/30",
@@ -305,7 +305,7 @@ const ToastIcon = React.forwardRef<
       )}
       {...props}
     >
-      {iconMap[variant]}
+      {React.cloneElement(iconMap[variant], { className: "w-3.5 h-3.5" })}
     </div>
   )
 })
