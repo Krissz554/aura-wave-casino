@@ -527,7 +527,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                              }}>
                           <div className="text-2xl font-bold text-accent drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]">
-                            {animatedStats.xp.toLocaleString()}
+                            {formatXP(animatedStats.xp)}
                           </div>
                           <div className="text-sm text-accent/80 font-mono tracking-wider">CURRENT XP</div>
                           
@@ -549,7 +549,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                              }}>
                           <div className="text-xl font-bold text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]">
-                            {xpToNext.toLocaleString()}
+                            {formatXP(xpToNext)}
                           </div>
                           <div className="text-sm text-green-400/80 font-mono tracking-wider">TO NEXT</div>
                           
