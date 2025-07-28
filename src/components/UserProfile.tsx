@@ -707,22 +707,22 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
             {/* Cyberpunk Tabs */}
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-              <div className="relative overflow-hidden group">
-                {/* Background */}
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/80 rounded-xl" />
-                
-                {/* Circuit Pattern */}
-                <div className="absolute inset-0 opacity-[0.08]">
-                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
-                </div>
-                
-                                 {/* Border Glow */}
-                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 blur-sm"
-                      style={{
-                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
-                      }} />
-                
-                <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl">
+                             <div className="relative group">
+                 {/* Background */}
+                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/80 rounded-xl overflow-hidden" />
+                 
+                 {/* Circuit Pattern */}
+                 <div className="absolute inset-0 opacity-[0.08] overflow-hidden">
+                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
+                 </div>
+                 
+                                  {/* Border Glow */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 blur-sm overflow-hidden"
+                       style={{
+                         clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                       }} />
+                 
+                 <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl overflow-visible">
                   <TabsTrigger 
                     value="overview" 
                     className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary/60 data-[state=active]:border-primary/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
@@ -756,17 +756,20 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                   
                   <TabsTrigger 
                     value="achievements" 
-                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600/80 data-[state=active]:to-orange-600/60 data-[state=active]:border-yellow-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
+                    className="relative border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600/80 data-[state=active]:to-orange-600/60 data-[state=active]:border-yellow-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
                     style={{
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
-                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
+                     {/* Scan line container with overflow control */}
+                     <div className="absolute inset-0 overflow-hidden"
                           style={{
                             clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                          }} />
-                     <Award className="w-4 h-4 mr-2 drop-shadow-sm" />
-                     <span className="font-mono tracking-wide">ACHIEVEMENTS</span>
+                          }}>
+                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                     </div>
+                     <Award className="w-4 h-4 mr-2 drop-shadow-sm relative z-10" />
+                     <span className="font-mono tracking-wide relative z-10">ACHIEVEMENTS</span>
                     
                                                                                    {/* Enhanced Notification Badge */}
                       {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
