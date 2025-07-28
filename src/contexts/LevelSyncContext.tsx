@@ -31,30 +31,33 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Try to get stats from profiles table first (primary source)
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('current_level, lifetime_xp, current_xp, xp_to_next_level, border_tier')
-        .eq('id', user.id)
+      // Get stats from user_level_stats table (primary source for XP data)
+      const { data: levelData, error: levelError } = await supabase
+        .from('user_level_stats')
+        .select('current_level, lifetime_xp, current_level_xp, xp_to_next_level, border_tier')
+        .eq('user_id', user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (levelError && levelError.code !== 'PGRST116') {
+        // PGRST116 is "not found" which is expected for new users
+        throw levelError;
+      }
 
-      if (profileData) {
+      if (levelData) {
         setLevelStats({
-          current_level: profileData.current_level || 1,
-          lifetime_xp: profileData.lifetime_xp || 0,
-          current_level_xp: profileData.current_xp || 0,
-          xp_to_next_level: profileData.xp_to_next_level || 1000,
-          border_tier: profileData.border_tier || 1
+          current_level: levelData.current_level || 1,
+          lifetime_xp: levelData.lifetime_xp || 0,
+          current_level_xp: levelData.current_level_xp || 0,
+          xp_to_next_level: levelData.xp_to_next_level || 100,
+          border_tier: levelData.border_tier || 1
         });
       } else {
-        // Fallback to default stats
+        // Fallback to default stats for new users
         setLevelStats({
           current_level: 1,
           lifetime_xp: 0,
           current_level_xp: 0,
-          xp_to_next_level: 1000,
+          xp_to_next_level: 100,
           border_tier: 1
         });
       }
@@ -65,7 +68,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
         current_level: 1,
         lifetime_xp: 0,
         current_level_xp: 0,
-        xp_to_next_level: 1000,
+        xp_to_next_level: 100,
         border_tier: 1
       });
     } finally {
@@ -82,7 +85,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
 
     fetchStats();
     
-    // Set up real-time subscription for level stats (profiles table)
+    // Set up real-time subscription for level stats (user_level_stats table)
     console.log('📊 Setting up level stats subscription for user:', user.id);
     const subscription = supabase
       .channel(`level_stats_${user.id}_${Date.now()}`)
@@ -91,8 +94,8 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
           {
             event: '*',
             schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`
+            table: 'user_level_stats',
+            filter: `user_id=eq.${user.id}`
           },
         (payload) => {
           console.log('📊 LEVEL STATS UPDATE:', payload);
@@ -101,8 +104,8 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
             setLevelStats({
               current_level: newData.current_level || 1,
               lifetime_xp: newData.lifetime_xp || 0,
-              current_level_xp: newData.current_xp || 0,
-              xp_to_next_level: newData.xp_to_next_level || 1000,
+              current_level_xp: newData.current_level_xp || 0,
+              xp_to_next_level: newData.xp_to_next_level || 100,
               border_tier: newData.border_tier || 1
             });
           }
