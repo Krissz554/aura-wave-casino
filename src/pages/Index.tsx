@@ -606,134 +606,114 @@ export default function Index({ initialGame }: IndexProps) {
               {user && (
                 <Dialog open={notificationModalOpen} onOpenChange={setNotificationModalOpen}>
                   <DialogTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={notificationLoading}
-                      data-notification-button="true"
-                      onClick={async () => {
-                        // Add button press animation class temporarily
-                        const button = document.activeElement as HTMLElement;
-                        if (button) {
-                          button.classList.add('animate-cyber-button-press');
-                          setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
-                        }
+                    <div className={cn(
+                      "relative group/notifications",
+                      // Dynamic grouping based on unread count
+                      unreadCount > 0 && "animate-pulse"
+                    )}>
+                      <Button
+                        variant="ghost"
+                        disabled={notificationLoading}
+                        data-notification-button="true"
+                        onClick={async () => {
+                          // Add button press animation class temporarily
+                          const button = document.activeElement as HTMLElement;
+                          if (button) {
+                            button.classList.add('animate-cyber-button-press');
+                            setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
+                          }
+                          
+                          // Show loading state briefly
+                          setNotificationLoading(true);
+                          await new Promise(resolve => setTimeout(resolve, 200));
+                          setNotificationLoading(false);
+                        }}
+                        className={cn(
+                          "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60",
+                          // Dynamic styling based on unread count and loading state
+                          unreadCount === 0 && !notificationLoading && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
+                          unreadCount > 0 && unreadCount <= 5 && !notificationLoading && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
+                          unreadCount > 5 && unreadCount <= 10 && !notificationLoading && "border border-red-500/40 bg-red-950/30 hover:bg-red-900/50",
+                          unreadCount > 10 && !notificationLoading && "border border-red-500/60 bg-red-950/40 hover:bg-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                        )}
+                      >
+                        {/* Cyberpunk scan line effect */}
+                        <div className={cn(
+                          "absolute inset-0 bg-gradient-to-r from-transparent to-transparent translate-x-[-100%] group-hover/notifications:translate-x-[100%] transition-transform duration-700 ease-out",
+                          unreadCount === 0 && "via-primary/20",
+                          unreadCount > 0 && unreadCount <= 5 && "via-orange-400/20",
+                          unreadCount > 5 && "via-red-400/20"
+                        )} />
                         
-                        // Show loading state briefly
-                        setNotificationLoading(true);
-                        await new Promise(resolve => setTimeout(resolve, 300));
-                        setNotificationLoading(false);
-                      }}
-                      className={cn(
-                        "relative px-3 py-2 overflow-hidden transition-all duration-300 backdrop-blur-sm active:scale-95 group",
-                        // Loading state styling
-                        notificationLoading && [
-                          "border-2 border-primary/60 bg-gradient-to-r from-primary/20 to-accent/20 animate-pulse"
-                        ],
-                        // Dynamic styling based on unread count (only when not loading)
-                        !notificationLoading && unreadCount === 0 && [
-                          "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50"
-                        ],
-                        !notificationLoading && unreadCount > 0 && unreadCount <= 5 && [
-                          "border-2 border-orange-400/60 bg-gradient-to-r from-orange-950/50 to-red-950/50"
-                        ],
-                        !notificationLoading && unreadCount > 5 && unreadCount <= 10 && [
-                          "border-2 border-red-400/80 bg-gradient-to-r from-red-950/60 to-pink-950/60"
-                        ],
-                        !notificationLoading && unreadCount > 10 && [
-                          "border-2 border-red-500/90 bg-gradient-to-r from-red-950/70 to-pink-950/70 shadow-[0_0_20px_rgba(239,68,68,0.6)]"
-                        ]
-                      )}
-                    >
-                      {/* Cyberpunk scan line effect */}
-                      <div className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-transparent to-transparent transition-transform duration-700 ease-out",
-                        notificationLoading && "via-primary/40 animate-[slideInOut_1.5s_ease-in-out_infinite]",
-                        !notificationLoading && "translate-x-[-100%] group-hover:translate-x-[100%]",
-                        !notificationLoading && unreadCount === 0 && "via-primary/20",
-                        !notificationLoading && unreadCount > 0 && "via-orange-400/30"
-                      )} />
-                      
-                      {/* Subtle inner glow on hover */}
-                      <div className={cn(
-                        "absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-                        unreadCount === 0 && "from-primary/5 via-primary/10 to-primary/5",
-                        unreadCount > 0 && "from-orange-400/10 via-red-400/15 to-orange-400/10"
-                      )} />
-                      
-                      {/* Edge pulse effect */}
-                      <div className={cn(
-                        "absolute inset-0 border border-transparent group-hover:border-opacity-30 rounded-md transition-all duration-300",
-                        unreadCount === 0 && "group-hover:border-primary/30",
-                        unreadCount > 0 && "group-hover:border-red-400/40"
-                      )} />
-                      
-                      {/* Icon with advanced animations */}
-                      <div className="relative z-10 flex items-center gap-2">
+                        {/* Subtle inner glow on hover */}
+                        <div className={cn(
+                          "absolute inset-0 bg-gradient-to-r opacity-0 group-hover/notifications:opacity-100 transition-opacity duration-300",
+                          unreadCount === 0 && "from-primary/5 via-primary/10 to-primary/5",
+                          unreadCount > 0 && unreadCount <= 5 && "from-orange-400/5 via-orange-400/10 to-orange-400/5",
+                          unreadCount > 5 && "from-red-400/5 via-red-400/10 to-red-400/5"
+                        )} />
+                        
+                        {/* Edge pulse effect */}
+                        <div className={cn(
+                          "absolute inset-0 border border-transparent group-hover/notifications:border-opacity-30 rounded-md transition-all duration-300",
+                          unreadCount === 0 && "group-hover/notifications:border-primary/30",
+                          unreadCount > 0 && unreadCount <= 5 && "group-hover/notifications:border-orange-400/30",
+                          unreadCount > 5 && "group-hover/notifications:border-red-400/30"
+                        )} />
+                        
+                        {/* Icon with proper loading state */}
                         <div className="relative">
                           {notificationLoading ? (
-                            <div className="w-5 h-5 flex items-center justify-center relative">
-                              {/* Outer pulse ring */}
-                              <div className="absolute inset-0 w-5 h-5 border border-primary/20 rounded-full animate-ping" />
-                              
-                              {/* Inner spinning loader with glow */}
-                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
-                              
-                              {/* Central glow dot */}
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-1 h-1 bg-primary/80 rounded-full animate-pulse" />
-                              </div>
+                            <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
+                              <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                             </div>
                           ) : unreadCount > 0 ? (
-                            <BellDot className="w-5 h-5 transition-all duration-300 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-cyber-glow" />
+                            <BellDot className={cn(
+                              "w-4 h-4 mr-2 transition-all duration-300 relative z-10",
+                              unreadCount <= 5 && "text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]",
+                              unreadCount > 5 && "text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.6)]"
+                            )} />
                           ) : (
-                            <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-all duration-300" />
+                            <Bell className="w-4 h-4 mr-2 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
                           )}
                           
-                          {/* Dynamic notification counter with epic animations */}
-                          {unreadCount > 0 && (
+                          {/* Notification counter badge */}
+                          {unreadCount > 0 && !notificationLoading && (
                             <div className={cn(
-                              "absolute -top-2 -right-2 flex items-center justify-center transition-all duration-300",
-                              // Dynamic size and style based on count
-                              unreadCount <= 5 && "min-w-[18px] h-[18px]",
-                              unreadCount > 5 && unreadCount <= 10 && "min-w-[22px] h-[22px]",
-                              unreadCount > 10 && "min-w-[26px] h-[26px]"
+                              "absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-xs font-bold flex items-center justify-center relative z-20",
+                              unreadCount <= 5 && "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
+                              unreadCount > 5 && unreadCount <= 10 && "bg-gradient-to-r from-red-500 to-red-600 text-white",
+                              unreadCount > 10 && "bg-gradient-to-r from-red-600 to-pink-600 text-white animate-pulse"
                             )}>
-                              {/* Background layers with count-based intensity */}
-                              <div className={cn(
-                                "absolute inset-0 rounded-full transition-all duration-300",
-                                unreadCount <= 5 && "bg-gradient-to-r from-red-500 via-pink-500 to-red-600 animate-cyber-counter-pulse",
-                                unreadCount > 5 && unreadCount <= 10 && "bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 animate-cyber-counter-bounce animate-cyber-counter-pulse",
-                                unreadCount > 10 && "bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 animate-cyber-counter-bounce animate-cyber-counter-pulse shadow-[0_0_20px_rgba(239,68,68,0.8)]"
-                              )} />
-                              
-                              {/* Ping effect - more intense for higher counts */}
-                              <div className={cn(
-                                "absolute inset-0 rounded-full opacity-40 animate-ping",
-                                unreadCount <= 5 && "bg-gradient-to-r from-red-400 to-pink-400",
-                                unreadCount > 5 && unreadCount <= 10 && "bg-gradient-to-r from-orange-400 to-red-400 animate-pulse",
-                                unreadCount > 10 && "bg-gradient-to-r from-red-500 to-purple-500 opacity-60"
-                              )} />
-                              
-                              {/* Extra glow layer for urgent notifications */}
-                              {unreadCount > 10 && (
-                                <div className="absolute inset-0 bg-gradient-to-r from-red-500/60 to-pink-500/60 rounded-full animate-ping delay-150" />
-                              )}
-                              
-                              {/* Text with dynamic sizing */}
-                              <span className={cn(
-                                "relative font-bold text-white z-10 transition-all duration-300",
-                                unreadCount <= 5 && "text-[10px]",
-                                unreadCount > 5 && unreadCount <= 10 && "text-[11px]",
-                                unreadCount > 10 && "text-[12px] animate-pulse"
-                              )}>
-                                {unreadCount > 99 ? '99+' : unreadCount}
-                              </span>
+                              {unreadCount > 99 ? '99+' : unreadCount}
                             </div>
                           )}
                         </div>
-                      </div>
-                    </Button>
+                        
+                        <span className={cn(
+                          "relative z-10 font-semibold bg-gradient-to-r bg-clip-text text-transparent",
+                          unreadCount === 0 && "from-primary to-accent",
+                          unreadCount > 0 && unreadCount <= 5 && "from-orange-300 to-orange-500",
+                          unreadCount > 5 && "from-red-300 to-red-500"
+                        )}>
+                          {notificationLoading ? 'Loading...' : 'Notifications'}
+                        </span>
+                        
+                        {/* Tech corner indicators */}
+                        <div className={cn(
+                          "absolute top-1 left-1 w-1.5 h-1.5 border-l border-t transition-colors duration-300",
+                          unreadCount === 0 && "border-primary/60 group-hover/notifications:border-primary",
+                          unreadCount > 0 && unreadCount <= 5 && "border-orange-400/60 group-hover/notifications:border-orange-300",
+                          unreadCount > 5 && "border-red-400/60 group-hover/notifications:border-red-300"
+                        )} />
+                        <div className={cn(
+                          "absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b transition-colors duration-300",
+                          unreadCount === 0 && "border-accent/60 group-hover/notifications:border-accent",
+                          unreadCount > 0 && unreadCount <= 5 && "border-orange-400/60 group-hover/notifications:border-orange-300",
+                          unreadCount > 5 && "border-red-400/60 group-hover/notifications:border-red-300"
+                        )} />
+                      </Button>
+                    </div>
                   </DialogTrigger>
                   
                   <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 border-0 bg-transparent overflow-hidden">
