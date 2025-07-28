@@ -384,13 +384,14 @@ export const RealtimeChat = () => {
               <div className="relative z-10 space-y-2">
                                  <div className="flex items-center justify-center gap-2">
                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                   <p className="text-sm text-white font-mono drop-shadow-lg">
-                     🔒 AUTHENTICATION REQUIRED
+                   <p className="text-sm text-white font-mono drop-shadow-lg tracking-wider">
+                     <Shield className="inline w-4 h-4 mr-2" />
+                     AUTHENTICATION_REQUIRED
                    </p>
                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-500" />
                  </div>
-                 <p className="text-xs text-slate-300 font-mono">
-                   Connect with other players and share your gaming experience!
+                 <p className="text-xs text-slate-300 font-mono tracking-wide">
+                   ESTABLISH_CONNECTION_TO_NETWORK_PROTOCOL
                  </p>
                 
                 {/* Tech accent lines */}

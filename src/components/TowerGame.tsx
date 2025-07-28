@@ -154,9 +154,9 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
 
     if (!userData) {
       toast({
-        title: "Sign In Required",
-        description: "Please sign in to play Tower",
-        variant: "destructive",
+        title: "AUTHENTICATION REQUIRED", 
+        description: "System access needed to engage tower protocol",
+        variant: "warning",
       });
       return;
     }
@@ -729,9 +729,10 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
                   </div>
                   <Button 
                     onClick={startGame}
-                    className="w-full gradient-primary hover:glow-primary transition-smooth"
+                    className="w-full relative bg-gradient-to-r from-orange-600/80 via-red-600/80 to-orange-600/80 hover:from-orange-500 hover:via-red-500 hover:to-orange-500 border border-orange-500/30 text-white font-mono tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/25 clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
                   >
-                    Sign In to Play
+                    <Shield className="w-4 h-4 mr-2" />
+                    AUTHENTICATE_TO_ENGAGE
                   </Button>
                 </div>
               )}

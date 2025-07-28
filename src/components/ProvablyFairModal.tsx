@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Shield, Eye, Calculator, Dice6, HelpCircle } from 'lucide-react';
+import { Shield, Eye, Calculator, Dice6, HelpCircle, Clock, Lock, AlertTriangle, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface RoundData {
@@ -460,12 +460,27 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
                       <p className={`text-sm font-semibold ${verificationData.verification_result === 'VALID' ? 'text-emerald-400' : 'text-red-400'}`}>
                         {verificationData.verification_result === 'VALID' ? '✅' : '❌'} Result: Slot {verificationData.result_slot} ({verificationData.result_color}) - {verificationData.verification_result}
                       </p>
-                      <div className="mt-3 text-xs text-muted-foreground">
-                        <p>🛡️ Enhanced provably fair cryptographic verification system</p>
-                        <p>📅 Daily seeds are generated every 24 hours and auto-revealed for transparency</p>
-                        <p>🔒 Results are predetermined and cannot be manipulated</p>
-                        <p>🚫 Client seeds cannot be changed during active rounds for security</p>
-                        <p>⚡ Legacy fallback systems disabled - only secure verification allowed</p>
+                      <div className="mt-3 text-xs text-slate-400 font-mono space-y-1">
+                        <p className="flex items-center gap-2">
+                          <Shield className="w-3 h-3 text-emerald-400" />
+                          Enhanced provably fair cryptographic verification system
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Clock className="w-3 h-3 text-cyan-400" />
+                          Daily seeds generated every 24 hours and auto-revealed for transparency
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Lock className="w-3 h-3 text-indigo-400" />
+                          Results are predetermined and cannot be manipulated
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <AlertTriangle className="w-3 h-3 text-orange-400" />
+                          Client seeds cannot be changed during active rounds for security
+                        </p>
+                        <p className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-purple-400" />
+                          Legacy fallback systems disabled - only secure verification allowed
+                        </p>
                       </div>
                     </div>
                   )}

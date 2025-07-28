@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, DollarSign, Zap } from 'lucide-react';
+import { Coins, DollarSign, Zap, Shield, Gamepad2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useGameHistory } from '@/hooks/useGameHistory';
 import { UserProfile } from '@/hooks/useUserProfile';
@@ -78,9 +78,9 @@ export default function CoinflipGame({ userData, onUpdateUser }: CoinflipGamePro
 
     if (!userData) {
       toast({
-        title: "Sign In Required",
-        description: "Please sign in to place bets",
-        variant: "destructive",
+        title: "AUTHENTICATION REQUIRED",
+        description: "System access needed to engage coinflip protocol", 
+        variant: "warning",
       });
       return;
     }
@@ -399,26 +399,40 @@ export default function CoinflipGame({ userData, onUpdateUser }: CoinflipGamePro
                 </>
               ) : (
                 <div className="text-center py-8 space-y-4">
-                  <div className="text-4xl mb-4">🎮</div>
-                  <h3 className="text-lg font-semibold">Coinflip Streak</h3>
-                  <p className="text-muted-foreground max-w-md mx-auto">
-                    Experience the thrill of our provably fair coinflip game with multiplying streaks! 
-                    Each correct guess multiplies your potential winnings.
-                  </p>
-                  <div className="glass rounded-lg p-4 space-y-2">
-                    <div className="text-sm text-muted-foreground">Demo Mode Features:</div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>• Provably Fair</div>
-                      <div>• Live Multipliers</div>
-                      <div>• Streak Rewards</div>
-                      <div>• Real-time Action</div>
+                  {/* Cyberpunk coinflip preview */}
+                  <div className="relative mx-auto w-16 h-16 mb-4">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/40 via-cyan-500/30 to-purple-500/40 rounded-full animate-pulse" />
+                    <div className="absolute inset-2 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full border border-purple-400/50" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Gamepad2 className="w-8 h-8 text-purple-400" />
                     </div>
                   </div>
+                  
+                  <h3 className="text-lg font-bold font-mono tracking-wider bg-gradient-to-r from-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    COINFLIP_PROTOCOL
+                  </h3>
+                  
+                  <p className="text-slate-300 max-w-md mx-auto font-mono text-sm leading-relaxed">
+                    Advanced probability manipulation system with exponential streak multipliers. 
+                    Each successful prediction amplifies potential returns.
+                  </p>
+                  
+                  <div className="bg-gradient-to-r from-slate-900/80 via-slate-800/60 to-slate-900/80 rounded-lg p-4 space-y-2 border border-purple-500/30">
+                    <div className="text-sm text-purple-300 font-mono tracking-wider">SYSTEM_FEATURES:</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+                      <div className="text-cyan-300">» PROVABLY_FAIR</div>
+                      <div className="text-cyan-300">» LIVE_MULTIPLIERS</div>
+                      <div className="text-cyan-300">» STREAK_REWARDS</div>
+                      <div className="text-cyan-300">» REALTIME_ACTION</div>
+                    </div>
+                  </div>
+                  
                   <Button 
                     onClick={handlePlaceBet}
-                    className="w-full gradient-primary hover:glow-primary transition-smooth"
+                    className="w-full relative bg-gradient-to-r from-purple-600/80 via-cyan-600/80 to-purple-600/80 hover:from-purple-500 hover:via-cyan-500 hover:to-purple-500 border border-purple-500/30 text-white font-mono tracking-wider transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25 clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]"
                   >
-                    Sign In to Play
+                    <Shield className="w-4 h-4 mr-2" />
+                    AUTHENTICATE_TO_ENGAGE
                   </Button>
                 </div>
               )}

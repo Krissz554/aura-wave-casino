@@ -750,11 +750,11 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
     // SECURITY 1: Comprehensive validation checks
     if (!user || !profile || !currentRound) {
-      toast({
-        title: "Sign In Required",
-        description: "Please sign in to place bets",
-        variant: "destructive",
-      });
+              toast({
+          title: "AUTHENTICATION REQUIRED",
+          description: "System access needed to engage betting protocol",
+          variant: "warning",
+        });
       return;
     }
 
@@ -1517,8 +1517,24 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                 </div>
               </div>
               ) : (
-                <div className="text-center py-4">
-                  <p className="text-muted-foreground">Sign in to place bets</p>
+                <div className="relative text-center py-4">
+                  {/* Cyberpunk authentication prompt */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 via-slate-800/40 to-slate-900/60 rounded-lg" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/30 to-indigo-500/20 rounded-lg blur-sm" />
+                  
+                  <div className="relative z-10 space-y-2">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+                      <p className="text-sm text-white font-mono tracking-wider drop-shadow-lg">
+                        <Shield className="inline w-4 h-4 mr-2" />
+                        AUTHENTICATION_REQUIRED
+                      </p>
+                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse delay-500" />
+                    </div>
+                    <p className="text-xs text-slate-300 font-mono tracking-wide">
+                      ENGAGE_SYSTEM_TO_ACCESS_BETTING_PROTOCOL
+                    </p>
+                  </div>
                 </div>
               )}
 
@@ -1563,7 +1579,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                           clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
                         }}
                         title={
-                          !user ? 'Sign in to bet' :
+                          !user ? 'Authentication required to engage betting protocol' :
                           currentRound.status !== 'betting' ? 'Betting closed' :
                           isPlacingBet ? 'Processing bet...' :
                           betAmount === '' ? 'Enter bet amount' :

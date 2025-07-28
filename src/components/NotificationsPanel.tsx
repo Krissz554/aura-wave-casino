@@ -277,7 +277,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(34,197,94,0.3)]',
           icon: 'text-green-400',
           accent: 'bg-green-400/20',
-          emoji: '💰'
+          emoji: ''
         };
       case 'tip_sent':
         return {
@@ -286,7 +286,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(59,130,246,0.3)]',
           icon: 'text-blue-400',
           accent: 'bg-blue-400/20',
-          emoji: '📤'
+          emoji: ''
         };
       case 'achievement_unlocked':
         return {
@@ -295,7 +295,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
           icon: 'text-purple-400',
           accent: 'bg-purple-400/20',
-          emoji: '🏆'
+          emoji: ''
         };
       case 'level_up':
         return {
@@ -304,7 +304,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)]',
           icon: 'text-yellow-400',
           accent: 'bg-yellow-400/20',
-          emoji: '⭐'
+          emoji: ''
         };
       case 'level_reward_case':
         return {
@@ -313,7 +313,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(251,146,60,0.3)]',
           icon: 'text-orange-400',
           accent: 'bg-orange-400/20',
-          emoji: '🎁'
+          emoji: ''
         };
       case 'admin_broadcast':
         return {
@@ -322,7 +322,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
           icon: 'text-red-400',
           accent: 'bg-red-400/20',
-          emoji: '📢'
+          emoji: ''
         };
       default:
         return {
@@ -331,7 +331,7 @@ export default function NotificationsPanel() {
           glow: 'shadow-[0_0_20px_rgba(107,114,128,0.3)]',
           icon: 'text-gray-400',
           accent: 'bg-gray-400/20',
-          emoji: '🔔'
+          emoji: ''
         };
     }
   };

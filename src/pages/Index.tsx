@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, Wallet, Gamepad2, LogOut, TrendingUp, Target, Building, Gift, LogIn, Bell, BellDot, Shield, Star, Award, Megaphone, Clock, Sparkles, Zap, Users, DollarSign, AlertTriangle, Check, X } from 'lucide-react';
+import { User, Wallet, Gamepad2, LogOut, TrendingUp, Target, Building, Gift, LogIn, Bell, BellDot, Shield, Star, Award, Megaphone, Clock, Sparkles, Zap, Users, DollarSign, AlertTriangle, Check, X, Terminal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -94,7 +94,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(34,197,94,0.3)]',
           icon: 'text-green-400',
           accent: 'bg-green-400/20',
-          emoji: '💰',
+          emoji: '',
           iconComponent: <DollarSign className="w-5 h-5" />
         };
       case 'tip_sent':
@@ -104,7 +104,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(59,130,246,0.3)]',
           icon: 'text-blue-400',
           accent: 'bg-blue-400/20',
-          emoji: '📤',
+          emoji: '',
           iconComponent: <TrendingUp className="w-5 h-5" />
         };
       case 'achievement_unlocked':
@@ -114,7 +114,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
           icon: 'text-purple-400',
           accent: 'bg-purple-400/20',
-          emoji: '🏆',
+          emoji: '',
           iconComponent: <Award className="w-5 h-5" />
         };
       case 'level_up':
@@ -124,7 +124,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)]',
           icon: 'text-yellow-400',
           accent: 'bg-yellow-400/20',
-          emoji: '⭐',
+          emoji: '',
           iconComponent: <Star className="w-5 h-5" />
         };
       case 'level_reward_case':
@@ -134,7 +134,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(251,146,60,0.3)]',
           icon: 'text-orange-400',
           accent: 'bg-orange-400/20',
-          emoji: '🎁',
+          emoji: '',
           iconComponent: <Gift className="w-5 h-5" />
         };
       case 'admin_broadcast':
@@ -154,7 +154,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(107,114,128,0.3)]',
           icon: 'text-gray-400',
           accent: 'bg-gray-400/20',
-          emoji: '🔔',
+          emoji: '',
           iconComponent: <Bell className="w-5 h-5" />
         };
     }
@@ -1414,7 +1414,7 @@ export default function Index({ initialGame }: IndexProps) {
                         
                         <LogIn className="w-4 h-4 mr-2 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
                         <span className="relative z-10 font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                          Sign In
+                          AUTHENTICATE
                         </span>
                         
                         {/* Tech corner indicators */}
@@ -1502,21 +1502,22 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative p-3 border border-primary/30 rounded-xl bg-slate-900/50 text-center">
                   <div className="flex items-center justify-center gap-3">
                     <div className="w-3 h-3 bg-accent rounded-full animate-pulse" />
-                    <span className="text-sm font-mono text-slate-300">
-                      🎮 Browsing as Guest
+                    <span className="text-sm font-mono text-slate-300 tracking-wider">
+                      <Terminal className="inline w-4 h-4 mr-2" />
+                      GUEST_MODE_ACTIVE
                     </span>
                     <div className="w-3 h-3 bg-primary rounded-full animate-pulse delay-500" />
                   </div>
                   
                   <div className="mt-2 flex items-center justify-center gap-1">
-                    <span className="text-sm text-slate-400">Unlock the future:</span>
+                    <span className="text-sm text-slate-400 font-mono">UNLOCK_PROTOCOL:</span>
                     <button
-                      className="text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:from-accent hover:to-primary transition-all duration-300 cursor-pointer"
+                      className="text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:from-accent hover:to-primary transition-all duration-300 cursor-pointer font-mono tracking-wider"
                       onClick={() => setShowAuthModal(true)}
                     >
-                      Sign In
+                      AUTHENTICATE
                     </button>
-                    <span className="text-sm text-slate-400">to play & earn!</span>
+                    <span className="text-sm text-slate-400 font-mono">TO_ENGAGE</span>
                   </div>
                   
                   {/* Tech accent lines */}
