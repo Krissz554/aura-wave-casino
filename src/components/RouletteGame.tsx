@@ -1125,17 +1125,17 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         
         {/* Animated Circuit Board Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
         </div>
         
         {/* Animated Border Glow */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-orange-500/30 to-red-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
         
         {/* Corner Tech Details */}
-        <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-red-400/60" />
-        <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-orange-400/60" />
-        <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-orange-400/60" />
-        <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-red-400/60" />
+        <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/60" />
+        <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-accent/60" />
+        <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-accent/60" />
+        <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-primary/60" />
         
         <Card className="relative z-10 bg-transparent border-0">
           <CardHeader className="pb-4">
@@ -1188,11 +1188,11 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             <div className="relative overflow-hidden group">
               {/* Cyberpunk Background */}
               <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/85 to-slate-900/90 backdrop-blur-md rounded-xl" />
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-400/20 via-orange-400/30 to-red-400/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300" />
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-sm group-hover:blur-md transition-all duration-300" />
               
               {/* Tech corner accents */}
-              <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-red-400/60" />
-              <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-orange-400/60" />
+              <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/60" />
+              <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-accent/60" />
               
               <div className="relative z-10 p-2 sm:p-3 flex items-center gap-2 sm:gap-3">
               <span className="text-xs sm:text-sm text-muted-foreground font-medium hidden sm:inline">Recent Results:</span>
@@ -1225,19 +1225,19 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             {/* Cyberpunk Background with Roulette Theme */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
             
-            {/* Animated Circuit Board Pattern with Red Theme */}
+            {/* Animated Circuit Board Pattern with Primary Theme */}
             <div className="absolute inset-0 opacity-10">
-              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.4)_25%,rgba(239,68,68,0.4)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.4)_75%,rgba(239,68,68,0.4)_76%,transparent_77%,transparent)] bg-[24px_24px] animate-grid-move-slow" />
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[24px_24px] animate-grid-move-slow" />
             </div>
             
-            {/* Animated Border Glow with Casino Colors */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-red-500/30 via-orange-500/40 to-red-500/30 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
+            {/* Animated Border Glow with Site Colors */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-accent/40 to-primary/30 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
             
             {/* Enhanced Corner Tech Details */}
-            <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-red-400/70" />
-            <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-orange-400/70" />
-            <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-orange-400/70" />
-            <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-red-400/70" />
+            <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-primary/70" />
+            <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-accent/70" />
+            <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-accent/70" />
+            <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-primary/70" />
             
             <Card className="relative z-10 bg-transparent border-0">
               <CardContent className="p-6">
@@ -1267,8 +1267,8 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             
             {/* Corner Tech Details */}
             <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-emerald-400/60" />
-            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-green-400/60" />
-            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-green-400/60" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-emerald-400/60" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-emerald-400/60" />
             <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-emerald-400/60" />
             
             <Card className="relative z-10 bg-transparent border-0">
