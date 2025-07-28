@@ -402,9 +402,78 @@ export default function Index({ initialGame }: IndexProps) {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Cyberpunk Base Background */}
+      <div className="fixed inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+      
+      {/* Animated Circuit Board Grid */}
+      <div className="fixed inset-0 opacity-[0.08]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.4)_1px,transparent_0)] bg-[20px_20px] animate-grid-move-slow" />
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.2)_25%,rgba(99,102,241,0.2)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.2)_75%,rgba(99,102,241,0.2)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.2)_25%,rgba(99,102,241,0.2)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.2)_75%,rgba(99,102,241,0.2)_76%,transparent_77%,transparent)] bg-[40px_40px]" />
+      </div>
+      
+      {/* Dynamic Energy Lines */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {/* Vertical energy flows */}
+        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-primary/20 to-transparent animate-energy-flow" />
+        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-accent/20 to-transparent animate-energy-flow delay-1000" />
+        <div className="absolute top-0 left-2/3 w-px h-full bg-gradient-to-b from-transparent via-primary/15 to-transparent animate-energy-flow delay-2000" />
+        
+        {/* Horizontal energy flows */}
+        <div className="absolute left-0 top-1/4 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent animate-energy-flow-horizontal" />
+        <div className="absolute left-0 bottom-1/3 w-full h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent animate-energy-flow-horizontal delay-1500" />
+        <div className="absolute left-0 top-2/3 w-full h-px bg-gradient-to-r from-transparent via-primary/15 to-transparent animate-energy-flow-horizontal delay-3000" />
+      </div>
+      
+      {/* Floating Orbs */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "absolute w-3 h-3 rounded-full opacity-20",
+              i % 3 === 0 ? "bg-primary/40" : i % 3 === 1 ? "bg-accent/40" : "bg-purple-400/40",
+              "animate-float-orb"
+            )}
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${i * 0.8}s`,
+              animationDuration: `${8 + Math.random() * 4}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      {/* Corner Tech Details */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-64 h-64">
+          <div className="absolute top-8 left-8 w-16 h-16 border-l-2 border-t-2 border-primary/30 animate-cyber-corner" />
+          <div className="absolute top-4 left-4 w-8 h-8 border-l border-t border-accent/20 animate-cyber-corner delay-300" />
+        </div>
+        <div className="absolute top-0 right-0 w-64 h-64">
+          <div className="absolute top-8 right-8 w-16 h-16 border-r-2 border-t-2 border-primary/30 animate-cyber-corner" />
+          <div className="absolute top-4 right-4 w-8 h-8 border-r border-t border-accent/20 animate-cyber-corner delay-300" />
+        </div>
+        <div className="absolute bottom-0 left-0 w-64 h-64">
+          <div className="absolute bottom-8 left-8 w-16 h-16 border-l-2 border-b-2 border-primary/30 animate-cyber-corner" />
+          <div className="absolute bottom-4 left-4 w-8 h-8 border-l border-b border-accent/20 animate-cyber-corner delay-300" />
+        </div>
+        <div className="absolute bottom-0 right-0 w-64 h-64">
+          <div className="absolute bottom-8 right-8 w-16 h-16 border-r-2 border-b-2 border-primary/30 animate-cyber-corner" />
+          <div className="absolute bottom-4 right-4 w-8 h-8 border-r border-b border-accent/20 animate-cyber-corner delay-300" />
+        </div>
+      </div>
+      
+      {/* Ambient Glow Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-purple-500/5 rounded-full blur-3xl animate-pulse delay-2000" />
+      </div>
+      
       {/* Main Content Container */}
-      <div className="p-4 pb-32">
+      <div className="relative z-10 p-4 pb-32">
         {/* Header */}
         <header className="mb-6">
           <div className="relative overflow-hidden group">
