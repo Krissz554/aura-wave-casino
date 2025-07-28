@@ -152,28 +152,80 @@ export const RealtimeChat = () => {
   };
 
   return (
-    <Card className="w-full h-full glass border-0 flex flex-col">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <MessageCircle className="w-5 h-5 text-primary" />
-            <span>Live Chat</span>
-            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'}`} />
-          </CardTitle>
-          <div className="text-xs text-muted-foreground">
-            {messages.length} messages
+    <div className="w-full h-full relative overflow-hidden group">
+      {/* Cyberpunk Background with Advanced Effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
+      
+      {/* Animated Circuit Board Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+      </div>
+      
+      {/* Animated Border Glow */}
+      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-sm group-hover:blur-md transition-all duration-500" />
+      
+      {/* Scan Line Effects */}
+      <div className="absolute inset-0 overflow-hidden rounded-2xl">
+        <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent animate-cyber-scan-horizontal" />
+        <div className="absolute w-px h-full bg-gradient-to-b from-transparent via-accent/40 to-transparent animate-cyber-scan left-1/4" />
+      </div>
+      
+      {/* Tech Corner Details */}
+      <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/60" />
+      <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-accent/60" />
+      <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-accent/60" />
+      <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-primary/60" />
+      
+      {/* Main Content Container */}
+      <Card className="relative z-10 w-full h-full bg-transparent border-0 flex flex-col">
+        <CardHeader className="pb-3 border-b border-primary/20">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-3">
+              <div className="relative">
+                <MessageCircle className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                <div className="absolute inset-0 animate-ping">
+                  <MessageCircle className="w-5 h-5 text-primary/40" />
+                </div>
+              </div>
+              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold">
+                Live Chat
+              </span>
+              <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                isConnected 
+                  ? 'bg-green-400 animate-pulse drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]' 
+                  : 'bg-red-400 animate-pulse drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
+              }`} />
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <div className="text-xs font-mono text-slate-400">
+                {messages.length} messages
+              </div>
+              {/* Tech indicator */}
+              <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
+            </div>
           </div>
-        </div>
-      </CardHeader>
+        </CardHeader>
       
       <CardContent className="p-0 h-full flex flex-col">
         <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
           <div className="space-y-3 pb-4">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-32 text-muted-foreground">
-                <div className="text-center">
-                  <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                  <p>No messages yet. Start the conversation!</p>
+              <div className="flex items-center justify-center h-32">
+                <div className="text-center relative">
+                  <div className="relative mb-4">
+                    <MessageCircle className="w-12 h-12 mx-auto text-primary/60 drop-shadow-[0_0_8px_rgba(99,102,241,0.4)]" />
+                    <div className="absolute inset-0 animate-ping">
+                      <MessageCircle className="w-12 h-12 mx-auto text-primary/20" />
+                    </div>
+                  </div>
+                  <p className="text-slate-300 font-mono text-sm">
+                    No messages yet. Start the conversation!
+                  </p>
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    <div className="w-1 h-1 bg-primary rounded-full animate-pulse" />
+                    <span className="text-xs text-slate-500 font-mono">AWAITING TRANSMISSION</span>
+                    <div className="w-1 h-1 bg-accent rounded-full animate-pulse delay-500" />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -182,45 +234,66 @@ export const RealtimeChat = () => {
                 const isOwnMessage = msg.user_id === user?.id;
                 
                 return (
-                  <div key={msg.id} className={`flex gap-3 items-start animate-fade-in ${isOwnMessage ? 'flex-row-reverse' : ''}`}>
-                    <div className="flex-shrink-0 mt-0.5">
-                      <ProfileBorder level={msg.user_level} size="sm">
-                        <Avatar className="w-full h-full">
-                          <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.username}`} />
-                          <AvatarFallback className="text-xs bg-gradient-to-br from-purple-500 to-blue-500 text-white">
-                            {msg.username.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </ProfileBorder>
+                  <div key={msg.id} className={`flex gap-3 items-start animate-fade-in ${isOwnMessage ? 'flex-row-reverse' : ''} group/message relative`}>
+                    {/* Message glow effect on hover */}
+                    <div className="absolute -inset-2 bg-gradient-to-r from-primary/5 via-accent/10 to-primary/5 rounded-xl opacity-0 group-hover/message:opacity-100 transition-all duration-300 blur-sm" />
+                    
+                    <div className="flex-shrink-0 mt-0.5 relative z-10">
+                      <div className="relative">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-accent/30 rounded-full blur-sm opacity-0 group-hover/message:opacity-100 transition-all duration-300" />
+                        <ProfileBorder level={msg.user_level} size="sm">
+                          <Avatar className="w-full h-full">
+                            <AvatarImage src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${msg.username}`} />
+                            <AvatarFallback className="text-xs bg-gradient-to-br from-purple-500 to-blue-500 text-white">
+                              {msg.username.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                        </ProfileBorder>
+                      </div>
                     </div>
                     
-                     <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} min-w-0 max-w-full`}>
-                        <div className={`flex items-center gap-1 mb-1 ${isOwnMessage ? 'justify-end' : ''} flex-wrap`}>
+                     <div className={`flex flex-col ${isOwnMessage ? 'items-end' : 'items-start'} min-w-0 max-w-full relative z-10`}>
+                        <div className={`flex items-center gap-2 mb-1 ${isOwnMessage ? 'justify-end' : ''} flex-wrap`}>
                           <ClickableUsername 
                             username={msg.username}
-                            className={`font-medium text-xs ${isOwnMessage ? 'text-primary' : ''} truncate max-w-20`}
+                            className={`font-medium text-xs ${
+                              isOwnMessage 
+                                ? 'bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent' 
+                                : 'text-slate-300'
+                            } truncate max-w-20 font-mono`}
                           >
                             {msg.username}
                           </ClickableUsername>
-                         <Badge variant="outline" className="text-xs px-1 py-0 text-[10px]">
+                         <Badge variant="outline" className={`text-xs px-2 py-0.5 text-[10px] font-mono border-primary/30 ${
+                           isOwnMessage ? 'bg-primary/10 text-primary' : 'bg-slate-800/50 text-accent'
+                         }`}>
                            L{msg.user_level}
                          </Badge>
                          {badge && (
-                           <div className={`flex items-center gap-1 text-xs ${badge.color}`}>
-                             <badge.icon className="w-2.5 h-2.5" />
+                           <div className={`flex items-center gap-1 text-xs ${badge.color} drop-shadow-[0_0_4px_currentColor]`}>
+                             <badge.icon className="w-3 h-3" />
                            </div>
                          )}
                        </div>
                       
-                      <div className={`p-2 rounded-lg text-xs break-words max-w-[85%] ${
+                      <div className={`relative p-3 rounded-lg text-xs break-words max-w-[85%] overflow-hidden ${
                         isOwnMessage 
-                          ? 'bg-primary/20 border border-primary/30' 
-                          : 'bg-card/50 border'
+                          ? 'bg-gradient-to-br from-primary/20 via-primary/15 to-primary/10 border border-primary/40' 
+                          : 'bg-gradient-to-br from-slate-800/50 via-slate-800/30 to-slate-800/20 border border-slate-600/30'
                       }`}>
-                        {msg.message}
+                        {/* Message background effects */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover/message:opacity-100 transition-opacity duration-300" />
+                        
+                        <span className={`relative z-10 ${isOwnMessage ? 'text-slate-200' : 'text-slate-300'}`}>
+                          {msg.message}
+                        </span>
+                        
+                        {/* Tech corner accents */}
+                        <div className="absolute top-1 left-1 w-1 h-1 border-l border-t border-primary/40" />
+                        <div className="absolute bottom-1 right-1 w-1 h-1 border-r border-b border-accent/40" />
                       </div>
                       
-                      <div className="text-xs text-muted-foreground mt-1">
+                      <div className="text-[10px] text-slate-500 mt-1 font-mono">
                         {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                       </div>
                     </div>
@@ -231,45 +304,93 @@ export const RealtimeChat = () => {
           </div>
         </ScrollArea>
         
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-primary/20">
           {user ? (
-            <div className="space-y-2">
-              <div className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Type a message..."
-                  disabled={loading}
-                  className="flex-1 glass border-0"
-                  maxLength={100}
-                />
-                <Button
-                  onClick={sendMessage}
-                  disabled={!newMessage.trim() || loading}
-                  className="glass border-0 hover:glow-primary"
-                >
-                  <Send className="w-4 h-4" />
-                </Button>
+            <div className="space-y-3">
+              <div className="flex gap-3">
+                <div className="relative flex-1 group/input">
+                  {/* Input background effects */}
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-lg blur-sm opacity-0 group-focus-within/input:opacity-100 transition-all duration-300" />
+                  
+                  <Input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Type a message..."
+                    disabled={loading}
+                    className="relative bg-slate-800/50 border border-slate-600/30 text-slate-200 placeholder:text-slate-500 focus:border-primary/60 focus:bg-slate-800/70 transition-all duration-300 font-mono text-sm"
+                    maxLength={100}
+                  />
+                  
+                  {/* Tech corner accents for input */}
+                  <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300" />
+                </div>
+                
+                <div className="relative group/send overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/30 to-accent/30 rounded-lg blur-sm group-hover/send:blur-md group-hover/send:from-primary/40 group-hover/send:to-accent/40 transition-all duration-300" />
+                  
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!newMessage.trim() || loading}
+                    className="relative border border-primary/30 bg-transparent hover:bg-primary/10 transition-all duration-300 group-hover/send:border-primary/60 group-hover/send:shadow-[0_0_15px_rgba(99,102,241,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/send:opacity-100 transition-opacity duration-300" />
+                    <Send className="w-4 h-4 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
+                    
+                    {/* Tech corner indicators */}
+                    <div className="absolute top-1 left-1 w-1 h-1 border-l border-t border-primary/60 group-hover/send:border-primary" />
+                    <div className="absolute bottom-1 right-1 w-1 h-1 border-r border-b border-accent/60 group-hover/send:border-accent" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex justify-end">
-                <span className={`text-xs ${newMessage.length > 90 ? 'text-destructive' : newMessage.length > 80 ? 'text-warning' : 'text-muted-foreground'}`}>
+              
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-xs text-slate-500 font-mono">TRANSMISSION READY</span>
+                </div>
+                <span className={`text-xs font-mono ${
+                  newMessage.length > 90 
+                    ? 'text-red-400' 
+                    : newMessage.length > 80 
+                      ? 'text-yellow-400' 
+                      : 'text-slate-500'
+                }`}>
                   {newMessage.length}/100
                 </span>
               </div>
             </div>
           ) : (
-            <div className="text-center py-3 space-y-2">
-              <p className="text-sm text-muted-foreground">
-                🔒 Please sign in to join the conversation
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Connect with other players and share your gaming experience!
-              </p>
+            <div className="relative text-center py-4">
+              {/* Background effects for sign-in prompt */}
+              <div className="absolute inset-0 bg-gradient-to-r from-slate-900/50 via-slate-800/30 to-slate-900/50 rounded-lg" />
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 via-accent/20 to-primary/10 rounded-lg blur-sm" />
+              
+              <div className="relative z-10 space-y-2">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                  <p className="text-sm text-slate-300 font-mono">
+                    🔒 AUTHENTICATION REQUIRED
+                  </p>
+                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-500" />
+                </div>
+                <p className="text-xs text-slate-500 font-mono">
+                  Connect with other players and share your gaming experience!
+                </p>
+                
+                {/* Tech accent lines */}
+                <div className="absolute top-2 left-2 w-3 h-px bg-gradient-to-r from-primary to-transparent" />
+                <div className="absolute top-2 right-2 w-3 h-px bg-gradient-to-l from-accent to-transparent" />
+                <div className="absolute bottom-2 left-2 w-3 h-px bg-gradient-to-r from-accent to-transparent" />
+                <div className="absolute bottom-2 right-2 w-3 h-px bg-gradient-to-l from-primary to-transparent" />
+              </div>
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+              </CardContent>
+      </Card>
+    </div>
   );
 };
