@@ -722,85 +722,160 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                          clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
                        }} />
                  
-                                   <div className="relative">
-                    <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl overflow-visible">
-                    
-                                         {/* Notification Badge - Top Right Corner of Achievements Tab */}
-                     {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                       <div className="absolute top-0 left-3/4 transform -translate-x-4 -translate-y-2 group/badge z-[9999]">
-                        <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
-                        <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                          <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
+                                                   <div className="relative p-6">
+                  {/* Navigation Header */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+                    <h2 className="text-xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent font-mono tracking-wider">
+                      PROFILE NAVIGATION
+                    </h2>
+                    <div className="flex-1 h-px bg-gradient-to-r from-primary/50 via-accent/30 to-transparent" />
+                    <div className="w-2 h-2 bg-accent rounded-full animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  </div>
+                  
+                  <TabsList className="relative grid w-full grid-cols-4 gap-3 bg-transparent border-0 p-0 h-auto">
+                    {/* Notification Badge - Positioned relative to achievements tab */}
+                    {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
+                      <div className="absolute top-0 left-[75%] transform -translate-x-1/2 -translate-y-3 group/badge z-[9999]">
+                        <div className="absolute -inset-1 bg-emerald-500/60 blur-sm animate-pulse"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'
+                             }} />
+                        <div className="relative w-7 h-7 bg-gradient-to-br from-emerald-500 to-green-600 border-2 border-white/30 backdrop-blur-sm flex items-center justify-center"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 3px) 0, 100% 3px, 100% 100%, 3px 100%, 0 calc(100% - 3px))'
+                             }}>
+                          <span className="text-xs font-bold text-white drop-shadow-[0_0_6px_rgba(0,0,0,0.8)] font-mono">
                             {notificationClaimable.length}
                           </span>
                         </div>
                       </div>
                     )}
-                  <TabsTrigger 
-                    value="overview" 
-                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary/60 data-[state=active]:border-primary/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
-                    style={{
-                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                    }}
-                  >
-                                         {/* Scan line effect for active state */}
-                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
-                          style={{
-                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                          }} />
-                    <BarChart3 className="w-4 h-4 mr-2 drop-shadow-sm" />
-                    <span className="font-mono tracking-wide">OVERVIEW</span>
-                  </TabsTrigger>
+                                      {/* Overview Tab Button */}
+                    <div className="relative group/tab">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-primary/40 to-blue-500/60 blur-sm opacity-0 group-hover/tab:opacity-100 transition-opacity duration-300"
+                           style={{
+                             clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                           }} />
+                      
+                      <TabsTrigger 
+                        value="overview" 
+                        className="relative w-full h-16 bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-slate-600/50 data-[state=active]:border-primary/70 data-[state=active]:bg-gradient-to-br data-[state=active]:from-primary/20 data-[state=active]:to-blue-600/30 text-slate-300 data-[state=active]:text-white hover:text-white hover:border-slate-500/70 transition-all duration-500 backdrop-blur-sm group overflow-hidden"
+                        style={{
+                          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                        }}
+                      >
+                        {/* Circuit Pattern Background */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
+                        </div>
+                        
+                        {/* Scan Line Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/30 to-transparent translate-x-[-100%] group-data-[state=active]:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                        
+                        {/* Content */}
+                        <div className="relative z-10 flex flex-col items-center justify-center gap-2 p-3">
+                          <BarChart3 className="w-6 h-6 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] group-data-[state=active]:animate-pulse" />
+                          <span className="text-xs font-bold font-mono tracking-wider">OVERVIEW</span>
+                        </div>
+                        
+                        {/* Tech Corner Indicators */}
+                        <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/60 group-data-[state=active]:border-primary" />
+                        <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-primary/60 group-data-[state=active]:border-primary" />
+                      </TabsTrigger>
+                    </div>
                   
-                  <TabsTrigger 
-                    value="games" 
-                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent/80 data-[state=active]:to-accent/60 data-[state=active]:border-accent/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
-                    style={{
-                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                    }}
-                  >
-                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
-                          style={{
-                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                          }} />
-                     <Gamepad2 className="w-4 h-4 mr-2 drop-shadow-sm" />
-                     <span className="font-mono tracking-wide">GAMES</span>
-                  </TabsTrigger>
+                                      {/* Games Tab Button */}
+                    <div className="relative group/tab">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/40 to-violet-500/60 blur-sm opacity-0 group-hover/tab:opacity-100 transition-opacity duration-300"
+                           style={{
+                             clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                           }} />
+                      
+                      <TabsTrigger 
+                        value="games" 
+                        className="relative w-full h-16 bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-slate-600/50 data-[state=active]:border-purple-500/70 data-[state=active]:bg-gradient-to-br data-[state=active]:from-purple-600/20 data-[state=active]:to-violet-600/30 text-slate-300 data-[state=active]:text-white hover:text-white hover:border-slate-500/70 transition-all duration-500 backdrop-blur-sm group overflow-hidden"
+                        style={{
+                          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                        }}
+                      >
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(147,51,234,0.4)_25%,rgba(147,51,234,0.4)_26%,transparent_27%,transparent_74%,rgba(147,51,234,0.4)_75%,rgba(147,51,234,0.4)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
+                        </div>
+                        
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/30 to-transparent translate-x-[-100%] group-data-[state=active]:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                        
+                        <div className="relative z-10 flex flex-col items-center justify-center gap-2 p-3">
+                          <Gamepad2 className="w-6 h-6 drop-shadow-[0_0_8px_rgba(147,51,234,0.6)] group-data-[state=active]:animate-pulse" />
+                          <span className="text-xs font-bold font-mono tracking-wider">GAMES</span>
+                        </div>
+                        
+                        <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-purple-500/60 group-data-[state=active]:border-purple-400" />
+                        <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-purple-500/60 group-data-[state=active]:border-purple-400" />
+                      </TabsTrigger>
+                    </div>
                   
-                  <TabsTrigger 
-                    value="achievements" 
-                    className="relative border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600/80 data-[state=active]:to-orange-600/60 data-[state=active]:border-yellow-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
-                    style={{
-                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                    }}
-                  >
-                     {/* Scan line container with overflow control */}
-                     <div className="absolute inset-0 overflow-hidden"
-                          style={{
-                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                          }}>
-                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
-                     </div>
-                     <Award className="w-4 h-4 mr-2 drop-shadow-sm relative z-10" />
-                     <span className="font-mono tracking-wide relative z-10">ACHIEVEMENTS</span>
-                  </TabsTrigger>
+                                      {/* Achievements Tab Button */}
+                    <div className="relative group/tab">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/40 to-orange-500/60 blur-sm opacity-0 group-hover/tab:opacity-100 transition-opacity duration-300"
+                           style={{
+                             clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                           }} />
+                      
+                      <TabsTrigger 
+                        value="achievements" 
+                        className="relative w-full h-16 bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-slate-600/50 data-[state=active]:border-yellow-500/70 data-[state=active]:bg-gradient-to-br data-[state=active]:from-yellow-600/20 data-[state=active]:to-orange-600/30 text-slate-300 data-[state=active]:text-white hover:text-white hover:border-slate-500/70 transition-all duration-500 backdrop-blur-sm group overflow-hidden"
+                        style={{
+                          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                        }}
+                      >
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(245,158,11,0.4)_25%,rgba(245,158,11,0.4)_26%,transparent_27%,transparent_74%,rgba(245,158,11,0.4)_75%,rgba(245,158,11,0.4)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
+                        </div>
+                        
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-yellow-400/30 to-transparent translate-x-[-100%] group-data-[state=active]:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                        
+                        <div className="relative z-10 flex flex-col items-center justify-center gap-2 p-3">
+                          <Award className="w-6 h-6 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)] group-data-[state=active]:animate-pulse" />
+                          <span className="text-xs font-bold font-mono tracking-wider">ACHIEVEMENTS</span>
+                        </div>
+                        
+                        <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-yellow-500/60 group-data-[state=active]:border-yellow-400" />
+                        <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-yellow-500/60 group-data-[state=active]:border-yellow-400" />
+                      </TabsTrigger>
+                    </div>
                   
-                  <TabsTrigger 
-                    value="stats" 
-                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600/80 data-[state=active]:to-teal-600/60 data-[state=active]:border-emerald-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
-                    style={{
-                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                    }}
-                  >
-                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
-                          style={{
-                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
-                          }} />
-                     <TrendingUp className="w-4 h-4 mr-2 drop-shadow-sm" />
-                     <span className="font-mono tracking-wide">STATISTICS</span>
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+                                      {/* Statistics Tab Button */}
+                    <div className="relative group/tab">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/40 to-teal-500/60 blur-sm opacity-0 group-hover/tab:opacity-100 transition-opacity duration-300"
+                           style={{
+                             clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                           }} />
+                      
+                      <TabsTrigger 
+                        value="stats" 
+                        className="relative w-full h-16 bg-gradient-to-br from-slate-800/80 to-slate-900/90 border border-slate-600/50 data-[state=active]:border-emerald-500/70 data-[state=active]:bg-gradient-to-br data-[state=active]:from-emerald-600/20 data-[state=active]:to-teal-600/30 text-slate-300 data-[state=active]:text-white hover:text-white hover:border-slate-500/70 transition-all duration-500 backdrop-blur-sm group overflow-hidden"
+                        style={{
+                          clipPath: 'polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))'
+                        }}
+                      >
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(16,185,129,0.4)_25%,rgba(16,185,129,0.4)_26%,transparent_27%,transparent_74%,rgba(16,185,129,0.4)_75%,rgba(16,185,129,0.4)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
+                        </div>
+                        
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent translate-x-[-100%] group-data-[state=active]:translate-x-[100%] transition-transform duration-1000 ease-out" />
+                        
+                        <div className="relative z-10 flex flex-col items-center justify-center gap-2 p-3">
+                          <TrendingUp className="w-6 h-6 drop-shadow-[0_0_8px_rgba(16,185,129,0.6)] group-data-[state=active]:animate-pulse" />
+                          <span className="text-xs font-bold font-mono tracking-wider">STATISTICS</span>
+                        </div>
+                        
+                        <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-emerald-500/60 group-data-[state=active]:border-emerald-400" />
+                        <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-emerald-500/60 group-data-[state=active]:border-emerald-400" />
+                      </TabsTrigger>
+                    </div>
+                  </TabsList>
+                </div>
               </div>
 
               {/* Cyberpunk Overview Tab */}
