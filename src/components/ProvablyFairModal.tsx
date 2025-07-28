@@ -626,24 +626,29 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* How it works link */}
-            <div className="flex justify-center pt-3 border-t border-border/40">
-              <Link 
-                to="/provably-fair" 
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
-                onClick={() => onClose()}
-              >
-                <HelpCircle className="w-4 h-4" />
-                How does Provably Fair work?
-              </Link>
+                </div>
+              </div>
             </div>
+          )}
+          
+          {/* Cyberpunk Footer */}
+          <div className="flex justify-center pt-6 mt-6 border-t border-indigo-500/20">
+            <Link 
+              to="/provably-fair" 
+              className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-400 transition-colors font-mono tracking-wider"
+              onClick={() => onClose()}
+            >
+              <div className="relative">
+                <HelpCircle className="w-4 h-4" />
+                <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
+              </div>
+              How does Provably Fair work?
+            </Link>
           </div>
-        )}
-      </DialogContent>
-    </Dialog>
+        </div>
+      </div>
+    </div>
+  </DialogContent>
+</Dialog>
   );
 }
