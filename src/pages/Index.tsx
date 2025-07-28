@@ -495,39 +495,42 @@ export default function Index({ initialGame }: IndexProps) {
                         }
                       }}
                       className={cn(
-                        "relative px-3 py-2 overflow-hidden group transition-all duration-500",
-                        "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
-                        "border rounded-xl",
-                        "active:scale-95",
+                        "relative px-3 py-2 overflow-hidden transition-all duration-300 backdrop-blur-sm active:scale-95 group",
                         // Dynamic styling based on unread count
                         unreadCount === 0 && [
-                          "border-primary/20",
-                          "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
-                          "animate-cyber-notification-glow"
+                          "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50"
                         ],
                         unreadCount > 0 && unreadCount <= 5 && [
-                          "border-primary/40",
-                          "animate-cyber-notification-alert animate-cyber-notification-glow",
-                          "bg-gradient-to-r from-red-900/20 to-orange-900/20"
+                          "border-2 border-orange-400/60 bg-gradient-to-r from-orange-950/50 to-red-950/50"
                         ],
                         unreadCount > 5 && unreadCount <= 10 && [
-                          "border-orange-400/60",
-                          "animate-cyber-notification-urgent animate-cyber-notification-pulse-ring",
-                          "bg-gradient-to-r from-orange-900/30 to-red-900/30"
+                          "border-2 border-red-400/80 bg-gradient-to-r from-red-950/60 to-pink-950/60"
                         ],
                         unreadCount > 10 && [
-                          "border-red-400/80",
-                          "animate-cyber-notification-urgent animate-cyber-notification-pulse-ring",
-                          "bg-gradient-to-r from-red-900/40 to-pink-900/40",
-                          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-red-500/10 before:via-orange-500/10 before:to-red-500/10",
-                          "before:bg-[length:200%_100%] before:animate-cyber-notification-energy-wave before:rounded-xl"
+                          "border-2 border-red-500/90 bg-gradient-to-r from-red-950/70 to-pink-950/70 shadow-[0_0_20px_rgba(239,68,68,0.6)]"
                         ]
                       )}
                     >
-                      {/* Animated background grid */}
-                      <div className="absolute inset-0 opacity-20">
-                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move" />
-                      </div>
+                      {/* Cyberpunk scan line effect */}
+                      <div className={cn(
+                        "absolute inset-0 bg-gradient-to-r from-transparent to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out",
+                        unreadCount === 0 && "via-primary/20",
+                        unreadCount > 0 && "via-orange-400/30"
+                      )} />
+                      
+                      {/* Subtle inner glow on hover */}
+                      <div className={cn(
+                        "absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300",
+                        unreadCount === 0 && "from-primary/5 via-primary/10 to-primary/5",
+                        unreadCount > 0 && "from-orange-400/10 via-red-400/15 to-orange-400/10"
+                      )} />
+                      
+                      {/* Edge pulse effect */}
+                      <div className={cn(
+                        "absolute inset-0 border border-transparent group-hover:border-opacity-30 rounded-md transition-all duration-300",
+                        unreadCount === 0 && "group-hover:border-primary/30",
+                        unreadCount > 0 && "group-hover:border-red-400/40"
+                      )} />
                       
                       {/* Icon with advanced animations */}
                       <div className="relative z-10 flex items-center gap-2">
@@ -580,8 +583,6 @@ export default function Index({ initialGame }: IndexProps) {
                             </div>
                           )}
                         </div>
-                        
-
                       </div>
                     </Button>
                   </DialogTrigger>
@@ -968,8 +969,8 @@ export default function Index({ initialGame }: IndexProps) {
                   </DialogContent>
                 </Dialog>
               )}
-
-                  {/* Cyberpunk Balance Display - Only show for authenticated users */}
+              
+              {/* Cyberpunk Balance Display - Only show for authenticated users */}
                   {user && userData && (
                     <div className="relative group/balance overflow-hidden">
                       {/* Multi-layered background */}
@@ -1013,18 +1014,23 @@ export default function Index({ initialGame }: IndexProps) {
 
                   {/* Cyberpunk Rewards Button - Only show for authenticated users */}
                   {user && (
-                    <div className="relative group/rewards overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500/0 via-purple-500/30 to-purple-500/0 rounded-lg blur-sm group-hover/rewards:blur-md group-hover/rewards:from-purple-500/40 group-hover/rewards:to-purple-500/40 transition-all duration-300" />
-                      
+                    <div className="relative group/rewards">
                       <Button
                         variant="ghost"
                         onClick={() => navigate('/rewards')}
-                        className="relative border border-purple-500/30 bg-transparent hover:bg-purple-500/10 transition-all duration-300 group-hover/rewards:border-purple-400/60 group-hover/rewards:shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                        className="relative overflow-hidden border border-purple-500/40 bg-purple-950/30 hover:bg-purple-900/50 backdrop-blur-sm transition-all duration-300"
                       >
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(168,85,247,0.1)_50%,transparent_70%)] opacity-0 group-hover/rewards:opacity-100 transition-opacity duration-300" />
-                        <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)]" />
-                        <span className="relative font-semibold bg-gradient-to-r from-purple-200 to-purple-400 bg-clip-text text-transparent">
+                        {/* Cyberpunk scan line effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/20 to-transparent translate-x-[-100%] group-hover/rewards:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Subtle inner glow on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/5 via-purple-400/10 to-purple-400/5 opacity-0 group-hover/rewards:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Edge pulse effect */}
+                        <div className="absolute inset-0 border border-purple-400/0 group-hover/rewards:border-purple-400/30 rounded-md transition-all duration-300" />
+                        
+                        <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)] relative z-10" />
+                        <span className="relative z-10 font-semibold bg-gradient-to-r from-purple-200 to-purple-400 bg-clip-text text-transparent">
                           Rewards
                         </span>
                         
@@ -1037,17 +1043,22 @@ export default function Index({ initialGame }: IndexProps) {
 
                   {/* Cyberpunk Admin Panel Button - Only show for authenticated users */}
                   {user && userData?.is_admin && (
-                    <div className="relative group/admin overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/0 via-red-500/30 to-red-500/0 rounded-lg blur-sm group-hover/admin:blur-md group-hover/admin:from-red-500/40 group-hover/admin:to-red-500/40 transition-all duration-300" />
-                      
+                    <div className="relative group/admin">
                       <Button
                         variant="ghost"
                         onClick={() => setShowAdminPanel(true)}
-                        className="relative border border-red-500/30 bg-transparent hover:bg-red-500/10 transition-all duration-300 group-hover/admin:border-red-400/60 group-hover/admin:shadow-[0_0_20px_rgba(239,68,68,0.4)]"
+                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300"
                       >
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(239,68,68,0.1)_50%,transparent_70%)] opacity-0 group-hover/admin:opacity-100 transition-opacity duration-300" />
-                        <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
+                        {/* Cyberpunk scan line effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/admin:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Subtle inner glow on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 via-red-400/10 to-red-400/5 opacity-0 group-hover/admin:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Edge pulse effect */}
+                        <div className="absolute inset-0 border border-red-400/0 group-hover/admin:border-red-400/30 rounded-md transition-all duration-300" />
+                        
+                        <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
                         <span className="relative font-semibold bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">
                           Admin
                         </span>
@@ -1153,18 +1164,23 @@ export default function Index({ initialGame }: IndexProps) {
 
                   {/* Cyberpunk Authentication Buttons */}
                   {user && userData ? (
-                    <div className="relative group/logout overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0 rounded-lg blur-sm group-hover/logout:blur-md group-hover/logout:from-red-500/40 group-hover/logout:to-red-500/40 transition-all duration-300" />
-                      
+                    <div className="relative group/logout">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={handleLogout}
-                        className="relative border border-red-500/30 bg-transparent hover:bg-red-500/10 transition-all duration-300 group-hover/logout:border-red-400/60 group-hover/logout:shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300"
                       >
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(239,68,68,0.1)_50%,transparent_70%)] opacity-0 group-hover/logout:opacity-100 transition-opacity duration-300" />
-                        <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]" />
+                        {/* Cyberpunk scan line effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/logout:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Subtle inner glow on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 via-red-400/10 to-red-400/5 opacity-0 group-hover/logout:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Edge pulse effect */}
+                        <div className="absolute inset-0 border border-red-400/0 group-hover/logout:border-red-400/30 rounded-md transition-all duration-300" />
+                        
+                        <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
                         
                         {/* Tech corner indicators */}
                         <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-red-400/60 group-hover/logout:border-red-300" />
@@ -1172,17 +1188,22 @@ export default function Index({ initialGame }: IndexProps) {
                       </Button>
                     </div>
                   ) : (
-                    <div className="relative group/signin overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/30 to-accent/30 rounded-lg blur-sm group-hover/signin:blur-md group-hover/signin:from-primary/40 group-hover/signin:to-accent/40 transition-all duration-300" />
-                      
+                    <div className="relative group/signin">
                       <Button
                         onClick={() => setShowAuthModal(true)}
-                        className="relative border border-primary/30 bg-transparent hover:bg-primary/10 transition-all duration-300 group-hover/signin:border-primary/60 group-hover/signin:shadow-[0_0_20px_rgba(99,102,241,0.5)]"
+                        className="relative overflow-hidden border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50 backdrop-blur-sm transition-all duration-300"
                       >
-                        <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/signin:opacity-100 transition-opacity duration-300" />
-                        <LogIn className="w-4 h-4 mr-2 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)]" />
-                        <span className="relative font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        {/* Cyberpunk scan line effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover/signin:translate-x-[100%] transition-transform duration-700 ease-out" />
+                        
+                        {/* Subtle inner glow on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover/signin:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Edge pulse effect */}
+                        <div className="absolute inset-0 border border-primary/0 group-hover/signin:border-primary/30 rounded-md transition-all duration-300" />
+                        
+                        <LogIn className="w-4 h-4 mr-2 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
+                        <span className="relative z-10 font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                           Sign In
                         </span>
                         
@@ -1192,8 +1213,8 @@ export default function Index({ initialGame }: IndexProps) {
                       </Button>
                     </div>
                   )}
-                          </div>
-            </div>
+                </div>
+              </div>
 
             {/* Cyberpunk XP Progress Bar - Only show for authenticated users */}
             {user && levelStats && (

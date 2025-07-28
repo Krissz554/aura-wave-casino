@@ -329,16 +329,21 @@ export const RealtimeChat = () => {
                   <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-300" />
                 </div>
                 
-                <div className="relative group/send overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-lg" />
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/0 via-primary/30 to-accent/30 rounded-lg blur-sm group-hover/send:blur-md group-hover/send:from-primary/40 group-hover/send:to-accent/40 transition-all duration-300" />
-                  
+                <div className="relative group/send">
                   <Button
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || loading}
-                    className="relative border border-primary/30 bg-transparent hover:bg-primary/10 transition-all duration-300 group-hover/send:border-primary/60 group-hover/send:shadow-[0_0_15px_rgba(99,102,241,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="relative overflow-hidden border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/send:opacity-100 transition-opacity duration-300" />
+                    {/* Cyberpunk scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover/send:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    
+                    {/* Subtle inner glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover/send:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Edge pulse effect */}
+                    <div className="absolute inset-0 border border-primary/0 group-hover/send:border-primary/30 rounded-md transition-all duration-300" />
+                    
                     <Send className="w-4 h-4 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
                     
                     {/* Tech corner indicators */}
