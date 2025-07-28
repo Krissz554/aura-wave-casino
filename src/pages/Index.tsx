@@ -1349,28 +1349,24 @@ export default function Index({ initialGame }: IndexProps) {
               </CardHeader>
               <CardContent className="space-y-3 p-4">
                 {/* Coinflip Game Button */}
-                <div className="relative group/coinflip overflow-hidden">
-                  <div className={`absolute inset-0 ${
-                    currentGame === 'coinflip' 
-                      ? 'bg-gradient-to-r from-blue-900/80 to-purple-900/80' 
-                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-md`} />
-                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-                    currentGame === 'coinflip' 
-                      ? 'from-blue-500/40 via-purple-500/40 to-blue-500/40' 
-                      : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-md blur-sm group-hover/coinflip:blur-md transition-all duration-300`} />
-                  
+                <div className="relative group/coinflip">
                   <Button
                     onClick={() => handleGameChange('coinflip')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'coinflip' 
-                        ? 'border-blue-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]' 
-                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                        ? 'border-2 border-blue-400/80 bg-gradient-to-r from-blue-950/50 to-purple-950/50 text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] backdrop-blur-sm' 
+                        : 'border border-slate-600/40 bg-slate-900/30 hover:border-primary/60 hover:bg-slate-800/50 backdrop-blur-sm'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300 rounded-md" />
+                    {/* Cyberpunk scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover/coinflip:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    
+                    {/* Subtle inner glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Edge pulse effect */}
+                    <div className="absolute inset-0 border border-primary/0 group-hover/coinflip:border-primary/30 rounded-md transition-all duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1399,28 +1395,24 @@ export default function Index({ initialGame }: IndexProps) {
                 </div>
               
                 {/* Roulette Game Button */}
-                <div className="relative group/roulette overflow-hidden">
-                  <div className={`absolute inset-0 ${
-                    currentGame === 'roulette' 
-                      ? 'bg-gradient-to-r from-red-900/80 to-orange-900/80' 
-                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-md`} />
-                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-                    currentGame === 'roulette' 
-                      ? 'from-red-500/40 via-orange-500/40 to-red-500/40' 
-                      : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-md blur-sm group-hover/roulette:blur-md transition-all duration-300`} />
-                  
+                <div className="relative group/roulette">
                   <Button
                     onClick={() => handleGameChange('roulette')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'roulette' 
-                        ? 'border-red-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
-                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                        ? 'border-2 border-red-400/80 bg-gradient-to-r from-red-950/50 to-orange-950/50 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] backdrop-blur-sm' 
+                        : 'border border-slate-600/40 bg-slate-900/30 hover:border-red-400/60 hover:bg-slate-800/50 backdrop-blur-sm'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300 rounded-md" />
+                    {/* Cyberpunk scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/roulette:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    
+                    {/* Subtle inner glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 via-red-400/10 to-red-400/5 opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Edge pulse effect */}
+                    <div className="absolute inset-0 border border-red-400/0 group-hover/roulette:border-red-400/30 rounded-md transition-all duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1449,28 +1441,24 @@ export default function Index({ initialGame }: IndexProps) {
                 </div>
               
                 {/* Tower Game Button */}
-                <div className="relative group/tower overflow-hidden">
-                  <div className={`absolute inset-0 ${
-                    currentGame === 'tower' 
-                      ? 'bg-gradient-to-r from-emerald-900/80 to-teal-900/80' 
-                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-md`} />
-                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-                    currentGame === 'tower' 
-                      ? 'from-emerald-500/40 via-teal-500/40 to-emerald-500/40' 
-                      : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-md blur-sm group-hover/tower:blur-md transition-all duration-300`} />
-                  
+                <div className="relative group/tower">
                   <Button
                     onClick={() => handleGameChange('tower')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'tower' 
-                        ? 'border-emerald-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                        ? 'border-2 border-emerald-400/80 bg-gradient-to-r from-emerald-950/50 to-teal-950/50 text-white shadow-[0_0_20px_rgba(16,185,129,0.6)] backdrop-blur-sm' 
+                        : 'border border-slate-600/40 bg-slate-900/30 hover:border-emerald-400/60 hover:bg-slate-800/50 backdrop-blur-sm'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300 rounded-md" />
+                    {/* Cyberpunk scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] group-hover/tower:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    
+                    {/* Subtle inner glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
+                    
+                    {/* Edge pulse effect */}
+                    <div className="absolute inset-0 border border-emerald-400/0 group-hover/tower:border-emerald-400/30 rounded-md transition-all duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1499,15 +1487,14 @@ export default function Index({ initialGame }: IndexProps) {
                 </div>
               
                 {/* Crash Game Button - Coming Soon */}
-                <div className="relative group/crash overflow-hidden opacity-60">
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-slate-800/40 backdrop-blur-md rounded-md" />
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 rounded-md blur-sm" />
-                  
+                <div className="relative group/crash opacity-60">
                   <Button
                     disabled
                     variant="ghost"
-                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed border border-slate-600/20 bg-transparent"
+                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed overflow-hidden border border-slate-600/40 bg-slate-900/20 backdrop-blur-sm"
                   >
+                    {/* Subtle disabled glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-yellow-500/10 to-amber-500/5 opacity-50" />
                                          <div className="flex items-center gap-3 relative z-10 w-full">
                        <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
                          <TrendingUp className="w-4 h-4" />
