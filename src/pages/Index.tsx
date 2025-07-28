@@ -73,10 +73,12 @@ export default function Index({ initialGame }: IndexProps) {
   const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
   
   // XP Animation states
-  const [animatedXP, setAnimatedXP] = useState(0);
+  const [animatedXP, setAnimatedXP] = useState(0); // For main lifetime XP display
+  const [animatedCurrentLevelXP, setAnimatedCurrentLevelXP] = useState(0); // For progress bar current XP
   const [animatedProgress, setAnimatedProgress] = useState(0);
   const [xpIncreaseAnimation, setXpIncreaseAnimation] = useState(false);
   const previousXP = useRef(0);
+  const previousCurrentLevelXP = useRef(0);
   const previousProgress = useRef(0);
   const [isInitialized, setIsInitialized] = useState(false);
   const navigate = useNavigate();
@@ -480,7 +482,7 @@ export default function Index({ initialGame }: IndexProps) {
   };
 
   const { levelStats } = useLevelSync();
-  const { stats: userLevelStats } = useUserLevelStats(); // This is the working hook that profile uses
+  const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats(); // This is the working hook that profile uses
 
   // Debug: Log when userLevelStats updates
   useEffect(() => {
@@ -492,6 +494,8 @@ export default function Index({ initialGame }: IndexProps) {
       });
     }
   }, [userLevelStats]);
+
+
 
   // Use userLevelStats as primary source (working real-time updates), fallback to levelStats
   const effectiveStats = userLevelStats || {
@@ -535,13 +539,16 @@ export default function Index({ initialGame }: IndexProps) {
   useEffect(() => {
     if (effectiveStats) {
       const currentXP = effectiveStats.lifetime_xp; // Use lifetime_xp for main tracking
+      const currentLevelXP = effectiveStats.current_level_xp; // XP within current level
       const currentProgress = xpProgress;
       
       // Initialize on first load
       if (!isInitialized) {
         setAnimatedXP(currentXP);
+        setAnimatedCurrentLevelXP(currentLevelXP);
         setAnimatedProgress(currentProgress);
         previousXP.current = currentXP;
+        previousCurrentLevelXP.current = currentLevelXP;
         previousProgress.current = currentProgress;
         setIsInitialized(true);
         return;
@@ -549,25 +556,36 @@ export default function Index({ initialGame }: IndexProps) {
       
       // Check if XP increased
       if (currentXP > previousXP.current) {
+        console.log('🎯 HEADER: XP INCREASED! Animating:', {
+          lifetimeXP: `${previousXP.current} → ${currentXP}`,
+          currentLevelXP: `${previousCurrentLevelXP.current} → ${currentLevelXP}`,
+          progress: `${previousProgress.current}% → ${currentProgress}%`
+        });
+        
         // Trigger increase animation
         setXpIncreaseAnimation(true);
         
-        // Animate XP number from previous value to current
+        // Animate lifetime XP (main display)
         animateToValue(previousXP.current, currentXP, 1500, setAnimatedXP);
         
-        // Animate progress bar from previous to current
+        // Animate current level XP (progress bar)
+        animateToValue(previousCurrentLevelXP.current, currentLevelXP, 1500, setAnimatedCurrentLevelXP);
+        
+        // Animate progress bar percentage
         animateToValue(previousProgress.current, currentProgress, 1500, setAnimatedProgress);
         
         // Reset animation state after delay
         setTimeout(() => setXpIncreaseAnimation(false), 2000);
-      } else if (currentXP !== previousXP.current) {
+      } else if (currentXP !== previousXP.current || currentLevelXP !== previousCurrentLevelXP.current) {
         // XP changed but didn't increase (level up reset), update instantly
         setAnimatedXP(currentXP);
+        setAnimatedCurrentLevelXP(currentLevelXP);
         setAnimatedProgress(currentProgress);
       }
       
       // Update refs for next comparison
       previousXP.current = currentXP;
+      previousCurrentLevelXP.current = currentLevelXP;
       previousProgress.current = currentProgress;
     }
   }, [effectiveStats, xpProgress, animateToValue, isInitialized]);
@@ -1541,7 +1559,7 @@ export default function Index({ initialGame }: IndexProps) {
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
                       <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
-                        {formatXP(effectiveStats.current_level_xp)}
+                        {formatXP(xpIncreaseAnimation ? animatedCurrentLevelXP : effectiveStats.current_level_xp)}
                       </span>
                       <span className="text-slate-500">/</span>
                       <span className="text-primary">{formatXP(effectiveStats.current_level_xp + effectiveStats.xp_to_next_level)}</span>
