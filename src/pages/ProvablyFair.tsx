@@ -104,14 +104,14 @@ export function ProvablyFair() {
          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
            
            {/* Cyberpunk How It Works */}
-           <div className="relative">
+           <div className="relative overflow-hidden rounded-lg">
              {/* Background Effects */}
              <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/15 to-cyan-500/20 rounded-lg" />
-             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40" />
+             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40 rounded-lg" />
              
-             <div className="relative border border-indigo-500/30 rounded-lg p-6">
-               {/* Scan Line Animation */}
-               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite] rounded-lg" />
+             <div className="relative border border-indigo-500/30 rounded-lg p-6 overflow-hidden">
+               {/* Scan Line Animation - Contained within card */}
+               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/30 to-transparent w-full translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite]" />
                
                {/* Header */}
                <div className="relative z-10 mb-6">
@@ -204,14 +204,14 @@ export function ProvablyFair() {
           </div>
 
            {/* Cyberpunk Why Trust It */}
-           <div className="relative">
+           <div className="relative overflow-hidden rounded-lg">
              {/* Background Effects */}
              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-green-500/15 to-emerald-500/20 rounded-lg" />
-             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.1)_25%,rgba(34,197,94,0.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.1)_75%,rgba(34,197,94,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40" />
+             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.1)_25%,rgba(34,197,94,0.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.1)_75%,rgba(34,197,94,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40 rounded-lg" />
              
-             <div className="relative border border-emerald-500/30 rounded-lg p-6">
-               {/* Scan Line Animation */}
-               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite_1s] rounded-lg" />
+             <div className="relative border border-emerald-500/30 rounded-lg p-6 overflow-hidden">
+               {/* Scan Line Animation - Contained within card */}
+               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent w-full translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite_1s]" />
                
                {/* Header */}
                <div className="relative z-10 mb-6">
