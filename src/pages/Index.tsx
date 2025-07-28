@@ -511,7 +511,7 @@ export default function Index({ initialGame }: IndexProps) {
         timestamp: new Date().toISOString()
       });
     }
-  }, [levelStats, effectiveStats.lifetime_xp, displayCurrentLevelXP]);
+  }, [levelStats]);
 
 
 
@@ -532,18 +532,20 @@ export default function Index({ initialGame }: IndexProps) {
       return Number(levelStats.current_level_xp);
     }
     // Fallback: calculate current level XP from lifetime XP with decimal precision
-    const lifetimeXP = effectiveStats.lifetime_xp;
-    const currentLevel = effectiveStats.current_level || 1;
+    const lifetimeXP = levelStats?.lifetime_xp || userLevelStats?.lifetime_xp || 0;
+    const currentLevel = levelStats?.current_level || userLevelStats?.current_level || 1;
+    const xpToNext = levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100;
+    const currentLevelXP = levelStats?.current_level_xp || userLevelStats?.current_level_xp || 0;
     
     // Simple approximation to preserve decimals in progress bar
     if (currentLevel === 1) {
       return lifetimeXP; // Level 1: all XP is current level XP
     } else {
       // For higher levels, use modulo to get approximate current level progress with decimals
-      const xpPerLevel = effectiveStats.xp_to_next_level + (effectiveStats.current_level_xp || 0);
+      const xpPerLevel = xpToNext + currentLevelXP;
       return lifetimeXP % xpPerLevel;
     }
-  }, [levelStats?.lifetime_xp, levelStats?.current_level_xp, effectiveStats.lifetime_xp, effectiveStats.current_level, effectiveStats.xp_to_next_level, effectiveStats.current_level_xp]);
+  }, [levelStats?.lifetime_xp, levelStats?.current_level_xp, levelStats?.current_level, levelStats?.xp_to_next_level, userLevelStats?.lifetime_xp, userLevelStats?.current_level_xp, userLevelStats?.current_level, userLevelStats?.xp_to_next_level]);
 
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
