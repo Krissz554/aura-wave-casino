@@ -1388,7 +1388,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(Number(Number(betAmount).toFixed(2)));
                                     }
                                   }}
-                                  className="w-full text-center text-2xl font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-lg [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider"
+                                  className="w-full text-center text-3xl font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-lg [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider"
                                   disabled={currentRound.status !== 'betting'}
                                   placeholder="[ 0.00 ]"
                                 />
