@@ -187,7 +187,7 @@ export const RealtimeChat = () => {
                   <MessageCircle className="w-5 h-5 text-primary/40" />
                 </div>
               </div>
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold">
+              <span className="text-white font-bold drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]">
                 Live Chat
               </span>
               <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
@@ -196,10 +196,10 @@ export const RealtimeChat = () => {
                   : 'bg-red-400 animate-pulse drop-shadow-[0_0_6px_rgba(239,68,68,0.6)]'
               }`} />
             </CardTitle>
-            <div className="flex items-center gap-2">
-              <div className="text-xs font-mono text-slate-400">
-                {messages.length} messages
-              </div>
+                           <div className="flex items-center gap-2">
+               <div className="text-xs font-mono text-slate-300">
+                 {messages.length} messages
+               </div>
               {/* Tech indicator */}
               <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
             </div>
@@ -218,12 +218,12 @@ export const RealtimeChat = () => {
                       <MessageCircle className="w-12 h-12 mx-auto text-primary/20" />
                     </div>
                   </div>
-                  <p className="text-slate-300 font-mono text-sm">
+                  <p className="text-white font-mono text-sm drop-shadow-lg">
                     No messages yet. Start the conversation!
                   </p>
                   <div className="mt-2 flex items-center justify-center gap-2">
                     <div className="w-1 h-1 bg-primary rounded-full animate-pulse" />
-                    <span className="text-xs text-slate-500 font-mono">AWAITING TRANSMISSION</span>
+                    <span className="text-xs text-slate-300 font-mono">AWAITING TRANSMISSION</span>
                     <div className="w-1 h-1 bg-accent rounded-full animate-pulse delay-500" />
                   </div>
                 </div>
@@ -258,14 +258,14 @@ export const RealtimeChat = () => {
                             username={msg.username}
                             className={`font-medium text-xs ${
                               isOwnMessage 
-                                ? 'bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent' 
-                                : 'text-slate-300'
+                                ? 'text-blue-300 drop-shadow-[0_0_4px_rgba(99,102,241,0.6)]' 
+                                : 'text-slate-200'
                             } truncate max-w-20 font-mono`}
                           >
                             {msg.username}
                           </ClickableUsername>
                          <Badge variant="outline" className={`text-xs px-2 py-0.5 text-[10px] font-mono border-primary/30 ${
-                           isOwnMessage ? 'bg-primary/10 text-primary' : 'bg-slate-800/50 text-accent'
+                           isOwnMessage ? 'bg-primary/20 text-blue-200' : 'bg-slate-800/50 text-green-300'
                          }`}>
                            L{msg.user_level}
                          </Badge>
@@ -284,7 +284,7 @@ export const RealtimeChat = () => {
                         {/* Message background effects */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover/message:opacity-100 transition-opacity duration-300" />
                         
-                        <span className={`relative z-10 ${isOwnMessage ? 'text-slate-200' : 'text-slate-300'}`}>
+                        <span className={`relative z-10 ${isOwnMessage ? 'text-white' : 'text-slate-100'} drop-shadow-sm`}>
                           {msg.message}
                         </span>
                         
@@ -293,9 +293,9 @@ export const RealtimeChat = () => {
                         <div className="absolute bottom-1 right-1 w-1 h-1 border-r border-b border-accent/40" />
                       </div>
                       
-                      <div className="text-[10px] text-slate-500 mt-1 font-mono">
-                        {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                      </div>
+                                             <div className="text-[10px] text-slate-400 mt-1 font-mono">
+                         {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
+                       </div>
                     </div>
                   </div>
                 );
@@ -318,7 +318,7 @@ export const RealtimeChat = () => {
                     onKeyPress={handleKeyPress}
                     placeholder="Type a message..."
                     disabled={loading}
-                    className="relative bg-slate-800/50 border border-slate-600/30 text-slate-200 placeholder:text-slate-500 focus:border-primary/60 focus:bg-slate-800/70 transition-all duration-300 font-mono text-sm"
+                    className="relative bg-slate-800/50 border border-slate-600/30 text-white placeholder:text-slate-400 focus:border-primary/60 focus:bg-slate-800/70 transition-all duration-300 font-mono text-sm"
                     maxLength={100}
                   />
                   
@@ -349,14 +349,14 @@ export const RealtimeChat = () => {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-1 h-1 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs text-slate-500 font-mono">TRANSMISSION READY</span>
+                  <span className="text-xs text-slate-300 font-mono">TRANSMISSION READY</span>
                 </div>
                 <span className={`text-xs font-mono ${
                   newMessage.length > 90 
                     ? 'text-red-400' 
                     : newMessage.length > 80 
                       ? 'text-yellow-400' 
-                      : 'text-slate-500'
+                      : 'text-slate-300'
                 }`}>
                   {newMessage.length}/100
                 </span>
@@ -369,16 +369,16 @@ export const RealtimeChat = () => {
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 via-accent/20 to-primary/10 rounded-lg blur-sm" />
               
               <div className="relative z-10 space-y-2">
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
-                  <p className="text-sm text-slate-300 font-mono">
-                    🔒 AUTHENTICATION REQUIRED
-                  </p>
-                  <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-500" />
-                </div>
-                <p className="text-xs text-slate-500 font-mono">
-                  Connect with other players and share your gaming experience!
-                </p>
+                                 <div className="flex items-center justify-center gap-2">
+                   <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
+                   <p className="text-sm text-white font-mono drop-shadow-lg">
+                     🔒 AUTHENTICATION REQUIRED
+                   </p>
+                   <div className="w-2 h-2 bg-primary rounded-full animate-pulse delay-500" />
+                 </div>
+                 <p className="text-xs text-slate-300 font-mono">
+                   Connect with other players and share your gaming experience!
+                 </p>
                 
                 {/* Tech accent lines */}
                 <div className="absolute top-2 left-2 w-3 h-px bg-gradient-to-r from-primary to-transparent" />
