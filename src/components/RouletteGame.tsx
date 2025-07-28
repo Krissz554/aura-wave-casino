@@ -1348,7 +1348,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                 <div className="absolute top-0 right-0 w-2 h-2 bg-primary/60 animate-pulse"></div>
                                 <div className="absolute bottom-0 left-0 w-2 h-2 bg-accent/60 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
                                 
-                                <div className="flex items-center gap-3 px-4 py-3 relative z-10">
+                                                                 <div className="flex items-center gap-3 px-4 py-4 relative z-10">
                                                                      {/* Cyber Dollar Symbol */}
                                    <div className="flex items-center justify-center min-w-[32px] h-8 bg-gradient-to-br from-slate-800/80 via-slate-700/60 to-slate-800/80 border border-primary/60 text-primary font-bold text-sm relative overflow-hidden" style={{
                                      clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
@@ -1388,7 +1388,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(Number(Number(betAmount).toFixed(2)));
                                     }
                                   }}
-                                  className="w-full text-center text-3xl font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-lg [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider"
+                                  className="w-full text-center text-4xl font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-xl [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider min-h-[40px] flex items-center justify-center"
                                   disabled={currentRound.status !== 'betting'}
                                   placeholder="[ 0.00 ]"
                                 />
