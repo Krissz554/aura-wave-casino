@@ -296,184 +296,472 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl h-[95vh] flex flex-col p-0 border-0 bg-transparent">
+      <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0 border-0 bg-transparent overflow-hidden">
         <div className="relative h-full">
-          {/* Animated Background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl rounded-2xl border border-white/10" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent to-accent/5 rounded-2xl" />
+          {/* Multi-layered Cyberpunk Background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95 backdrop-blur-xl rounded-2xl" />
           
-          {/* Close Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="absolute top-4 right-4 z-10 h-8 w-8 p-0 rounded-full glass border border-white/20 hover:bg-white/10"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          {/* Animated Circuit Board Pattern */}
+          <div className="absolute inset-0 opacity-[0.08]">
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[24px_24px] animate-grid-move-slow" />
+          </div>
+          
+          {/* Animated Border Glow */}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/30 via-accent/40 to-primary/30 rounded-2xl blur-sm animate-pulse" />
+          
+          {/* Dynamic Energy Lines */}
+          <div className="absolute inset-0 overflow-hidden rounded-2xl">
+            <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-energy-flow" />
+            <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent animate-energy-flow" style={{ animationDelay: '1s' }} />
+            <div className="absolute left-0 top-1/3 w-full h-px bg-gradient-to-r from-transparent via-primary/25 to-transparent animate-energy-flow-horizontal" style={{ animationDelay: '2s' }} />
+          </div>
+          
+          {/* Floating Orbs */}
+          <div className="absolute inset-0 overflow-hidden rounded-2xl">
+            {[...Array(8)].map((_, i) => (
+              <div
+                key={i}
+                className={`absolute w-2 h-2 rounded-full opacity-30 animate-float-orb ${
+                  i % 3 === 0 ? 'bg-primary/60' : i % 3 === 1 ? 'bg-accent/60' : 'bg-purple-400/60'
+                }`}
+                style={{
+                  left: `${15 + (i * 12)}%`,
+                  top: `${10 + (i * 8)}%`,
+                  animationDelay: `${i * 0.8}s`,
+                  animationDuration: `${4 + (i % 3)}s`
+                }}
+              />
+            ))}
+          </div>
+          
+          {/* Tech Corner Details */}
+          <div className="absolute top-3 left-3 w-6 h-6 border-l-2 border-t-2 border-primary/60 rounded-tl-sm" />
+          <div className="absolute top-3 right-3 w-6 h-6 border-r-2 border-t-2 border-accent/60 rounded-tr-sm" />
+          <div className="absolute bottom-3 left-3 w-6 h-6 border-l-2 border-b-2 border-accent/60 rounded-bl-sm" />
+          <div className="absolute bottom-3 right-3 w-6 h-6 border-r-2 border-b-2 border-primary/60 rounded-br-sm" />
+          
+          {/* Enhanced Close Button */}
+          <div className="absolute top-4 right-4 z-50 group/close">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClose}
+              className="relative h-10 w-10 p-0 overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300"
+              style={{
+                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+              }}
+            >
+              {/* Scan line effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/close:translate-x-[100%] transition-transform duration-700 ease-out" />
+              
+              {/* Inner glow */}
+              <div className="absolute inset-0 bg-gradient-to-r from-red-400/5 via-red-400/10 to-red-400/5 opacity-0 group-hover/close:opacity-100 transition-opacity duration-300" />
+              
+              <X className="w-5 h-5 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
+              
+              {/* Tech corners */}
+              <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-red-400/60 group-hover/close:border-red-300" />
+              <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-red-400/60 group-hover/close:border-red-300" />
+            </Button>
+          </div>
 
           <div className="relative p-8 h-full overflow-y-auto">
-            {/* Hero Header */}
-            <div className="relative mb-8">
-              {/* Background Pattern */}
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/10 to-primary/10 rounded-2xl" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(120,119,198,0.1),transparent)] rounded-2xl" />
+            {/* Cyberpunk Hero Header */}
+            <div className="relative mb-8 overflow-hidden group">
+              {/* Multi-layered Background */}
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 rounded-2xl" />
               
-              <div className="relative p-8 flex flex-col md:flex-row items-center gap-8">
-                {/* Enhanced Avatar */}
-                <div className="relative group">
-                  <div className="absolute -inset-2 bg-gradient-to-r from-primary via-accent to-primary rounded-full opacity-75 group-hover:opacity-100 animate-pulse blur-sm" />
+              {/* Circuit Board Pattern */}
+              <div className="absolute inset-0 opacity-[0.12]">
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.5)_25%,rgba(99,102,241,0.5)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.5)_75%,rgba(99,102,241,0.5)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.5)_25%,rgba(99,102,241,0.5)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.5)_75%,rgba(99,102,241,0.5)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+              </div>
+              
+              {/* Animated Border Glow */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-sm group-hover:blur-md transition-all duration-500" />
+              
+              {/* Holographic Scan Lines */}
+              <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-cyber-scan-horizontal" />
+                <div className="absolute w-px h-full bg-gradient-to-b from-transparent via-accent/60 to-transparent animate-cyber-scan left-1/3" />
+                <div className="absolute w-px h-full bg-gradient-to-b from-transparent via-primary/40 to-transparent animate-cyber-scan right-1/4" style={{ animationDelay: '1.5s' }} />
+              </div>
+              
+              {/* Tech Corner Details */}
+              <div className="absolute top-3 left-3 w-5 h-5 border-l-2 border-t-2 border-primary/70 rounded-tl-sm" />
+              <div className="absolute top-3 right-3 w-5 h-5 border-r-2 border-t-2 border-accent/70 rounded-tr-sm" />
+              <div className="absolute bottom-3 left-3 w-5 h-5 border-l-2 border-b-2 border-accent/70 rounded-bl-sm" />
+              <div className="absolute bottom-3 right-3 w-5 h-5 border-r-2 border-b-2 border-primary/70 rounded-br-sm" />
+              
+              <div className="relative z-10 p-8 flex flex-col md:flex-row items-center gap-8"
+                   style={{
+                     clipPath: 'polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px))'
+                   }}>
+                {/* Cyberpunk Avatar */}
+                <div className="relative group/avatar">
+                  {/* Outer Energy Ring */}
+                  <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary/40 via-accent/60 to-primary/40 animate-cyber-avatar-scan blur-sm" />
+                  
+                  {/* Middle Tech Ring */}
+                  <div className="absolute -inset-2 rounded-full border-2 border-primary/60 bg-gradient-to-r from-primary/10 to-accent/10 backdrop-blur-sm" />
+                  
+                  {/* Holographic Scan Lines */}
+                  <div className="absolute -inset-2 rounded-full overflow-hidden">
+                    <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-accent/80 to-transparent animate-cyber-scan-horizontal top-1/3" />
+                    <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-cyber-scan-horizontal bottom-1/3" style={{ animationDelay: '1s' }} />
+                  </div>
+                  
                   <ProfileBorder level={currentLevel} size="lg">
-                    <div className="w-full h-full rounded-full overflow-hidden relative">
+                    <div className="w-full h-full rounded-full overflow-hidden relative group-hover/avatar:scale-105 transition-transform duration-500">
                       <img 
                         src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.username}`}
                         alt={`${userData.username} avatar`}
                         className="w-full h-full object-cover"
                       />
+                      
+                      {/* Cyberpunk Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-accent/20 opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-500" />
+                      
                       {/* Level Crown for high levels */}
                       {currentLevel >= 100 && (
-                        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1">
-                          <Crown className="w-6 h-6 text-yellow-400 drop-shadow-lg animate-bounce" />
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                          <div className="relative">
+                            <Crown className="w-8 h-8 text-yellow-400 drop-shadow-[0_0_10px_rgba(252,211,77,0.8)] animate-bounce" />
+                            <div className="absolute inset-0 rounded-full bg-yellow-400/20 blur-md animate-pulse" />
+                          </div>
                         </div>
                       )}
+                      
+                      {/* Level Badge */}
+                      <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-primary/90 via-primary/80 to-accent/90 border-2 border-white/20 rounded-full p-2 backdrop-blur-sm">
+                        <div className="text-white font-bold text-sm drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
+                          L{currentLevel}
+                        </div>
+                      </div>
                     </div>
                   </ProfileBorder>
+                  
+                  {/* Corner Tech Indicators */}
+                  <div className="absolute -top-1 -left-1 w-3 h-3 border-l-2 border-t-2 border-primary/80" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 border-r-2 border-t-2 border-accent/80" />
+                  <div className="absolute -bottom-1 -left-1 w-3 h-3 border-l-2 border-b-2 border-accent/80" />
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 border-r-2 border-b-2 border-primary/80" />
                 </div>
 
-                {/* User Info */}
-                <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                    <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {/* Cyberpunk User Info */}
+                <div className="flex-1 text-center md:text-left space-y-4">
+                  {/* Username and VIP Badge */}
+                  <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
+                    <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-cyber-logo-shine">
                       {userData.username}
                     </h1>
+                    
                     {currentLevel >= 50 && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30">
-                        <Star className="w-4 h-4 text-yellow-400" />
-                        <span className="text-xs font-bold text-yellow-400">VIP</span>
+                      <div className="relative group/vip">
+                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/40 to-orange-500/40 rounded-lg blur-sm animate-pulse" />
+                        <div className="relative px-3 py-2 bg-gradient-to-r from-yellow-900/80 to-orange-900/80 border border-yellow-500/50 backdrop-blur-sm"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                             }}>
+                          <div className="flex items-center gap-2">
+                            <Star className="w-4 h-4 text-yellow-400 drop-shadow-[0_0_6px_rgba(252,211,77,0.8)]" />
+                            <span className="text-sm font-bold text-yellow-400 drop-shadow-sm">VIP</span>
+                          </div>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-yellow-400/60" />
+                          <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-yellow-400/60" />
+                        </div>
                       </div>
                     )}
                   </div>
                   
-                  <div className="flex items-center justify-center md:justify-start gap-4 text-muted-foreground mb-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>Joined {registrationDate}</span>
+                  {/* Player Details */}
+                  <div className="flex items-center justify-center md:justify-start gap-6">
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-800/50 border border-slate-600/50 rounded-lg backdrop-blur-sm">
+                      <Calendar className="w-4 h-4 text-primary" />
+                      <span className="text-slate-300 font-mono text-sm">Joined {registrationDate}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>Player #{userData.id.slice(-6).toUpperCase()}</span>
+                    <div className="flex items-center gap-2 px-3 py-1 bg-slate-800/50 border border-slate-600/50 rounded-lg backdrop-blur-sm">
+                      <Users className="w-4 h-4 text-accent" />
+                      <span className="text-slate-300 font-mono text-sm">ID #{userData.id.slice(-6).toUpperCase()}</span>
                     </div>
                   </div>
 
-                  {/* Level & XP Display */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center md:justify-start gap-4">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold text-primary animate-pulse">
-                          {animatedStats.level}
+                  {/* Cyberpunk Level & XP Display */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center md:justify-start gap-6">
+                      {/* Level Display */}
+                      <div className="relative group/level">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-primary/50 rounded-lg blur-sm animate-pulse" />
+                        <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-primary/60 backdrop-blur-sm"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }}>
+                          <div className="text-3xl font-bold text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-cyber-balance-glow">
+                            {animatedStats.level}
+                          </div>
+                          <div className="text-sm text-primary/80 font-mono tracking-wider">LEVEL</div>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/60" />
+                          <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-primary/60" />
                         </div>
-                        <div className="text-sm text-muted-foreground">Level</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-bold text-accent">
-                          {animatedStats.xp.toLocaleString()}
+                      
+                      {/* Current XP Display */}
+                      <div className="relative group/xp">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-accent/30 to-accent/50 rounded-lg blur-sm animate-pulse" style={{ animationDelay: '0.5s' }} />
+                        <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-accent/60 backdrop-blur-sm"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }}>
+                          <div className="text-2xl font-bold text-accent drop-shadow-[0_0_6px_rgba(168,85,247,0.8)]">
+                            {animatedStats.xp.toLocaleString()}
+                          </div>
+                          <div className="text-sm text-accent/80 font-mono tracking-wider">CURRENT XP</div>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-accent/60" />
+                          <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/60" />
                         </div>
-                        <div className="text-sm text-muted-foreground">Current XP</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-xl font-bold text-green-400">
-                          {xpToNext.toLocaleString()}
+                      
+                      {/* XP to Next Display */}
+                      <div className="relative group/next">
+                        <div className="absolute -inset-2 bg-gradient-to-r from-green-500/30 to-emerald-500/50 rounded-lg blur-sm animate-pulse" style={{ animationDelay: '1s' }} />
+                        <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-green-500/60 backdrop-blur-sm"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }}>
+                          <div className="text-xl font-bold text-green-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.8)]">
+                            {xpToNext.toLocaleString()}
+                          </div>
+                          <div className="text-sm text-green-400/80 font-mono tracking-wider">TO NEXT</div>
+                          
+                          {/* Tech corners */}
+                          <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-green-500/60" />
+                          <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-green-500/60" />
                         </div>
-                        <div className="text-sm text-muted-foreground">To Next</div>
                       </div>
                     </div>
                     
-                    {/* Enhanced Progress Bar */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Level {currentLevel} Progress</span>
-                        <span>{Math.round(xpProgress)}%</span>
+                    {/* Cyberpunk Progress Bar */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm font-mono tracking-wider">
+                        <span className="text-primary">LEVEL {currentLevel} PROGRESS</span>
+                        <span className="text-accent">{Math.round(xpProgress)}% COMPLETE</span>
                       </div>
-                      <div className="relative h-3 bg-muted rounded-full overflow-hidden">
+                      
+                      <div className="relative group/progress">
+                        {/* Progress Container */}
+                        <div className="relative h-4 bg-slate-800/60 border border-slate-600/50 backdrop-blur-sm overflow-hidden"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                             }}>
+                          
+                          {/* Progress Fill */}
+                          <div 
+                            className="h-full bg-gradient-to-r from-primary via-accent to-primary relative transition-all duration-1000 ease-out"
+                            style={{ width: `${xpProgress}%` }}
+                          >
+                            {/* Animated Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-white/10 to-white/30 animate-pulse" />
+                            
+                            {/* Moving Scan Line */}
+                            <div className="absolute top-0 right-0 w-1 h-full bg-white/80 shadow-[0_0_10px_rgba(255,255,255,0.8)] animate-pulse" />
+                          </div>
+                          
+                          {/* Grid Pattern Overlay */}
+                          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(255,255,255,0.1)_25%,rgba(255,255,255,0.1)_26%,transparent_27%,transparent_74%,rgba(255,255,255,0.1)_75%,rgba(255,255,255,0.1)_76%,transparent_77%,transparent)] bg-[8px_8px] opacity-20" />
+                        </div>
+                        
+                        {/* Progress Percentage Indicator */}
                         <div 
-                          className="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-1000 ease-out relative"
-                          style={{ width: `${xpProgress}%` }}
+                          className="absolute top-1/2 transform -translate-y-1/2 text-xs font-mono font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)] transition-all duration-1000 ease-out"
+                          style={{ left: `${Math.max(5, Math.min(90, xpProgress))}%` }}
                         >
-                          <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent rounded-full animate-pulse" />
+                          {Math.round(xpProgress)}%
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                                 {/* Balance Card - Only show for own profile */}
+                                 {/* Cyberpunk Balance Card - Only show for own profile */}
                  {(isOwnProfile || shouldShowOwnProfile) && (
-                   <Card className="glass border-0 bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/20">
-                     <CardContent className="p-6 text-center">
-                       <div className="flex items-center justify-center gap-2 mb-2">
-                         <Wallet className="w-5 h-5 text-green-400" />
-                         <span className="text-sm font-medium text-green-400">Balance</span>
+                   <div className="relative group/balance">
+                     {/* Outer Glow */}
+                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/40 to-emerald-500/60 rounded-xl blur-md animate-pulse" />
+                     
+                     {/* Main Card Container */}
+                     <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-green-500/60 backdrop-blur-sm p-6 text-center overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                          }}>
+                       
+                       {/* Circuit Pattern */}
+                       <div className="absolute inset-0 opacity-10">
+                         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.4)_25%,rgba(34,197,94,0.4)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.4)_75%,rgba(34,197,94,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(34,197,94,0.4)_25%,rgba(34,197,94,0.4)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.4)_75%,rgba(34,197,94,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
+                       </div>
+                       
+                       {/* Header */}
+                       <div className="relative flex items-center justify-center gap-3 mb-4">
+                         <Wallet className="w-6 h-6 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                         <span className="text-lg font-bold text-green-400 font-mono tracking-wider">BALANCE</span>
                          <Button
                            variant="ghost"
                            size="sm"
-                           className="h-6 w-6 p-0"
+                           className="h-8 w-8 p-0 border border-green-500/40 bg-green-950/30 hover:bg-green-900/50 transition-all duration-300"
                            onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+                           style={{
+                             clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                           }}
                          >
-                           {isBalanceVisible ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                           {isBalanceVisible ? 
+                             <Eye className="w-4 h-4 text-green-400" /> : 
+                             <EyeOff className="w-4 h-4 text-green-400" />
+                           }
                          </Button>
                        </div>
-                       <div className="text-3xl font-bold text-green-400">
+                       
+                       {/* Balance Amount */}
+                       <div className="text-4xl font-bold text-green-400 drop-shadow-[0_0_12px_rgba(34,197,94,0.8)] font-mono animate-cyber-balance-glow">
                          {isBalanceVisible ? `$${animatedStats.balance.toFixed(2)}` : '$••••••'}
                        </div>
-                     </CardContent>
-                   </Card>
+                       
+                       {/* Tech Corner Indicators */}
+                       <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-green-400/80" />
+                       <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-green-400/80" />
+                       <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-green-400/80" />
+                       <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-green-400/80" />
+                     </div>
+                   </div>
                  )}
                  
-                 {/* Player Info Card for Other Users */}
+                 {/* Cyberpunk Player Info Card for Other Users */}
                  {!isOwnProfile && !shouldShowOwnProfile && (
-                   <Card className="glass border-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20">
-                     <CardContent className="p-6 text-center">
-                       <div className="flex items-center justify-center gap-2 mb-2">
-                         <Globe className="w-5 h-5 text-blue-400" />
-                         <span className="text-sm font-medium text-blue-400">Player Info</span>
+                   <div className="relative group/playerinfo">
+                     {/* Outer Glow */}
+                     <div className="absolute -inset-2 bg-gradient-to-r from-primary/40 to-accent/60 rounded-xl blur-md animate-pulse" />
+                     
+                     {/* Main Card Container */}
+                     <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-primary/60 backdrop-blur-sm p-6 text-center overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                          }}>
+                       
+                       {/* Circuit Pattern */}
+                       <div className="absolute inset-0 opacity-10">
+                         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[16px_16px] animate-grid-move-slow" />
                        </div>
-                       <div className="text-xl font-bold text-blue-400 mb-1">
-                         {totalGames} Games
+                       
+                       {/* Header */}
+                       <div className="relative flex items-center justify-center gap-3 mb-4">
+                         <Globe className="w-6 h-6 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]" />
+                         <span className="text-lg font-bold text-primary font-mono tracking-wider">PLAYER DATA</span>
                        </div>
-                       <div className="text-sm text-muted-foreground">
-                         {winRate.toFixed(1)}% Win Rate
+                       
+                       {/* Game Stats */}
+                       <div className="space-y-2">
+                         <div className="text-3xl font-bold text-primary drop-shadow-[0_0_10px_rgba(99,102,241,0.8)] font-mono">
+                           {totalGames}
+                         </div>
+                         <div className="text-sm text-primary/80 font-mono tracking-wider">GAMES PLAYED</div>
+                         
+                         <div className="text-xl font-bold text-accent drop-shadow-[0_0_8px_rgba(168,85,247,0.8)] font-mono mt-2">
+                           {winRate.toFixed(1)}%
+                         </div>
+                         <div className="text-sm text-accent/80 font-mono tracking-wider">WIN RATE</div>
                        </div>
-                     </CardContent>
-                   </Card>
+                       
+                       {/* Tech Corner Indicators */}
+                       <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-primary/80" />
+                       <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-accent/80" />
+                       <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-accent/80" />
+                       <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-primary/80" />
+                     </div>
+                   </div>
                  )}
               </div>
             </div>
 
-            {/* Enhanced Tabs */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4 glass bg-background/50 p-1">
-                <TabsTrigger value="overview" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="games" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <Gamepad2 className="w-4 h-4 mr-2" />
-                  Games
-                </TabsTrigger>
-                <TabsTrigger value="achievements" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
-                  <Award className="w-4 h-4 mr-2" />
-                  Achievements
-                  {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                    <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                      {notificationClaimable.length}
-                    </div>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="stats" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                  <TrendingUp className="w-4 h-4 mr-2" />
-                  Statistics
-                </TabsTrigger>
-              </TabsList>
+            {/* Cyberpunk Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+              <div className="relative overflow-hidden group">
+                {/* Background */}
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/80 rounded-xl" />
+                
+                {/* Circuit Pattern */}
+                <div className="absolute inset-0 opacity-[0.08]">
+                  <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
+                </div>
+                
+                {/* Border Glow */}
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-sm" />
+                
+                <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl">
+                  <TabsTrigger 
+                    value="overview" 
+                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary/60 data-[state=active]:border-primary/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    {/* Scan line effect for active state */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    <BarChart3 className="w-4 h-4 mr-2 drop-shadow-sm" />
+                    <span className="font-mono tracking-wide">OVERVIEW</span>
+                  </TabsTrigger>
+                  
+                  <TabsTrigger 
+                    value="games" 
+                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent/80 data-[state=active]:to-accent/60 data-[state=active]:border-accent/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    <Gamepad2 className="w-4 h-4 mr-2 drop-shadow-sm" />
+                    <span className="font-mono tracking-wide">GAMES</span>
+                  </TabsTrigger>
+                  
+                  <TabsTrigger 
+                    value="achievements" 
+                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600/80 data-[state=active]:to-orange-600/60 data-[state=active]:border-yellow-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    <Award className="w-4 h-4 mr-2 drop-shadow-sm" />
+                    <span className="font-mono tracking-wide">ACHIEVEMENTS</span>
+                    
+                    {/* Enhanced Notification Badge */}
+                    {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
+                      <div className="absolute -top-2 -right-2 group/badge">
+                        <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
+                        <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                          <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
+                            {notificationClaimable.length}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </TabsTrigger>
+                  
+                  <TabsTrigger 
+                    value="stats" 
+                    className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600/80 data-[state=active]:to-teal-600/60 data-[state=active]:border-emerald-500/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
+                    style={{
+                      clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    <TrendingUp className="w-4 h-4 mr-2 drop-shadow-sm" />
+                    <span className="font-mono tracking-wide">STATISTICS</span>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               {/* Overview Tab */}
               <TabsContent value="overview" className="space-y-6">
