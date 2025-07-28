@@ -177,14 +177,14 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
             tower: { wins: levelStats?.tower_wins || 0, losses: Math.max(0, (levelStats?.tower_games || 0) - (levelStats?.tower_wins || 0)), profit: levelStats?.tower_profit || 0 }
           };
 
-          // Build user data object
+          // Build user data object (use profile XP data which has 3-decimal precision)
           const fetchedUser: UserProfileType = {
             id: profile.id,
             username: profile.username,
             balance: profile.balance,
-            current_level: levelStats?.current_level || 1,
-            current_xp: levelStats?.current_level_xp || 0,
-            xp_to_next_level: levelStats?.xp_to_next_level || 100,
+            current_level: profile.current_level || 1,
+            current_xp: profile.current_xp || 0, // Use profiles.current_xp (3 decimals)
+            xp_to_next_level: profile.xp_to_next_level || 100,
             registration_date: profile.created_at,
             gameStats,
             badges: [] // You might want to fetch this from a badges table
@@ -233,10 +233,14 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
         requestAnimationFrame(animate);
       };
 
-      animateValue(0, stats.current_level, 800, (val) => 
+      // Use the correct XP source (prioritize stats for own profile, userData for others)
+      const currentLevel = stats?.current_level || userData.current_level;
+      const currentXP = stats?.current_level_xp || userData.current_xp;
+
+      animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
       );
-      animateValue(0, stats.current_level_xp, 1000, (val) => 
+      animateValue(0, currentXP, 1000, (val) => 
         setAnimatedStats(prev => ({ ...prev, xp: val }))
       );
       animateValue(0, userData.balance, 1200, (val) => 
