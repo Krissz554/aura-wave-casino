@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -70,6 +70,12 @@ export default function Index({ initialGame }: IndexProps) {
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [profileModalLoading, setProfileModalLoading] = useState(false);
   const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
+  
+  // XP Animation states
+  const [animatedXP, setAnimatedXP] = useState(0);
+  const [animatedProgress, setAnimatedProgress] = useState(0);
+  const [xpIncreaseAnimation, setXpIncreaseAnimation] = useState(false);
+  const previousXP = useRef(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -474,6 +480,58 @@ export default function Index({ initialGame }: IndexProps) {
 
   const getXpForNextLevel = (level: number) => level * 100;
   const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
+
+  // Smooth XP animation function
+  const animateToValue = useCallback((start: number, end: number, duration: number, callback: (value: number) => void) => {
+    const startTime = performance.now();
+    const difference = end - start;
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
+      const currentValue = start + (difference * easeOutCubic);
+      
+      callback(currentValue);
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+  }, []);
+
+  // Handle XP changes with animations
+  useEffect(() => {
+    if (levelStats) {
+      const currentXP = levelStats.current_level_xp;
+      const currentProgress = xpProgress;
+      
+      // Check if XP increased
+      if (currentXP > previousXP.current && previousXP.current > 0) {
+        // Trigger increase animation
+        setXpIncreaseAnimation(true);
+        
+        // Animate XP number
+        animateToValue(animatedXP, currentXP, 1500, setAnimatedXP);
+        
+        // Animate progress bar
+        animateToValue(animatedProgress, currentProgress, 1500, setAnimatedProgress);
+        
+        // Reset animation state after delay
+        setTimeout(() => setXpIncreaseAnimation(false), 2000);
+      } else {
+        // Set initial values or instant update
+        setAnimatedXP(currentXP);
+        setAnimatedProgress(currentProgress);
+      }
+      
+      previousXP.current = currentXP;
+    }
+  }, [levelStats, xpProgress, animateToValue, animatedXP, animatedProgress]);
 
   if (authLoading) {
     return (
@@ -1304,7 +1362,9 @@ export default function Index({ initialGame }: IndexProps) {
                               {levelStats && (
                                 <>
                                   <span className="text-slate-500">•</span>
-                                  <span className="text-slate-400 font-mono">{formatXP(levelStats.current_level_xp)} XP</span>
+                                  <span className={`text-slate-400 font-mono transition-all duration-300 ${xpIncreaseAnimation ? 'text-green-400 scale-105 drop-shadow-[0_0_4px_rgba(34,197,94,0.6)]' : ''}`}>
+                                    {formatXP(animatedXP)} XP
+                                  </span>
                                 </>
                               )}
                             </div>
@@ -1441,36 +1501,55 @@ export default function Index({ initialGame }: IndexProps) {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
-                      <span className="text-accent">{formatXP(levelStats.current_level_xp)}</span>
+                      <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
+                        {formatXP(animatedXP)}
+                      </span>
                       <span className="text-slate-500">/</span>
                       <span className="text-primary">{formatXP(levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
                       <span className="text-slate-400">XP</span>
+                      {xpIncreaseAnimation && (
+                        <span className="text-green-400 animate-bounce text-xs">+</span>
+                      )}
                     </div>
                   </div>
                   
-                  {/* Enhanced Progress Bar */}
-                  <div className="relative">
+                  {/* Enhanced Live Progress Bar */}
+                  <div className={`relative transition-all duration-300 ${xpIncreaseAnimation ? 'scale-[1.02]' : ''}`}>
                     {/* Background track */}
-                    <div className="h-2 bg-slate-800/80 rounded-full border border-slate-700/50 overflow-hidden">
+                    <div className={`h-2 bg-slate-800/80 rounded-full border overflow-hidden transition-all duration-300 ${xpIncreaseAnimation ? 'border-green-400/50 shadow-[0_0_8px_rgba(34,197,94,0.3)]' : 'border-slate-700/50'}`}>
                       {/* Animated background pattern */}
                       <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_40%,rgba(99,102,241,0.1)_50%,transparent_60%)] bg-[length:30px_100%] animate-grid-move-slow" />
                       
-                      {/* Progress fill */}
+                      {/* Live Progress fill */}
                       <div 
-                        className="h-full bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] animate-cyber-logo-shine rounded-full transition-all duration-1000 relative overflow-hidden"
-                        style={{ width: `${xpProgress}%` }}
+                        className={`h-full rounded-full relative overflow-hidden transition-all duration-1000 ${xpIncreaseAnimation ? 'bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-gradient-to-r from-primary via-accent to-primary'} bg-[length:200%_100%] animate-cyber-logo-shine`}
+                        style={{ width: `${animatedProgress}%` }}
                       >
-                        {/* Glow effect */}
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shine" />
+                        {/* Enhanced glow effect */}
+                        <div className={`absolute inset-0 bg-gradient-to-r from-transparent to-transparent animate-shine ${xpIncreaseAnimation ? 'via-white/40' : 'via-white/20'}`} />
+                        
+                        {/* XP increase pulse effect */}
+                        {xpIncreaseAnimation && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-green-400/30 via-emerald-400/50 to-green-400/30 animate-pulse" />
+                        )}
                       </div>
                     </div>
                     
-                    {/* Progress percentage */}
+                    {/* Live Progress percentage */}
                     <div className="absolute right-1 top-1/2 -translate-y-1/2">
-                      <span className="text-[10px] font-bold text-white drop-shadow-lg">
-                        {Math.round(xpProgress)}%
+                      <span className={`text-[10px] font-bold drop-shadow-lg transition-all duration-300 ${xpIncreaseAnimation ? 'text-green-300 scale-110' : 'text-white'}`}>
+                        {Math.round(animatedProgress)}%
                       </span>
                     </div>
+                    
+                    {/* XP gain indicator */}
+                    {xpIncreaseAnimation && (
+                      <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 animate-float">
+                        <span className="text-xs text-green-400 font-bold bg-green-900/20 px-2 py-1 rounded border border-green-400/30 backdrop-blur-sm">
+                          +XP
+                        </span>
+                      </div>
+                    )}
                   </div>
                   
                   {/* Tech corners */}
