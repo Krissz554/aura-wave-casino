@@ -892,27 +892,8 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         variant: "success",
       });
 
-      // DIRECT XP TRACKING - Add XP immediately since roulette doesn't use game_history trigger
-      console.log('🎯 BET CONFIRMED: Adding XP directly for $' + betAmount + ' roulette bet');
-      
-      try {
-        // Calculate and add XP directly (10% of wager)
-        const xpToAdd = Number(betAmount) * 0.1;
-        console.log(`💎 ROULETTE XP: Adding ${xpToAdd} XP for $${betAmount} bet`);
-        
-        const { data: xpData, error: xpError } = await supabase.rpc('add_xp_and_check_levelup', {
-          user_uuid: userData.id,
-          xp_amount: xpToAdd
-        });
-        
-        if (xpError) {
-          console.error('❌ ROULETTE XP ERROR:', xpError);
-        } else {
-          console.log('✅ ROULETTE XP SUCCESS:', xpData);
-        }
-      } catch (error) {
-        console.error('❌ ROULETTE XP EXCEPTION:', error);
-      }
+      // XP TRACKING - Now handled automatically by total_wagered trigger
+      console.log('🎯 BET CONFIRMED: XP will be awarded automatically via total_wagered trigger for $' + betAmount + ' bet');
       
       // Force refresh XP data after successful bet - IMMEDIATE + FOLLOW-UP
       console.log('🔄 ROULETTE: Forcing IMMEDIATE XP refresh after $' + betAmount + ' bet');
