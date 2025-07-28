@@ -480,6 +480,8 @@ export default function Index({ initialGame }: IndexProps) {
 
   const { levelStats } = useLevelSync();
 
+
+
   // Calculate XP progress using current_level_xp for progress bar
   const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
   

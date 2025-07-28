@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtimeFeeds } from '@/hooks/useRealtimeFeeds';
 import { useMaintenance } from '@/contexts/MaintenanceContext';
+import { useLevelSync } from '@/contexts/LevelSyncContext';
 import { RouletteReel } from './RouletteReel';
 import { ProvablyFairModal } from './ProvablyFairModal';
 import { ProvablyFairHistoryModal } from './ProvablyFairHistoryModal';
@@ -75,6 +76,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
   const { toast } = useToast();
   const { liveBetFeed, isConnected } = useRealtimeFeeds();
   const { isMaintenanceMode } = useMaintenance();
+  const { forceRefresh } = useLevelSync();
 
   // Game state
   const [currentRound, setCurrentRound] = useState<RouletteRound | null>(null);
@@ -887,6 +889,12 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         description: `$${betAmount} • ${color.toUpperCase()}`,
         variant: "success",
       });
+
+      // Force refresh XP data after successful bet
+      console.log('🎯 BET CONFIRMED: Forcing XP refresh after $' + betAmount + ' bet');
+      setTimeout(() => {
+        forceRefresh().catch(console.error);
+      }, 500); // Small delay to allow backend processing
 
       // Update local user bets immediately
       setUserBets(prev => {

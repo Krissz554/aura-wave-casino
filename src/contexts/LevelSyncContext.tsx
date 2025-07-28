@@ -14,6 +14,7 @@ interface LevelSyncContextType {
   levelStats: LevelStats | null;
   loading: boolean;
   refreshStats: () => void;
+  forceRefresh: () => Promise<void>;
 }
 
 const LevelSyncContext = createContext<LevelSyncContextType | undefined>(undefined);
@@ -131,8 +132,15 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     };
   }, [user]);
 
+  // Force refresh function for immediate updates
+  const forceRefresh = async () => {
+    console.log('📊 FORCE REFRESH: Manually refreshing XP data');
+    setLoading(true);
+    await fetchStats();
+  };
+
   return (
-    <LevelSyncContext.Provider value={{ levelStats, loading, refreshStats: fetchStats }}>
+    <LevelSyncContext.Provider value={{ levelStats, loading, refreshStats: fetchStats, forceRefresh }}>
       {children}
     </LevelSyncContext.Provider>
   );
