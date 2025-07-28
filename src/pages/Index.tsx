@@ -416,22 +416,17 @@ export default function Index({ initialGame }: IndexProps) {
   };
 
   const confirmLogout = async () => {
-    console.log('🔴 confirmLogout called'); // Debug log
     try {
       setLogoutLoading(true);
-      console.log('🔄 Setting logout loading to true'); // Debug log
       
       // Call the signOut function from AuthContext
-      console.log('🚪 Calling signOut function'); // Debug log
       await signOut();
-      console.log('✅ signOut completed successfully'); // Debug log
       
       // Give a small delay to ensure state updates propagate
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       // Close the confirmation dialog
       setShowLogoutConfirmation(false);
-      console.log('🔐 Logout confirmation dialog closed'); // Debug log
       
       // Show success toast
       toast({
@@ -441,15 +436,19 @@ export default function Index({ initialGame }: IndexProps) {
       });
       
     } catch (error) {
-      console.error('❌ Error signing out:', error);
+      console.error('Error signing out:', error);
+      
+      // Even if there's an error, try to clear local state and close dialog
+      setShowLogoutConfirmation(false);
+      
+      // Show a warning instead of error since logout might have worked partially
       toast({
-        title: "LOGOUT ERROR",
-        description: "Failed to terminate session",
-        variant: "destructive",
+        title: "LOGOUT WARNING",
+        description: "Session ended but cleanup may be incomplete",
+        variant: "warning",
       });
     } finally {
       setLogoutLoading(false);
-      console.log('🔄 Setting logout loading to false'); // Debug log
     }
   };
 

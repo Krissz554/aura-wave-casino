@@ -113,8 +113,47 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
+    try {
+      // Try to sign out from Supabase
+      const { error } = await supabase.auth.signOut()
+      
+      // Handle different types of errors
+      if (error) {
+        // These errors are generally safe to ignore
+        const safeErrors = [
+          'The user session was not found',
+          'session_not_found',
+          'no_session_found',
+          'User not logged in'
+        ]
+        
+        const isSafeError = safeErrors.some(safeError => 
+          error.message?.toLowerCase().includes(safeError.toLowerCase())
+        )
+        
+        if (!isSafeError) {
+          console.warn('SignOut warning:', error.message)
+        }
+      }
+      
+    } catch (networkError) {
+      // Network errors or other issues - we still want to clear local state
+      console.warn('Network error during signOut:', networkError)
+    }
+    
+    // Always clear local state regardless of Supabase response
+    // The auth state listener will also handle cleanup when Supabase state changes
+    setUser(null)
+    setSession(null)
+    
+    // Clear any stored tokens from localStorage as a backup
+    try {
+      localStorage.removeItem('supabase.auth.token')
+      localStorage.removeItem('sb-' + supabase.supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
+    } catch (storageError) {
+      // Ignore localStorage errors
+      console.warn('Could not clear localStorage:', storageError)
+    }
   }
 
   const value = {
