@@ -457,7 +457,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                     
                     {currentLevel >= 50 && (
                       <div className="relative group/vip">
-                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/40 to-orange-500/40 rounded-lg blur-sm animate-pulse" />
+                        <div className="absolute -inset-1 bg-gradient-to-r from-yellow-500/40 to-orange-500/40 blur-sm animate-pulse"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
+                             }} />
                         <div className="relative px-3 py-2 bg-gradient-to-r from-yellow-900/80 to-orange-900/80 border border-yellow-500/50 backdrop-blur-sm"
                              style={{
                                clipPath: 'polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px))'
@@ -492,7 +495,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                     <div className="flex items-center justify-center md:justify-start gap-6">
                       {/* Level Display */}
                       <div className="relative group/level">
-                        <div className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-primary/50 rounded-lg blur-sm animate-pulse" />
+                        <div className="absolute -inset-2 bg-gradient-to-r from-primary/30 to-primary/50 blur-sm animate-pulse"
+                             style={{
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }} />
                         <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-primary/60 backdrop-blur-sm"
                              style={{
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
@@ -510,7 +516,11 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       
                       {/* Current XP Display */}
                       <div className="relative group/xp">
-                        <div className="absolute -inset-2 bg-gradient-to-r from-accent/30 to-accent/50 rounded-lg blur-sm animate-pulse" style={{ animationDelay: '0.5s' }} />
+                        <div className="absolute -inset-2 bg-gradient-to-r from-accent/30 to-accent/50 blur-sm animate-pulse"
+                             style={{ 
+                               animationDelay: '0.5s',
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }} />
                         <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-accent/60 backdrop-blur-sm"
                              style={{
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
@@ -528,7 +538,11 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       
                       {/* XP to Next Display */}
                       <div className="relative group/next">
-                        <div className="absolute -inset-2 bg-gradient-to-r from-green-500/30 to-emerald-500/50 rounded-lg blur-sm animate-pulse" style={{ animationDelay: '1s' }} />
+                        <div className="absolute -inset-2 bg-gradient-to-r from-green-500/30 to-emerald-500/50 blur-sm animate-pulse"
+                             style={{ 
+                               animationDelay: '1s',
+                               clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                             }} />
                         <div className="relative text-center px-4 py-3 bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-green-500/60 backdrop-blur-sm"
                              style={{
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
@@ -591,7 +605,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                  {(isOwnProfile || shouldShowOwnProfile) && (
                    <div className="relative group/balance">
                      {/* Outer Glow */}
-                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/40 to-emerald-500/60 rounded-xl blur-md animate-pulse" />
+                     <div className="absolute -inset-2 bg-gradient-to-r from-green-500/40 to-emerald-500/60 blur-md animate-pulse"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                          }} />
                      
                      {/* Main Card Container */}
                      <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-green-500/60 backdrop-blur-sm p-6 text-center overflow-hidden"
@@ -642,7 +659,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                  {!isOwnProfile && !shouldShowOwnProfile && (
                    <div className="relative group/playerinfo">
                      {/* Outer Glow */}
-                     <div className="absolute -inset-2 bg-gradient-to-r from-primary/40 to-accent/60 rounded-xl blur-md animate-pulse" />
+                     <div className="absolute -inset-2 bg-gradient-to-r from-primary/40 to-accent/60 blur-md animate-pulse"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                          }} />
                      
                      {/* Main Card Container */}
                      <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border border-primary/60 backdrop-blur-sm p-6 text-center overflow-hidden"
@@ -696,8 +716,11 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                   <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.4)_25%,rgba(99,102,241,0.4)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.4)_75%,rgba(99,102,241,0.4)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move-slow" />
                 </div>
                 
-                {/* Border Glow */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-sm" />
+                                 {/* Border Glow */}
+                 <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 blur-sm"
+                      style={{
+                        clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
+                      }} />
                 
                 <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl">
                   <TabsTrigger 
@@ -745,9 +768,9 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                      <Award className="w-4 h-4 mr-2 drop-shadow-sm" />
                      <span className="font-mono tracking-wide">ACHIEVEMENTS</span>
                     
-                                         {/* Enhanced Notification Badge */}
-                     {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                       <div className="absolute -top-2 -right-2 group/badge z-50">
+                                                                                   {/* Enhanced Notification Badge */}
+                      {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
+                        <div className="absolute -top-2 -right-2 group/badge z-[9999]">
                          <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
                          <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                            <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
