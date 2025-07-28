@@ -1364,13 +1364,13 @@ export default function Index({ initialGame }: IndexProps) {
                   <Button
                     onClick={() => handleGameChange('coinflip')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
                       currentGame === 'coinflip' 
                         ? 'border-blue-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]' 
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300 rounded-md" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1414,13 +1414,13 @@ export default function Index({ initialGame }: IndexProps) {
                   <Button
                     onClick={() => handleGameChange('roulette')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
                       currentGame === 'roulette' 
                         ? 'border-red-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300 rounded-md" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1464,13 +1464,13 @@ export default function Index({ initialGame }: IndexProps) {
                   <Button
                     onClick={() => handleGameChange('tower')}
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border overflow-hidden ${
                       currentGame === 'tower' 
                         ? 'border-emerald-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300 rounded-md" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
