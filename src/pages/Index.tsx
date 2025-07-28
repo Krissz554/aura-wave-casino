@@ -58,7 +58,6 @@ export default function Index({ initialGame }: IndexProps) {
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
   const [hoveredNotification, setHoveredNotification] = useState<string | null>(null);
   const [newNotificationIds, setNewNotificationIds] = useState<Set<string>>(new Set());
-  const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -285,7 +284,6 @@ export default function Index({ initialGame }: IndexProps) {
         )
         .subscribe((status) => {
           console.log('🔔 Notifications subscription status:', status);
-          setIsConnected(status === 'SUBSCRIBED');
           if (status === 'SUBSCRIBED') {
             console.log('✅ Enhanced notifications subscription active for user:', user.id);
           }
@@ -378,7 +376,7 @@ export default function Index({ initialGame }: IndexProps) {
                         "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
                         "border border-primary/20 rounded-xl transition-all duration-500",
                         "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
-                        isConnected && unreadCount > 0 && "animate-cyber-pulse"
+                        unreadCount > 0 && "animate-cyber-pulse"
                       )}
                     >
                       {/* Animated background grid */}
@@ -390,11 +388,7 @@ export default function Index({ initialGame }: IndexProps) {
                       <div className="relative z-10 flex items-center gap-2">
                         <div className="relative">
                           {unreadCount > 0 ? (
-                            <BellDot className={cn(
-                              "w-5 h-5 transition-all duration-300",
-                              "text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]",
-                              isConnected && "animate-cyber-glow"
-                            )} />
+                            <BellDot className="w-5 h-5 transition-all duration-300 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-cyber-glow" />
                           ) : (
                             <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-all duration-300" />
                           )}
@@ -411,18 +405,7 @@ export default function Index({ initialGame }: IndexProps) {
                           )}
                         </div>
                         
-                        {/* Connection status indicator */}
-                        <div className="flex flex-col items-center gap-1">
-                          <div className={cn(
-                            "w-2 h-2 rounded-full border transition-all duration-300",
-                            isConnected 
-                              ? "bg-green-400 border-green-300 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-cyber-pulse" 
-                              : "bg-red-400 border-red-300 animate-pulse"
-                          )} />
-                          <div className="text-[8px] text-slate-400 font-mono">
-                            {isConnected ? 'LIVE' : 'SYNC'}
-                          </div>
-                        </div>
+
                       </div>
                     </Button>
                   </DialogTrigger>
@@ -500,17 +483,13 @@ export default function Index({ initialGame }: IndexProps) {
                                 <div className={cn(
                                   "w-16 h-16 rounded-2xl flex items-center justify-center relative overflow-hidden",
                                   "bg-gradient-to-br from-slate-800/80 to-slate-900/80",
-                                  "border-2 border-primary/30 backdrop-blur-sm",
-                                  isConnected ? "animate-cyber-container" : "opacity-60"
+                                  "border-2 border-primary/30 backdrop-blur-sm animate-cyber-container"
                                 )}>
                                   {/* Inner circuit pattern */}
                                   <div className="absolute inset-2 border border-primary/20 rounded-lg" />
                                   <div className="absolute inset-4 border border-accent/15 rounded-md" />
                                   
-                                  <Bell className={cn(
-                                    "w-8 h-8 relative z-10 transition-all duration-300",
-                                    isConnected ? "text-primary drop-shadow-[0_0_12px_rgba(99,102,241,0.8)]" : "text-slate-500"
-                                  )} />
+                                  <Bell className="w-8 h-8 relative z-10 transition-all duration-300 text-primary drop-shadow-[0_0_12px_rgba(99,102,241,0.8)]" />
                                   
                                   {/* Notification count overlay */}
                                   {unreadCount > 0 && (
@@ -524,18 +503,7 @@ export default function Index({ initialGame }: IndexProps) {
                                   )}
                                 </div>
                                 
-                                {/* Connection status */}
-                                <div className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2 py-1 bg-slate-900/90 rounded-full border border-primary/20">
-                                  <div className={cn(
-                                    "w-2 h-2 rounded-full transition-all duration-300",
-                                    isConnected 
-                                      ? "bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-cyber-pulse" 
-                                      : "bg-red-400 animate-pulse"
-                                  )} />
-                                  <span className="text-[10px] font-mono text-slate-400">
-                                    {isConnected ? 'ONLINE' : 'OFFLINE'}
-                                  </span>
-                                </div>
+
                               </div>
                               
                               {/* Title and status */}
@@ -545,16 +513,7 @@ export default function Index({ initialGame }: IndexProps) {
                                     NOTIFICATION CENTER
                                   </span>
                                 </h2>
-                                <div className="flex items-center gap-4 text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-slate-400 font-mono">STATUS:</span>
-                                    <span className={cn(
-                                      "font-bold",
-                                      isConnected ? "text-green-400" : "text-red-400"
-                                    )}>
-                                      {isConnected ? 'LIVE SYNC ACTIVE' : 'RECONNECTING...'}
-                                    </span>
-                                  </div>
+                                <div className="flex items-center gap-6 text-sm">
                                   <div className="flex items-center gap-2">
                                     <span className="text-slate-400 font-mono">TOTAL:</span>
                                     <span className="text-primary font-bold">{notifications.length}</span>
@@ -616,7 +575,7 @@ export default function Index({ initialGame }: IndexProps) {
                                     </h3>
                                     <p className="text-slate-400 text-lg">No active notifications detected</p>
                                     <p className="text-slate-500 text-sm font-mono">
-                                      Real-time monitoring active • Awaiting new signals
+                                      System monitoring active • Awaiting new signals
                                     </p>
                                   </div>
                                 </div>
@@ -686,11 +645,7 @@ export default function Index({ initialGame }: IndexProps) {
                                             {theme.emoji}
                                           </div>
                                           
-                                          {/* Status indicator */}
-                                          <div className={cn(
-                                            "absolute -bottom-1 -left-1 w-3 h-3 rounded-full border-2 border-slate-900",
-                                            notification.is_read ? "bg-slate-500" : "bg-green-400 animate-cyber-pulse"
-                                          )} />
+
                                         </div>
                                         
                                         {/* Content */}
