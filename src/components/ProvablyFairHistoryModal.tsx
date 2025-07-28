@@ -565,34 +565,33 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
               )}
             </div>
 
-                    {/* Cyberpunk Footer */}
-                    <div className="flex items-center justify-between pt-6 mt-6 border-t border-indigo-500/20">
-                      <Link 
-                        to="/provably-fair" 
-                        className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-400 transition-colors font-mono tracking-wider"
-                        onClick={() => onClose()}
-                      >
-                        <div className="relative">
-                          <HelpCircle className="w-4 h-4" />
-                          <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
-                        </div>
-                        SYSTEM_DOCUMENTATION
-                      </Link>
-                      
-                      <Button 
-                        onClick={onClose} 
-                        className="relative bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-red-600/80 hover:via-red-500/80 hover:to-red-600/80 border border-slate-400/30 hover:border-red-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25 clip-path-[polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))] font-mono tracking-wider"
-                      >
-                        <X className="w-4 h-4 mr-2" />
-                        TERMINATE
-                      </Button>
-                    </div>
-                  </div>
+            {/* Cyberpunk Footer */}
+            <div className="flex items-center justify-between pt-6 mt-6 border-t border-indigo-500/20">
+              <Link 
+                to="/provably-fair" 
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-400 transition-colors font-mono tracking-wider"
+                onClick={() => onClose()}
+              >
+                <div className="relative">
+                  <HelpCircle className="w-4 h-4" />
+                  <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
                 </div>
-              </div>
+                SYSTEM_DOCUMENTATION
+              </Link>
+              
+              <Button 
+                onClick={onClose} 
+                className="relative bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-red-600/80 hover:via-red-500/80 hover:to-red-600/80 border border-slate-400/30 hover:border-red-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25 clip-path-[polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))] font-mono tracking-wider"
+              >
+                <X className="w-4 h-4 mr-2" />
+                TERMINATE
+              </Button>
             </div>
-          </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      </div>
+    </DialogContent>
+  </Dialog>
 
       {/* Round Details Modal */}
       <ProvablyFairModal
