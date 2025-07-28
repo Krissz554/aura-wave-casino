@@ -89,17 +89,17 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
     isSpinning: false
   });
 
-  // 🎨 Get tile styling based on color
+  // 🎨 Get cyberpunk tile styling based on color (EXACT SAME DIMENSIONS)
   const getTileStyle = (color: string): string => {
     switch (color) {
       case 'green': 
-        return 'bg-gradient-to-br from-emerald-500 to-emerald-600 border-emerald-400 text-white shadow-lg';
+        return 'bg-gradient-to-br from-emerald-900/90 via-emerald-800/70 to-emerald-900/90 border-emerald-500/70 text-emerald-100 shadow-lg hover:border-emerald-400';
       case 'red': 
-        return 'bg-gradient-to-br from-red-500 to-red-600 border-red-400 text-white shadow-lg';
+        return 'bg-gradient-to-br from-red-900/90 via-red-800/70 to-red-900/90 border-red-500/70 text-red-100 shadow-lg hover:border-red-400';
       case 'black': 
-        return 'bg-gradient-to-br from-gray-700 to-gray-800 border-gray-500 text-white shadow-lg';
+        return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg hover:border-slate-400';
       default: 
-        return 'bg-gray-500 border-gray-400 text-white';
+        return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg';
     }
   };
 
@@ -434,24 +434,58 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
             return (
               <div
                 key={tile.id}
-                className={`
-                  flex-shrink-0 flex items-center justify-center text-xl font-bold border-2 
-                  transition-all duration-200 relative select-none
-                  ${getTileStyle(tile.color)}
-                  ${isUnderMarker ? 'border-white border-opacity-90 z-20' : 'border-opacity-60 z-10'}
-                  ${isWinningTile ? 'ring-4 ring-yellow-400 ring-opacity-80 scale-105' : ''}
-                `}
+                className="flex-shrink-0 relative overflow-hidden group/tile transition-all duration-200 select-none"
                 style={{ 
                   width: `${TILE_SIZE_PX}px`,
-                  height: `${TILE_SIZE_PX}px`
+                  height: `${TILE_SIZE_PX}px`,
+                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                 }}
               >
-                {tile.slot}
+                {/* Holographic Scan Lines */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className={`absolute inset-0 transition-transform duration-500 ease-out ${
+                    tile.color === 'red' ? 'bg-gradient-to-r from-transparent via-red-400/20 to-transparent' :
+                    tile.color === 'green' ? 'bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent' :
+                    'bg-gradient-to-r from-transparent via-slate-400/20 to-transparent'
+                  } translate-x-[-100%] group-hover/tile:translate-x-[100%]`}></div>
+                </div>
                 
-                {/* Winning effect overlay */}
-                {isWinningTile && (
-                  <div className="absolute inset-0 bg-yellow-400 bg-opacity-25 animate-pulse rounded-sm" />
-                )}
+                {/* Main Tile */}
+                <div
+                  className={`
+                    w-full h-full flex items-center justify-center text-xl font-bold border-2 
+                    transition-all duration-200 relative
+                    ${getTileStyle(tile.color)}
+                    ${isUnderMarker ? 'border-white border-opacity-90 z-20' : 'border-opacity-60 z-10'}
+                    ${isWinningTile ? 'ring-4 ring-yellow-400 ring-opacity-80 scale-105' : ''}
+                  `}
+                >
+                  {/* Inner Glow Effect */}
+                  <div className={`absolute inset-0 opacity-0 group-hover/tile:opacity-100 transition-opacity duration-300 ${
+                    tile.color === 'red' ? 'bg-gradient-to-r from-red-500/15 via-red-400/25 to-red-500/15' :
+                    tile.color === 'green' ? 'bg-gradient-to-r from-emerald-500/15 via-emerald-400/25 to-emerald-500/15' :
+                    'bg-gradient-to-r from-slate-500/15 via-slate-400/25 to-slate-500/15'
+                  }`}></div>
+                  
+                  {/* Tech Corner Indicators */}
+                  <div className={`absolute top-0 right-0 w-1 h-1 animate-pulse ${
+                    tile.color === 'red' ? 'bg-red-500/60' :
+                    tile.color === 'green' ? 'bg-emerald-500/60' :
+                    'bg-slate-500/60'
+                  }`}></div>
+                  <div className={`absolute bottom-0 left-0 w-1 h-1 animate-pulse ${
+                    tile.color === 'red' ? 'bg-red-500/60' :
+                    tile.color === 'green' ? 'bg-emerald-500/60' :
+                    'bg-slate-500/60'
+                  }`} style={{ animationDelay: '0.2s' }}></div>
+                  
+                  <span className="relative z-10 font-mono tracking-wider">{tile.slot}</span>
+                  
+                  {/* Winning effect overlay */}
+                  {isWinningTile && (
+                    <div className="absolute inset-0 bg-yellow-400 bg-opacity-25 animate-pulse" />
+                  )}
+                </div>
               </div>
             );
           })}
