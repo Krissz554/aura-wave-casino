@@ -9,6 +9,7 @@ import { useGameHistory } from '@/hooks/useGameHistory';
 import { UserProfile } from '@/hooks/useUserProfile';
 import { useMaintenance } from '@/contexts/MaintenanceContext';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
+import { useXPSync } from '@/contexts/XPSyncContext';
 import { supabase } from '@/integrations/supabase/client';
 import CoinFlipAnimation from './CoinflipStreak/CoinFlipAnimation';
 import StreakTracker from './CoinflipStreak/StreakTracker';
@@ -67,6 +68,7 @@ export default function CoinflipGame({ userData, onUpdateUser }: CoinflipGamePro
   const { toast } = useToast();
   const { isMaintenanceMode } = useMaintenance();
   const { forceRefresh } = useLevelSync();
+  const { forceFullRefresh } = useXPSync();
 
   const handlePlaceBet = async () => {
     if (isMaintenanceMode) {
@@ -177,9 +179,9 @@ export default function CoinflipGame({ userData, onUpdateUser }: CoinflipGamePro
       const won = data.won;
       
       // Force refresh XP data after successful coinflip
-      console.log('🎯 COINFLIP COMPLETED: Forcing XP refresh after $' + gameState.betAmount + ' bet');
+      console.log('🎯 COINFLIP COMPLETED: Forcing comprehensive XP refresh after $' + gameState.betAmount + ' bet');
       setTimeout(() => {
-        forceRefresh().catch(console.error);
+        forceFullRefresh().catch(console.error);
       }, 500);
       
       // Wait for animation to complete

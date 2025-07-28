@@ -12,6 +12,7 @@ import { useGameHistory } from '@/hooks/useGameHistory';
 import { UserProfile } from '@/hooks/useUserProfile';
 import { useMaintenance } from '@/contexts/MaintenanceContext';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
+import { useXPSync } from '@/contexts/XPSyncContext';
 import ClickableUsername from './ClickableUsername';
 
 interface TowerGameProps {
@@ -115,6 +116,7 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
   const { liveBetFeed, isConnected } = useRealtimeFeeds();
   const { addGameRecord } = useGameHistory('tower', 10);
   const { forceRefresh } = useLevelSync();
+  const { forceFullRefresh } = useXPSync();
 
   // Filter tower bets from live feed
   const towerBets = liveBetFeed.filter(bet => bet.game_type === 'tower');
@@ -356,9 +358,9 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
         });
 
         // Force refresh XP data after tower game completion
-        console.log('🎯 TOWER GAME COMPLETED: Forcing XP refresh after $' + game.bet_amount + ' bet');
+        console.log('🎯 TOWER GAME COMPLETED: Forcing comprehensive XP refresh after $' + game.bet_amount + ' bet');
         setTimeout(() => {
-          forceRefresh().catch(console.error);
+          forceFullRefresh().catch(console.error);
         }, 500);
 
         // Get current balance from database for accurate updates
@@ -485,9 +487,9 @@ export const TowerGame = ({ userData, onUpdateUser }: TowerGameProps) => {
       });
 
       // Force refresh XP data after tower cash out
-      console.log('🎯 TOWER CASH OUT: Forcing XP refresh after $' + game.bet_amount + ' bet');
+      console.log('🎯 TOWER CASH OUT: Forcing comprehensive XP refresh after $' + game.bet_amount + ' bet');
       setTimeout(() => {
-        forceRefresh().catch(console.error);
+        forceFullRefresh().catch(console.error);
       }, 500);
 
       // Update user balance

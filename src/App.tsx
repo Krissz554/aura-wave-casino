@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LevelSyncProvider } from "@/contexts/LevelSyncContext";
+import { XPSyncProvider } from "@/contexts/XPSyncContext";
 import { MaintenanceProvider } from "@/contexts/MaintenanceContext";
 import MaintenanceOverlay from "@/components/MaintenanceOverlay";
 import Index from "./pages/Index";
@@ -20,7 +21,8 @@ const App = () => (
     <Sonner />
     <AuthProvider>
       <LevelSyncProvider>
-        <MaintenanceProvider>
+        <XPSyncProvider>
+          <MaintenanceProvider>
           <MaintenanceOverlay />
           <Routes>
             <Route path="/" element={<Index />} />
@@ -32,7 +34,8 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </MaintenanceProvider>
+          </MaintenanceProvider>
+        </XPSyncProvider>
       </LevelSyncProvider>
     </AuthProvider>
   </QueryClientProvider>
