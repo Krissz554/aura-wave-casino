@@ -667,29 +667,11 @@ export default function Index({ initialGame }: IndexProps) {
                           unreadCount > 5 && "group-hover/notifications:border-red-400/30"
                         )} />
                         
-                        {/* Icon with cyberpunk loading state */}
+                        {/* Icon with loading state matching game buttons */}
                         <div className="relative">
                           {notificationLoading ? (
                             <div className="w-5 h-5 flex items-center justify-center relative z-10">
-                              {/* Outer pulse ring */}
-                              <div className="absolute inset-0 w-5 h-5 border border-primary/20 rounded-full animate-ping" />
-                              
-                              {/* Multiple rotating rings */}
-                              <div className="absolute inset-0 w-5 h-5 border-2 border-transparent border-t-primary border-r-primary/50 rounded-full animate-spin" />
-                              <div className="absolute inset-1 w-3 h-3 border border-transparent border-b-accent border-l-accent/50 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
-                              
-                              {/* Central pulsing core */}
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse drop-shadow-[0_0_4px_rgba(99,102,241,0.8)]" />
-                              </div>
-                              
-                              {/* Energy particles */}
-                              <div className="absolute inset-0">
-                                <div className="absolute top-0 left-1/2 w-0.5 h-0.5 bg-accent rounded-full animate-ping" style={{ animationDelay: '0.2s' }} />
-                                <div className="absolute bottom-0 right-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.4s' }} />
-                                <div className="absolute left-0 top-1/2 w-0.5 h-0.5 bg-accent rounded-full animate-ping" style={{ animationDelay: '0.6s' }} />
-                                <div className="absolute right-0 bottom-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.8s' }} />
-                              </div>
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                             </div>
                           ) : unreadCount > 0 ? (
                             <BellDot className={cn(
