@@ -18,7 +18,7 @@ import { useUserLevelStats } from '@/hooks/useUserLevelStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
-import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
+import { formatXP, formatXPProgress, calculateXPProgress, calculateLevelFromTotalXP } from '@/lib/xpUtils';
 
 interface UserProfileProps {
   isOpen: boolean;
@@ -269,11 +269,14 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
   if (!userData) return null;
 
-  const currentLevel = stats?.current_level || userData.current_level;
-  const totalXP = stats?.total_xp || userData.total_xp || 0; // UNIFIED XP - total accumulated
-  const currentLevelXP = stats?.current_level_xp || userData.current_xp; // XP within current level
-  const xpToNext = stats?.xp_to_next_level || userData.xp_to_next_level;
-      const xpProgress = calculateXPProgress(currentLevelXP, xpToNext);
+  // SINGLE XP SYSTEM - calculate everything from total_xp
+  const totalXP = userData.total_xp || 0; // SINGLE SOURCE OF TRUTH
+  const levelInfo = calculateLevelFromTotalXP(totalXP);
+  
+  const currentLevel = levelInfo.currentLevel;
+  const currentLevelXP = levelInfo.currentLevelXP;
+  const xpToNext = levelInfo.xpToNextLevel;
+  const xpProgress = levelInfo.progressPercentage;
 
   const registrationDate = new Date(userData.registration_date).toLocaleDateString('en-US', {
     year: 'numeric',

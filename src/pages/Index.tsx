@@ -28,7 +28,7 @@ import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
 import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
 import { formatDistanceToNow } from 'date-fns';
-import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
+import { formatXP, formatXPProgress, calculateXPProgress, calculateLevelFromTotalXP, animateXPCounter } from '@/lib/xpUtils';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useConnectionMonitor } from '@/hooks/useConnectionMonitor';
@@ -480,8 +480,8 @@ export default function Index({ initialGame }: IndexProps) {
 
   const { levelStats } = useLevelSync();
 
-  const getXpForNextLevel = (level: number) => level * 100;
-  const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
+  // Calculate XP progress from total XP (SINGLE SOURCE)
+  const xpProgress = levelStats ? calculateXPProgress(levelStats.total_xp) : 0;
   
   // Use current values when not animating, animated values when animating
   // Display total XP (unified system) instead of just current level XP

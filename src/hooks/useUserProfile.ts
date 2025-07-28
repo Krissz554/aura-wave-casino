@@ -9,17 +9,17 @@ export interface UserProfile {
   registration_date: string
   balance: number
   level: number
-  total_xp: number // UNIFIED XP - single source of truth (3 decimal precision)
-  current_level: number
+  total_xp: number // SINGLE SOURCE OF TRUTH - all XP calculations based on this
+  current_level: number // Calculated from total_xp
   current_xp: number // XP within current level (calculated from total_xp)
-  xp_to_next_level: number // XP needed for next level (calculated)
+  xp_to_next_level: number // XP needed for next level (calculated from total_xp)
   total_wagered: number
   total_profit: number
   last_claim_time: string
   badges: string[]
-  // Legacy fields for backward compatibility
-  xp?: number // Legacy field - maps to total_xp
-  lifetime_xp?: number // Legacy field - maps to total_xp
+  // Legacy fields for backward compatibility (but not used)
+  xp?: number
+  lifetime_xp?: number
   gameStats: {
     coinflip: { wins: number; losses: number; profit: number }
     crash: { wins: number; losses: number; profit: number }
