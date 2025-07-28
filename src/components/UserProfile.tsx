@@ -296,7 +296,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0 border-0 bg-transparent overflow-hidden">
+      <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0 border-0 bg-transparent overflow-hidden user-profile-scrollbar cyberpunk-scrollbar">
         <div className="relative h-full">
           {/* Multi-layered Cyberpunk Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95 backdrop-blur-xl rounded-2xl" />
@@ -365,7 +365,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
             </Button>
           </div>
 
-          <div className="relative p-8 h-full overflow-y-auto">
+          <div className="relative p-8 h-full overflow-y-auto user-profile-scrollbar cyberpunk-scrollbar">
             {/* Cyberpunk Hero Header */}
             <div className="relative mb-8 overflow-hidden group">
               {/* Multi-layered Background */}
