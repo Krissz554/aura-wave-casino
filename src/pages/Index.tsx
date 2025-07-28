@@ -366,7 +366,7 @@ export default function Index({ initialGame }: IndexProps) {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Enhanced Cyberpunk Notification Button - Only show for authenticated users */}
+              {/* Cyberpunk Notification System - Only show for authenticated users */}
               {user && (
                 <Dialog open={notificationModalOpen} onOpenChange={setNotificationModalOpen}>
                   <DialogTrigger asChild>
@@ -374,257 +374,408 @@ export default function Index({ initialGame }: IndexProps) {
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "relative px-3 py-1 glass rounded-lg transition-all duration-300",
-                        isConnected && unreadCount > 0 && "animate-pulse shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+                        "relative px-3 py-2 overflow-hidden group",
+                        "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
+                        "border border-primary/20 rounded-xl transition-all duration-500",
+                        "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
+                        isConnected && unreadCount > 0 && "animate-cyber-pulse"
                       )}
                     >
-                      {unreadCount > 0 ? (
-                        <BellDot className="w-4 h-4 text-primary" />
-                      ) : (
-                        <Bell className="w-4 h-4" />
-                      )}
-                      {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] animate-bounce">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                      {/* Connection indicator */}
-                      <div className={cn(
-                        "absolute -bottom-1 -right-1 w-2 h-2 rounded-full border border-slate-900 transition-all",
-                        isConnected ? "bg-green-400 animate-pulse" : "bg-red-400"
-                      )} />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="glass border-0 max-w-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl">
-                    {/* Animated background effects */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-60 rounded-lg" />
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-radial from-primary/20 to-transparent blur-3xl animate-pulse" />
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-radial from-accent/20 to-transparent blur-2xl animate-pulse delay-1000" />
-                    
-                    {/* Scanning line effect */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent h-1 animate-pulse-scan rounded-lg" />
-                    
-                    <DialogHeader className="relative z-10 pb-4">
-                      <DialogTitle className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="relative">
-                            <div className={cn(
-                              "w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center",
-                              "border border-primary/30 backdrop-blur-sm transition-all duration-300",
-                              isConnected ? "animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.4)]" : "opacity-60"
-                            )}>
-                              <Bell className="w-6 h-6 text-primary" />
-                              {unreadCount > 0 && (
-                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
-                                  <span className="text-xs font-bold text-white">
-                                    {unreadCount > 9 ? '9+' : unreadCount}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            {/* Connection indicator */}
-                            <div className={cn(
-                              "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-900 transition-all",
-                              isConnected ? "bg-green-400 animate-pulse" : "bg-red-400"
+                      {/* Animated background grid */}
+                      <div className="absolute inset-0 opacity-20">
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[12px_12px] animate-grid-move" />
+                      </div>
+                      
+                      {/* Icon with advanced animations */}
+                      <div className="relative z-10 flex items-center gap-2">
+                        <div className="relative">
+                          {unreadCount > 0 ? (
+                            <BellDot className={cn(
+                              "w-5 h-5 transition-all duration-300",
+                              "text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]",
+                              isConnected && "animate-cyber-glow"
                             )} />
-                          </div>
+                          ) : (
+                            <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-all duration-300" />
+                          )}
                           
-                          <div>
-                            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-                              Notifications
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {isConnected ? '🟢 Live updates active' : '🔴 Connecting...'}
-                            </p>
-                          </div>
-                          
+                          {/* Notification counter with enhanced design */}
                           {unreadCount > 0 && (
-                            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 animate-pulse px-3 py-1 rounded-full text-xs font-bold">
-                              {unreadCount > 99 ? '99+' : unreadCount} new
+                            <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center">
+                              <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-pink-500 to-red-600 rounded-full animate-cyber-pulse" />
+                              <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-400 rounded-full animate-ping opacity-40" />
+                              <span className="relative text-[10px] font-bold text-white z-10">
+                                {unreadCount > 99 ? '99+' : unreadCount}
+                              </span>
                             </div>
                           )}
                         </div>
                         
-                        {unreadCount > 0 && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={markAllNotificationsAsRead}
-                            className="glass border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-                          >
-                            <Check className="w-4 h-4 mr-2" />
-                            Clear all
-                          </Button>
-                        )}
-                      </DialogTitle>
-                    </DialogHeader>
-                    
-                    <ScrollArea className="h-[500px] relative z-10">
-                      {notifications.length === 0 ? (
-                        <div className="text-center py-16 px-6">
-                          <div className="relative mb-6">
-                            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30">
-                              <Bell className="w-10 h-10 text-primary/60" />
-                            </div>
-                            <div className="absolute top-0 right-1/2 transform translate-x-8 -translate-y-2">
-                              <Sparkles className="w-6 h-6 text-accent animate-pulse" />
-                            </div>
-                            <div className="absolute bottom-0 left-1/2 transform -translate-x-8 translate-y-2">
-                              <Zap className="w-4 h-4 text-primary animate-pulse delay-500" />
-                            </div>
+                        {/* Connection status indicator */}
+                        <div className="flex flex-col items-center gap-1">
+                          <div className={cn(
+                            "w-2 h-2 rounded-full border transition-all duration-300",
+                            isConnected 
+                              ? "bg-green-400 border-green-300 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-cyber-pulse" 
+                              : "bg-red-400 border-red-300 animate-pulse"
+                          )} />
+                          <div className="text-[8px] text-slate-400 font-mono">
+                            {isConnected ? 'LIVE' : 'SYNC'}
                           </div>
-                          
-                          <h4 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-3">
-                            All Clear! 🎉
-                          </h4>
-                          <p className="text-muted-foreground text-lg mb-2">No new notifications</p>
-                          <p className="text-sm text-muted-foreground/75">
-                            You're all caught up with the latest updates
-                          </p>
                         </div>
-                      ) : (
-                        <div className="space-y-3 p-4">
-                          {notifications.map((notification) => {
-                            const theme = getNotificationTheme(notification.type);
-                            const isNew = newNotificationIds.has(notification.id);
-                            
-                            return (
-                              <div
-                                key={notification.id}
-                                className={cn(
-                                  "group relative p-4 rounded-2xl border-2 backdrop-blur-md transition-all duration-500 cursor-pointer",
-                                  "bg-gradient-to-br", theme.gradient,
-                                  notification.is_read ? theme.border.replace('/40', '/20') : theme.border,
-                                  !notification.is_read && theme.glow,
-                                  "hover:scale-[1.02] hover:shadow-2xl",
-                                  isNew && "animate-slide-in-cyber ring-2 ring-primary/50 ring-offset-2 ring-offset-slate-900",
-                                  hoveredNotification === notification.id && "scale-[1.02] shadow-2xl"
-                                )}
-                                onMouseEnter={() => setHoveredNotification(notification.id)}
-                                onMouseLeave={() => setHoveredNotification(null)}
-                                onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
-                              >
-                                {/* Cyberpunk corner accents */}
-                                <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary/60 rounded-tl-2xl" />
-                                <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-accent/60 rounded-br-2xl" />
-                                
-                                {/* New notification pulse effect */}
-                                {isNew && (
-                                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl animate-pulse-wave" />
-                                )}
-                                
-                                {/* Shine effect for unread */}
-                                {!notification.is_read && (
-                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 animate-shine" />
-                                )}
-                                
-                                <div className="flex items-start gap-4 relative z-10">
-                                  {/* Enhanced icon with cyberpunk styling */}
-                                  <div className={cn(
-                                    "flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 relative",
-                                    "bg-gradient-to-br", theme.accent, "border border-current/30",
-                                    notification.is_read ? "opacity-60" : "animate-pulse-icon",
-                                    theme.icon
-                                  )}>
-                                    {theme.iconComponent}
-                                    
-                                    {/* Type emoji overlay */}
-                                    <div className="absolute -top-1 -right-1 text-xs">
-                                      {theme.emoji}
-                                    </div>
-                                  </div>
-                                  
-                                  <div className="flex-1 min-w-0 space-y-3">
-                                    <div className="flex items-start justify-between gap-3">
-                                      <h4 className={cn(
-                                        "font-bold text-base leading-tight transition-colors",
-                                        notification.is_read 
-                                          ? "text-muted-foreground" 
-                                          : "text-white bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent"
-                                      )}>
-                                        {notification.title}
-                                      </h4>
-                                      
-                                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                        {!notification.is_read && (
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              markNotificationAsRead(notification.id);
-                                            }}
-                                            className="h-8 w-8 p-0 glass hover:bg-green-500/20 hover:text-green-400 hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
-                                          >
-                                            <Check className="w-4 h-4" />
-                                          </Button>
-                                        )}
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={(e) => {
-                                            e.stopPropagation();
-                                            deleteNotification(notification.id);
-                                          }}
-                                          className="h-8 w-8 p-0 glass hover:bg-red-500/20 hover:text-red-400 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]"
-                                        >
-                                          <X className="w-4 h-4" />
-                                        </Button>
-                                      </div>
-                                    </div>
-                                    
-                                    <p className={cn(
-                                      "text-sm leading-relaxed",
-                                      notification.is_read ? "text-muted-foreground/75" : "text-gray-300"
-                                    )}>
-                                      {notification.message}
-                                    </p>
-                                    
-                                    {/* Enhanced tip message display */}
-                                    {notification.data?.tip_message && (
-                                      <div className="relative p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary/50 backdrop-blur-sm">
-                                        <div className="absolute top-1 right-1 text-primary/40">💬</div>
-                                        <p className="text-sm italic text-primary/90 font-medium pr-6">
-                                          "{notification.data.tip_message}"
-                                        </p>
-                                      </div>
-                                    )}
-                                    
-                                    {/* Enhanced timestamp with cyberpunk styling */}
-                                    <div className="flex items-center gap-2 pt-2">
-                                      <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
-                                      <Clock className="w-3 h-3 text-accent/60" />
-                                      <p className="text-xs text-muted-foreground/75 font-mono">
-                                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                                      </p>
-                                      <div className="flex-1 h-px bg-gradient-to-r from-accent/20 to-transparent" />
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </ScrollArea>
-                    
-                    {/* Floating particles for added effect */}
-                    {unreadCount > 0 && (
-                      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
-                        {[...Array(6)].map((_, i) => (
+                      </div>
+                    </Button>
+                  </DialogTrigger>
+                  
+                  <DialogContent className={cn(
+                    "max-w-4xl w-[95vw] h-[85vh] p-0 border-0 bg-transparent",
+                    "data-[state=open]:animate-cyber-modal-in",
+                    "data-[state=closed]:animate-cyber-modal-out"
+                  )}>
+                    {/* Main cyberpunk container */}
+                    <div className="relative w-full h-full overflow-hidden">
+                      {/* Animated background with multiple layers */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95 backdrop-blur-2xl" />
+                      
+                      {/* Circuit board pattern */}
+                      <div className="absolute inset-0 opacity-[0.15]">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.3)_1px,transparent_0)] bg-[12px_12px] animate-grid-move" />
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[24px_24px]" />
+                      </div>
+                      
+                      {/* Animated corner elements */}
+                      <div className="absolute top-0 left-0 w-32 h-32">
+                        <div className="absolute top-4 left-4 w-6 h-6 border-l-2 border-t-2 border-primary/60 animate-cyber-corner" />
+                        <div className="absolute top-2 left-2 w-3 h-3 border-l border-t border-accent/40 animate-cyber-corner delay-150" />
+                      </div>
+                      <div className="absolute top-0 right-0 w-32 h-32">
+                        <div className="absolute top-4 right-4 w-6 h-6 border-r-2 border-t-2 border-primary/60 animate-cyber-corner" />
+                        <div className="absolute top-2 right-2 w-3 h-3 border-r border-t border-accent/40 animate-cyber-corner delay-150" />
+                      </div>
+                      <div className="absolute bottom-0 left-0 w-32 h-32">
+                        <div className="absolute bottom-4 left-4 w-6 h-6 border-l-2 border-b-2 border-primary/60 animate-cyber-corner" />
+                        <div className="absolute bottom-2 left-2 w-3 h-3 border-l border-b border-accent/40 animate-cyber-corner delay-150" />
+                      </div>
+                      <div className="absolute bottom-0 right-0 w-32 h-32">
+                        <div className="absolute bottom-4 right-4 w-6 h-6 border-r-2 border-b-2 border-primary/60 animate-cyber-corner" />
+                        <div className="absolute bottom-2 right-2 w-3 h-3 border-r border-b border-accent/40 animate-cyber-corner delay-150" />
+                      </div>
+                      
+                      {/* Dynamic energy flows */}
+                      <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-primary/30 to-transparent animate-energy-flow" />
+                        <div className="absolute top-0 right-1/3 w-px h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent animate-energy-flow delay-1000" />
+                        <div className="absolute left-0 top-1/4 w-full h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent animate-energy-flow-horizontal" />
+                        <div className="absolute left-0 bottom-1/3 w-full h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent animate-energy-flow-horizontal delay-1500" />
+                      </div>
+                      
+                      {/* Floating orbs */}
+                      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        {[...Array(8)].map((_, i) => (
                           <div
                             key={i}
-                            className="absolute w-1 h-1 bg-primary/60 rounded-full animate-float-particle"
+                            className={cn(
+                              "absolute w-2 h-2 rounded-full",
+                              i % 2 === 0 ? "bg-primary/30" : "bg-accent/30",
+                              "animate-float-orb"
+                            )}
                             style={{
                               left: `${Math.random() * 100}%`,
                               top: `${Math.random() * 100}%`,
-                              animationDelay: `${Math.random() * 3}s`,
-                              animationDuration: `${4 + Math.random() * 2}s`
+                              animationDelay: `${Math.random() * 5}s`,
+                              animationDuration: `${8 + Math.random() * 4}s`
                             }}
                           />
                         ))}
                       </div>
-                    )}
+                      
+                      {/* Main content area */}
+                      <div className="relative z-10 h-full flex flex-col">
+                        {/* Header section with enhanced design */}
+                        <div className="p-6 border-b border-primary/20 bg-gradient-to-r from-slate-900/40 to-slate-800/40 backdrop-blur-sm">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                              {/* Advanced status indicator */}
+                              <div className="relative">
+                                <div className={cn(
+                                  "w-16 h-16 rounded-2xl flex items-center justify-center relative overflow-hidden",
+                                  "bg-gradient-to-br from-slate-800/80 to-slate-900/80",
+                                  "border-2 border-primary/30 backdrop-blur-sm",
+                                  isConnected ? "animate-cyber-container" : "opacity-60"
+                                )}>
+                                  {/* Inner circuit pattern */}
+                                  <div className="absolute inset-2 border border-primary/20 rounded-lg" />
+                                  <div className="absolute inset-4 border border-accent/15 rounded-md" />
+                                  
+                                  <Bell className={cn(
+                                    "w-8 h-8 relative z-10 transition-all duration-300",
+                                    isConnected ? "text-primary drop-shadow-[0_0_12px_rgba(99,102,241,0.8)]" : "text-slate-500"
+                                  )} />
+                                  
+                                  {/* Notification count overlay */}
+                                  {unreadCount > 0 && (
+                                    <div className="absolute -top-1 -right-1 min-w-[20px] h-[20px] flex items-center justify-center">
+                                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-pink-500 to-red-600 rounded-full animate-cyber-pulse" />
+                                      <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-400 rounded-full animate-ping opacity-40" />
+                                      <span className="relative text-xs font-bold text-white z-10">
+                                        {unreadCount > 99 ? '99+' : unreadCount}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                {/* Connection status */}
+                                <div className="absolute -bottom-2 -right-2 flex items-center gap-1 px-2 py-1 bg-slate-900/90 rounded-full border border-primary/20">
+                                  <div className={cn(
+                                    "w-2 h-2 rounded-full transition-all duration-300",
+                                    isConnected 
+                                      ? "bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)] animate-cyber-pulse" 
+                                      : "bg-red-400 animate-pulse"
+                                  )} />
+                                  <span className="text-[10px] font-mono text-slate-400">
+                                    {isConnected ? 'ONLINE' : 'OFFLINE'}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              {/* Title and status */}
+                              <div className="space-y-2">
+                                <h2 className="text-2xl font-bold">
+                                  <span className="bg-gradient-to-r from-white via-slate-200 to-white bg-clip-text text-transparent">
+                                    NOTIFICATION CENTER
+                                  </span>
+                                </h2>
+                                <div className="flex items-center gap-4 text-sm">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-400 font-mono">STATUS:</span>
+                                    <span className={cn(
+                                      "font-bold",
+                                      isConnected ? "text-green-400" : "text-red-400"
+                                    )}>
+                                      {isConnected ? 'LIVE SYNC ACTIVE' : 'RECONNECTING...'}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-400 font-mono">TOTAL:</span>
+                                    <span className="text-primary font-bold">{notifications.length}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-slate-400 font-mono">UNREAD:</span>
+                                    <span className="text-accent font-bold">{unreadCount}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Action buttons */}
+                            <div className="flex items-center gap-3">
+                              {unreadCount > 0 && (
+                                <Button
+                                  onClick={markAllNotificationsAsRead}
+                                  className={cn(
+                                    "px-6 py-2 bg-gradient-to-r from-primary/20 to-accent/20",
+                                    "border border-primary/30 hover:border-primary/50",
+                                    "text-primary hover:text-white transition-all duration-300",
+                                    "hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]",
+                                    "backdrop-blur-sm hover:bg-gradient-to-r hover:from-primary/30 hover:to-accent/30"
+                                  )}
+                                >
+                                  <Check className="w-4 h-4 mr-2" />
+                                  CLEAR ALL
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Content area */}
+                        <div className="flex-1 overflow-hidden">
+                          <ScrollArea className="h-full">
+                            {notifications.length === 0 ? (
+                              <div className="flex items-center justify-center h-full min-h-[400px]">
+                                <div className="text-center space-y-8 animate-fade-in-up">
+                                  {/* Enhanced empty state */}
+                                  <div className="relative">
+                                    <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border-2 border-primary/20 flex items-center justify-center relative overflow-hidden">
+                                      <div className="absolute inset-4 border border-primary/10 rounded-full" />
+                                      <Bell className="w-16 h-16 text-primary/40" />
+                                      
+                                      {/* Animated decorations */}
+                                      <div className="absolute top-2 right-8">
+                                        <Sparkles className="w-6 h-6 text-accent/60 animate-pulse" />
+                                      </div>
+                                      <div className="absolute bottom-8 left-4">
+                                        <Zap className="w-4 h-4 text-primary/60 animate-pulse delay-500" />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="space-y-4">
+                                    <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                                      ALL SYSTEMS CLEAR
+                                    </h3>
+                                    <p className="text-slate-400 text-lg">No active notifications detected</p>
+                                    <p className="text-slate-500 text-sm font-mono">
+                                      Real-time monitoring active • Awaiting new signals
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-6 space-y-4">
+                                {notifications.map((notification, index) => {
+                                  const theme = getNotificationTheme(notification.type);
+                                  const isNew = newNotificationIds.has(notification.id);
+                                  
+                                  return (
+                                    <div
+                                      key={notification.id}
+                                      className={cn(
+                                        "group relative overflow-hidden rounded-2xl transition-all duration-500",
+                                        "bg-gradient-to-r from-slate-900/60 via-slate-800/40 to-slate-900/60",
+                                        "border backdrop-blur-sm cursor-pointer",
+                                        notification.is_read 
+                                          ? "border-slate-700/50 hover:border-slate-600/70" 
+                                          : `border-primary/30 hover:border-primary/50 ${theme.glow}`,
+                                        "hover:scale-[1.02] hover:shadow-2xl",
+                                        isNew && "animate-cyber-notification-in",
+                                        hoveredNotification === notification.id && "scale-[1.02]"
+                                      )}
+                                      style={{ animationDelay: `${index * 100}ms` }}
+                                      onMouseEnter={() => setHoveredNotification(notification.id)}
+                                      onMouseLeave={() => setHoveredNotification(null)}
+                                      onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
+                                    >
+                                      {/* Animated background pattern */}
+                                      <div className="absolute inset-0 opacity-10">
+                                        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[8px_8px] animate-grid-move-slow" />
+                                      </div>
+                                      
+                                      {/* Corner accents */}
+                                      <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-primary/40 transition-all duration-300 group-hover:border-primary/70" />
+                                      <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-accent/40 transition-all duration-300 group-hover:border-accent/70" />
+                                      
+                                      {/* New notification indicator */}
+                                      {isNew && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-accent/5 to-primary/10 animate-cyber-pulse" />
+                                      )}
+                                      
+                                      {/* Shine effect for unread */}
+                                      {!notification.is_read && (
+                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/3 to-transparent -skew-x-12 animate-cyber-shine" />
+                                      )}
+                                      
+                                      <div className="relative z-10 p-5 flex items-start gap-4">
+                                        {/* Enhanced icon container */}
+                                        <div className={cn(
+                                          "flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center relative overflow-hidden",
+                                          "bg-gradient-to-br from-slate-800/80 to-slate-900/80",
+                                          "border-2 transition-all duration-300",
+                                          notification.is_read 
+                                            ? "border-slate-600/30 opacity-60" 
+                                            : "border-primary/30 animate-cyber-icon",
+                                          theme.icon
+                                        )}>
+                                          {/* Inner circuit pattern */}
+                                          <div className="absolute inset-2 border border-current/20 rounded-lg opacity-30" />
+                                          
+                                          {theme.iconComponent}
+                                          
+                                          {/* Type indicator */}
+                                          <div className="absolute -top-1 -right-1 text-sm">
+                                            {theme.emoji}
+                                          </div>
+                                          
+                                          {/* Status indicator */}
+                                          <div className={cn(
+                                            "absolute -bottom-1 -left-1 w-3 h-3 rounded-full border-2 border-slate-900",
+                                            notification.is_read ? "bg-slate-500" : "bg-green-400 animate-cyber-pulse"
+                                          )} />
+                                        </div>
+                                        
+                                        {/* Content */}
+                                        <div className="flex-1 min-w-0 space-y-3">
+                                          <div className="flex items-start justify-between gap-4">
+                                            <h3 className={cn(
+                                              "font-bold text-lg leading-tight transition-all duration-300",
+                                              notification.is_read 
+                                                ? "text-slate-400" 
+                                                : "text-white"
+                                            )}>
+                                              {notification.title}
+                                            </h3>
+                                            
+                                            {/* Action buttons */}
+                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                              {!notification.is_read && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    markNotificationAsRead(notification.id);
+                                                  }}
+                                                  className="h-9 w-9 p-0 bg-green-500/20 border border-green-400/30 hover:bg-green-500/30 hover:border-green-400/50 text-green-400 hover:shadow-[0_0_12px_rgba(34,197,94,0.4)] transition-all duration-300"
+                                                >
+                                                  <Check className="w-4 h-4" />
+                                                </Button>
+                                              )}
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={(e) => {
+                                                  e.stopPropagation();
+                                                  deleteNotification(notification.id);
+                                                }}
+                                                className="h-9 w-9 p-0 bg-red-500/20 border border-red-400/30 hover:bg-red-500/30 hover:border-red-400/50 text-red-400 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                              >
+                                                <X className="w-4 h-4" />
+                                              </Button>
+                                            </div>
+                                          </div>
+                                          
+                                          <p className={cn(
+                                            "text-base leading-relaxed transition-all duration-300",
+                                            notification.is_read ? "text-slate-500" : "text-slate-300"
+                                          )}>
+                                            {notification.message}
+                                          </p>
+                                          
+                                          {/* Enhanced tip message */}
+                                          {notification.data?.tip_message && (
+                                            <div className="relative p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary/50 backdrop-blur-sm">
+                                              <div className="absolute top-2 right-2 text-primary/40">💬</div>
+                                              <p className="text-sm italic text-primary/90 font-medium pr-8">
+                                                "{notification.data.tip_message}"
+                                              </p>
+                                            </div>
+                                          )}
+                                          
+                                          {/* Timestamp with enhanced design */}
+                                          <div className="flex items-center gap-3 pt-2">
+                                            <div className="flex items-center gap-2">
+                                              <div className="w-2 h-2 bg-accent rounded-full animate-cyber-pulse" />
+                                              <Clock className="w-4 h-4 text-accent/60" />
+                                              <span className="text-sm text-slate-500 font-mono">
+                                                {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                                              </span>
+                                            </div>
+                                            <div className="flex-1 h-px bg-gradient-to-r from-accent/20 via-primary/10 to-transparent" />
+                                            <span className="text-xs text-slate-600 font-mono uppercase">
+                                              {notification.type.replace('_', ' ')}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </ScrollArea>
+                        </div>
+                      </div>
+                    </div>
                   </DialogContent>
                 </Dialog>
               )}
