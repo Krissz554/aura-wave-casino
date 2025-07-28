@@ -87,9 +87,9 @@ export function useUserLevelStats() {
 
     fetchStats();
     
-    // Set up real-time subscription
+    // Set up real-time subscription with enhanced logging
     const subscription = supabase
-      .channel('user_level_stats_changes')
+      .channel(`user_level_stats_changes_${user.id}_${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -98,11 +98,15 @@ export function useUserLevelStats() {
           table: 'user_level_stats',
           filter: `user_id=eq.${user.id}`
         },
-        () => {
+        (payload) => {
+          console.log('📊 USER_LEVEL_STATS: Real-time update received:', payload);
           fetchStats();
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('📊 USER_LEVEL_STATS: Subscription status:', status);
+        if (err) console.error('📊 USER_LEVEL_STATS: Subscription error:', err);
+      });
 
     return () => {
       supabase.removeChannel(subscription);

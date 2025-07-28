@@ -23,6 +23,7 @@ import { LiveLevelUpNotification } from '@/components/LiveLevelUpNotification';
 import { ProfileBorder } from '@/components/ProfileBorder';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
 import { useUserLevelStats } from '@/hooks/useUserLevelStats';
+import { usePollingXPStats } from '@/hooks/usePollingXPStats';
 import { useXPSync } from '@/contexts/XPSyncContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
@@ -483,24 +484,28 @@ export default function Index({ initialGame }: IndexProps) {
   };
 
   const { levelStats } = useLevelSync();
-  const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats(); // This is the working hook that profile uses
+  const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats(); // Subscription-based (might not work)
+  const { stats: pollingStats } = usePollingXPStats(); // Polling-based (backup)
   const { forceFullRefresh } = useXPSync();
 
-  // Debug: Log when userLevelStats updates
+  // Use polling stats if available, fallback to subscription stats
+  const workingStats = pollingStats || userLevelStats;
+
+  // Debug: Log when stats update
   useEffect(() => {
-    if (userLevelStats) {
-      console.log('🎯 HEADER: userLevelStats updated:', {
-        lifetime_xp: userLevelStats.lifetime_xp,
-        current_level_xp: userLevelStats.current_level_xp,
-        current_level: userLevelStats.current_level
-      });
-    }
-  }, [userLevelStats]);
+    console.log('🎯 HEADER: Stats comparison:', {
+      subscription_stats: userLevelStats ? 'AVAILABLE' : 'NULL',
+      polling_stats: pollingStats ? 'AVAILABLE' : 'NULL',
+      using: workingStats ? 'polling or subscription' : 'fallback',
+      effective_lifetime_xp: effectiveStats.lifetime_xp,
+      timestamp: new Date().toISOString()
+    });
+  }, [userLevelStats, pollingStats, workingStats, effectiveStats]);
 
 
 
-  // Use userLevelStats as primary source (working real-time updates), fallback to levelStats
-  const effectiveStats = userLevelStats || {
+  // Use workingStats (polling) as primary source, fallback to subscription stats, then levelStats
+  const effectiveStats = workingStats || {
     current_level: levelStats?.current_level || 1,
     lifetime_xp: levelStats?.lifetime_xp || 0,
     current_level_xp: levelStats?.current_level_xp || 0,
@@ -623,6 +628,19 @@ export default function Index({ initialGame }: IndexProps) {
         setTimeout(() => {
           console.log('🔄 Forcing refresh after manual XP test');
           forceFullRefresh().catch(console.error);
+        }, 500);
+        
+        // Also do aggressive polling to test if subscriptions work
+        let pollCount = 0;
+        const pollInterval = setInterval(() => {
+          pollCount++;
+          console.log(`🔄 AGGRESSIVE POLL ${pollCount}: Checking for XP changes`);
+          forceFullRefresh().catch(console.error);
+          
+          if (pollCount >= 10) { // Stop after 10 polls (5 seconds)
+            clearInterval(pollInterval);
+            console.log('🔄 Stopping aggressive polling');
+          }
         }, 500);
       }
     } catch (error) {
