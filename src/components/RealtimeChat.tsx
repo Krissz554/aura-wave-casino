@@ -154,7 +154,7 @@ export const RealtimeChat = () => {
   return (
     <div className="w-full h-full relative overflow-hidden group">
       {/* Cyberpunk Background with Advanced Effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-slate-700/85 to-slate-800/90 backdrop-blur-xl rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
       
       {/* Animated Circuit Board Pattern */}
       <div className="absolute inset-0 opacity-10">

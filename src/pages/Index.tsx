@@ -478,7 +478,7 @@ export default function Index({ initialGame }: IndexProps) {
         <header className="mb-6">
           <div className="relative overflow-hidden group">
             {/* Cyberpunk Background with Advanced Effects */}
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-800/90 via-slate-700/85 to-slate-800/90 backdrop-blur-xl rounded-2xl animate-cyber-header-pulse" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl animate-cyber-header-pulse" />
             
             {/* Animated Circuit Board Pattern */}
             <div className="absolute inset-0 opacity-10">
@@ -1349,7 +1349,7 @@ export default function Index({ initialGame }: IndexProps) {
             {!user && (
               <div className="relative mt-3 overflow-hidden group">
                 {/* Background effects */}
-                <div className="absolute inset-0 bg-gradient-to-r from-slate-800/85 via-slate-700/75 to-slate-800/85 rounded-xl" />
+                <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 via-slate-800/80 to-slate-900/90 rounded-xl" />
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-md group-hover:blur-lg transition-all duration-500" />
                 
                 {/* Animated circuit pattern */}
@@ -1396,7 +1396,7 @@ export default function Index({ initialGame }: IndexProps) {
         <div className="lg:col-span-1 space-y-4">
           <div className="relative overflow-hidden group">
             {/* Cyberpunk Background with Advanced Effects */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-slate-700/85 to-slate-800/90 backdrop-blur-xl rounded-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
             
             {/* Animated Circuit Board Pattern */}
             <div className="absolute inset-0 opacity-10">
