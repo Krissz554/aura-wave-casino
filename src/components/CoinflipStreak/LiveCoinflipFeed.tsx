@@ -9,7 +9,7 @@ import UserProfile from '../UserProfile';
 export default function LiveCoinflipFeed() {
   const [selectedUsername, setSelectedUsername] = useState<string | null>(null);
   const [showUserStats, setShowUserStats] = useState(false);
-  const { liveBetFeed, isConnected } = useRealtimeFeeds();
+  const { liveBetFeed } = useRealtimeFeeds();
 
   const handleUsernameClick = (username: string) => {
     setSelectedUsername(username);
@@ -26,7 +26,6 @@ export default function LiveCoinflipFeed() {
     <Card className="glass border-0">
       <CardHeader>
         <CardTitle className="text-lg flex items-center space-x-2">
-          <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500 animate-glow-pulse' : 'bg-red-500 animate-pulse'}`} />
           <Coins className="w-5 h-5 text-primary" />
           <span>Live Coinflip Feed</span>
           <Badge variant="secondary" className="text-xs animate-fade-in">

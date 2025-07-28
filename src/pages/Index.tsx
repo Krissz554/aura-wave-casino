@@ -52,7 +52,7 @@ export default function Index({ initialGame }: IndexProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { userData, loading: profileLoading, updateUserProfile } = useUserProfile();
   const { toast } = useToast();
-  const { connectionStatus, handleGameError, isHealthy } = useConnectionMonitor();
+  const { handleGameError } = useConnectionMonitor();
   const isUnmountingRef = useRef(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -253,17 +253,14 @@ export default function Index({ initialGame }: IndexProps) {
           (payload) => {
             if (payload.eventType === 'INSERT') {
               const newNotification = payload.new as Notification;
-              console.log('🔔 REAL-TIME NOTIFICATION RECEIVED:', newNotification);
               
               // Prevent duplicates with better logic
               setNotifications(prev => {
                 const exists = prev.some(n => n.id === newNotification.id);
                 if (exists) {
-                  console.log('🚫 Duplicate notification prevented');
                   return prev;
                 }
                 
-                console.log('✅ Adding new notification to UI with animation');
                 return [newNotification, ...prev];
               });
               
@@ -326,7 +323,6 @@ export default function Index({ initialGame }: IndexProps) {
             
             if (payload.eventType === 'UPDATE') {
               const updatedNotification = payload.new as Notification;
-              console.log('🔄 REAL-TIME NOTIFICATION UPDATED:', updatedNotification);
               
               setNotifications(prev => 
                 prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
@@ -335,30 +331,21 @@ export default function Index({ initialGame }: IndexProps) {
             
             if (payload.eventType === 'DELETE') {
               const deletedId = payload.old.id;
-              console.log('🗑️ REAL-TIME NOTIFICATION DELETED:', deletedId);
               
               setNotifications(prev => prev.filter(n => n.id !== deletedId));
             }
           }
         )
         .subscribe((status) => {
-          console.log('🔔 Notifications subscription status:', status);
-          if (status === 'SUBSCRIBED') {
-            console.log('✅ Enhanced notifications subscription active for user:', user.id);
-          } else if (status === 'CHANNEL_ERROR') {
-            console.error('❌ Notifications subscription failed with error:', status);
+          if (status === 'CHANNEL_ERROR') {
             // Only show error if not unmounting
             if (!isUnmountingRef.current) {
               handleGameError(new Error(`Notification subscription failed: ${status}`), 'Notifications');
             }
-          } else if (status === 'CLOSED') {
-            console.log('🔔 Notifications subscription closed (normal cleanup)');
-            // Don't show error for normal closes during cleanup
           }
         });
 
       return () => {
-        console.log('🔔 Cleaning up notifications subscription');
         isUnmountingRef.current = true;
         supabase.removeChannel(channel);
       };
@@ -933,21 +920,6 @@ export default function Index({ initialGame }: IndexProps) {
                     className="font-semibold"
                   />
                   <FloatingBalanceIncrease increases={increases} />
-                  
-                  {/* Connection status indicator */}
-                  <div 
-                    className={cn(
-                      "w-2 h-2 rounded-full transition-all duration-300",
-                      isHealthy 
-                        ? "bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)]" 
-                        : "bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"
-                    )}
-                    title={
-                      isHealthy 
-                        ? "Connected to game servers" 
-                        : `Connection issue: ${connectionStatus.lastError || 'Checking connection...'}`
-                    }
-                  />
                 </div>
               )}
 

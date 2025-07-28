@@ -25,7 +25,6 @@ export const useConnectionMonitor = () => {
   // Monitor browser online/offline status
   useEffect(() => {
     const handleOnline = () => {
-      console.log('🌐 Browser is back online');
       setConnectionStatus(prev => ({ ...prev, isOnline: true }));
       
       if (hasShownOfflineToast.current && !hasShownOnlineToast.current) {
@@ -40,7 +39,6 @@ export const useConnectionMonitor = () => {
     };
 
     const handleOffline = () => {
-      console.log('🌐 Browser is offline');
       setConnectionStatus(prev => ({ 
         ...prev, 
         isOnline: false,
@@ -82,8 +80,6 @@ export const useConnectionMonitor = () => {
         // If we get here, connection is healthy
         setConnectionStatus(prev => {
           if (!prev.isSupabaseConnected) {
-            console.log('✅ Supabase connection restored');
-            
             toast({
               title: "🎮 Game Server Connected",
               description: "Connection to game server restored.",
@@ -101,7 +97,6 @@ export const useConnectionMonitor = () => {
         
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
-        console.error('❌ Supabase health check failed:', errorMessage);
         
         setConnectionStatus(prev => {
           const newAttempts = prev.reconnectAttempts + 1;
@@ -146,8 +141,6 @@ export const useConnectionMonitor = () => {
 
   // Enhanced error handler for game operations
   const handleGameError = (error: Error, context: string) => {
-    console.error(`❌ Game error in ${context}:`, error);
-    
     // Check if it's a connection-related error
     const isConnectionError = error.message.toLowerCase().includes('fetch') ||
                             error.message.toLowerCase().includes('network') ||
@@ -160,8 +153,7 @@ export const useConnectionMonitor = () => {
                                 error.message.toLowerCase().includes('channel_error'));
     
     if (isSubscriptionError) {
-      // For subscription errors, just log and update status without showing user notification
-      console.log(`🔔 Subscription issue in ${context}: ${error.message}`);
+      // For subscription errors, just update status without showing user notification
       setConnectionStatus(prev => ({
         ...prev,
         lastError: `${context}: ${error.message}`,

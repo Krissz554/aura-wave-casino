@@ -70,8 +70,6 @@ export const useRealtimeFeeds = () => {
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
         }
-
-        console.log('🔍 Fetching initial live bet feed data...');
         
         // Initial data fetch with timeout
         const fetchPromise = Promise.all([
@@ -103,18 +101,9 @@ export const useRealtimeFeeds = () => {
           timeoutPromise
         ]) as any;
 
-        console.log('📊 Initial data fetch results:', {
-          liveFeedCount: liveFeedData.data?.length || 0,
-          liveFeedError: liveFeedData.error,
-          crashRoundCount: crashRoundData.data?.length || 0,
-          crashBetsCount: crashBetsData.data?.length || 0
-        });
-
         if (liveFeedData.data) {
-          console.log('✅ Setting initial live bet feed:', liveFeedData.data.length, 'entries');
           setLiveBetFeed(liveFeedData.data as LiveBetFeed[]);
         } else if (liveFeedData.error) {
-          console.error('❌ Error fetching live bet feed:', liveFeedData.error);
           setLastError(`Database error: ${liveFeedData.error.message}`);
         }
         
@@ -130,7 +119,6 @@ export const useRealtimeFeeds = () => {
         channelsRef.current = {};
 
         // Set up live bet feed subscription with improved error handling
-        console.log('🔗 Setting up live bet feed subscription...');
         channelsRef.current.liveFeed = supabase
           .channel(`live_bet_feed_${Date.now()}`) // Unique channel name
           .on(
@@ -141,18 +129,14 @@ export const useRealtimeFeeds = () => {
               table: 'live_bet_feed'
             },
             (payload) => {
-              console.log('📡 RECEIVED: New bet in feed:', payload);
               const newBet = payload.new as LiveBetFeed;
               
               setLiveBetFeed(prev => {
                 // Check for duplicates
                 const exists = prev.some(bet => bet.id === newBet.id);
                 if (exists) {
-                  console.log('⚠️ Duplicate bet detected, skipping:', newBet.id);
                   return prev;
                 }
-                
-                console.log('✅ SUCCESS: Adding bet to feed:', newBet.username, newBet.game_type, newBet.bet_amount);
                 
                 // Add to beginning of array and limit to 50 items
                 return [newBet, ...prev].slice(0, 50);
@@ -160,22 +144,17 @@ export const useRealtimeFeeds = () => {
             }
           )
           .subscribe((status) => {
-            console.log('📡 Live bet feed status change:', status);
-            
             if (status === 'SUBSCRIBED') {
-              console.log('✅ CONNECTED: Live bet feed is now listening for changes');
               setIsConnected(true);
               setConnectionAttempts(0);
               setLastError(null);
             } else if (status === 'CHANNEL_ERROR') {
-              console.error('❌ ERROR: Live bet feed subscription failed with error:', status);
               setIsConnected(false);
               setLastError(`Connection error: ${status}`);
               
               // Only retry if we haven't exceeded max attempts
               if (connectionAttempts < maxRetries) {
                 const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000); // Exponential backoff, max 30s
-                console.log(`🔄 RETRY: Attempting to reconnect in ${retryDelay}ms (attempt ${connectionAttempts + 1}/${maxRetries})`);
                 
                 setConnectionAttempts(prev => prev + 1);
                 
@@ -183,18 +162,15 @@ export const useRealtimeFeeds = () => {
                   setupRealtimeSubscriptions();
                 }, retryDelay);
               } else {
-                console.error('❌ MAX RETRIES: Giving up on real-time connection after', maxRetries, 'attempts');
                 setLastError('Real-time connection failed after multiple retries');
               }
             } else if (status === 'CLOSED') {
-              console.log('📡 Live bet feed subscription closed (normal cleanup)');
               setIsConnected(false);
               // Don't set error or retry for normal closes during cleanup
             }
           });
 
         // Set up crash rounds subscription with same improvements
-        console.log('🎰 Setting up crash rounds subscription...');
         channelsRef.current.crashRound = supabase
           .channel(`crash_rounds_${Date.now()}`)
           .on(
@@ -205,19 +181,14 @@ export const useRealtimeFeeds = () => {
               table: 'crash_rounds'
             },
             (payload) => {
-              console.log('🎰 RECEIVED: Crash round update:', payload);
               if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-                console.log('✅ SUCCESS: Updating crash round:', payload.new);
                 setCurrentCrashRound(payload.new as CrashRound);
               }
             }
           )
-          .subscribe((status) => {
-            console.log('🎰 Crash rounds status change:', status);
-          });
+          .subscribe(() => {});
 
         // Set up crash bets subscription with same improvements
-        console.log('💰 Setting up crash bets subscription...');
         channelsRef.current.crashBets = supabase
           .channel(`crash_bets_${Date.now()}`)
           .on(
@@ -228,20 +199,16 @@ export const useRealtimeFeeds = () => {
               table: 'crash_bets'
             },
             (payload) => {
-              console.log('💰 RECEIVED: Crash bet update:', payload);
               if (payload.eventType === 'INSERT') {
                 const newBet = payload.new as CrashBet;
                 setCrashBets(prev => {
                   const exists = prev.some(bet => bet.id === newBet.id);
                   if (exists) {
-                    console.log('⚠️ Duplicate crash bet detected, skipping:', newBet.id);
                     return prev;
                   }
-                  console.log('✅ SUCCESS: Adding new crash bet:', newBet);
                   return [newBet, ...prev].slice(0, 100);
                 });
               } else if (payload.eventType === 'UPDATE') {
-                console.log('✅ SUCCESS: Updating crash bet:', payload.new);
                 setCrashBets(prev => 
                   prev.map(bet => 
                     bet.id === payload.new.id ? payload.new as CrashBet : bet
@@ -250,15 +217,11 @@ export const useRealtimeFeeds = () => {
               }
             }
           )
-          .subscribe((status) => {
-            console.log('💰 Crash bets status change:', status);
-          });
+          .subscribe(() => {});
 
-        console.log('✅ All subscriptions set up successfully');
         setLoading(false);
 
       } catch (error) {
-        console.error('❌ Error setting up realtime subscriptions:', error);
         setLastError(`Setup error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setLoading(false);
         setIsConnected(false);
@@ -266,7 +229,6 @@ export const useRealtimeFeeds = () => {
         // Retry with backoff if we haven't hit max retries
         if (connectionAttempts < maxRetries) {
           const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000);
-          console.log(`🔄 RETRY: Attempting to reconnect after error in ${retryDelay}ms`);
           
           setConnectionAttempts(prev => prev + 1);
           
@@ -281,8 +243,6 @@ export const useRealtimeFeeds = () => {
 
     // Cleanup subscriptions and timeouts
     return () => {
-      console.log('🧹 Cleaning up realtime subscriptions...');
-      
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
@@ -290,7 +250,6 @@ export const useRealtimeFeeds = () => {
       Object.entries(channelsRef.current).forEach(([name, channel]) => {
         if (channel) {
           supabase.removeChannel(channel);
-          console.log(`🧹 Removed ${name} channel`);
         }
       });
       
@@ -334,7 +293,7 @@ export const useCrashRoundUpdates = () => {
             setCurrentRound(data as CrashRound);
           }
         } catch (error) {
-          console.error('❌ Error fetching round update:', error);
+          // Silently handle error
         }
       }
     }, 1000);
