@@ -416,14 +416,40 @@ export default function Index({ initialGame }: IndexProps) {
   };
 
   const confirmLogout = async () => {
+    console.log('🔴 confirmLogout called'); // Debug log
     try {
       setLogoutLoading(true);
+      console.log('🔄 Setting logout loading to true'); // Debug log
+      
+      // Call the signOut function from AuthContext
+      console.log('🚪 Calling signOut function'); // Debug log
       await signOut();
+      console.log('✅ signOut completed successfully'); // Debug log
+      
+      // Give a small delay to ensure state updates propagate
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Close the confirmation dialog
       setShowLogoutConfirmation(false);
+      console.log('🔐 Logout confirmation dialog closed'); // Debug log
+      
+      // Show success toast
+      toast({
+        title: "SESSION TERMINATED",
+        description: "Successfully signed out of system",
+        variant: "info",
+      });
+      
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error('❌ Error signing out:', error);
+      toast({
+        title: "LOGOUT ERROR",
+        description: "Failed to terminate session",
+        variant: "destructive",
+      });
     } finally {
       setLogoutLoading(false);
+      console.log('🔄 Setting logout loading to false'); // Debug log
     }
   };
 
@@ -1889,23 +1915,28 @@ export default function Index({ initialGame }: IndexProps) {
                   <Button
                     onClick={confirmLogout}
                     disabled={logoutLoading}
-                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300 disabled:opacity-60"
+                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed z-20"
                     style={{
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
                     {/* Scan line effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/confirm:translate-x-[100%] transition-transform duration-500" />
-                    {logoutLoading ? (
-                      <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
-                        <div className="w-3 h-3 border-2 border-red-300/30 border-t-red-300 rounded-full animate-spin" />
-                      </div>
-                    ) : (
-                      <LogOut className="w-4 h-4 mr-2 text-red-300 relative z-10" />
-                    )}
-                    <span className="relative z-10 font-semibold text-red-200">
-                      {logoutLoading ? 'Signing Out...' : 'Sign Out'}
-                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/confirm:translate-x-[100%] transition-transform duration-500 pointer-events-none" />
+                    <div className="relative z-30 flex items-center justify-center">
+                      {logoutLoading ? (
+                        <>
+                          <div className="w-4 h-4 mr-2 flex items-center justify-center">
+                            <div className="w-3 h-3 border-2 border-red-300/30 border-t-red-300 rounded-full animate-spin" />
+                          </div>
+                          <span className="font-semibold text-red-200">Signing Out...</span>
+                        </>
+                      ) : (
+                        <>
+                          <LogOut className="w-4 h-4 mr-2 text-red-300" />
+                          <span className="font-semibold text-red-200">Sign Out</span>
+                        </>
+                      )}
+                    </div>
                   </Button>
                 </div>
               </div>
