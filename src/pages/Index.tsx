@@ -133,7 +133,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
           icon: 'text-red-400',
           accent: 'bg-red-400/20',
-          emoji: '📢',
+          emoji: '🚨',
           iconComponent: <AlertTriangle className="w-5 h-5" />
         };
       default:
@@ -658,21 +658,37 @@ export default function Index({ initialGame }: IndexProps) {
                               </div>
                             </div>
                             
-                            {/* Action buttons */}
+                            {/* Enhanced action buttons */}
                             <div className="flex items-center gap-3">
                               {unreadCount > 0 && (
                                 <Button
                                   onClick={markAllNotificationsAsRead}
                                   className={cn(
-                                    "px-6 py-2 bg-gradient-to-r from-primary/20 to-accent/20",
-                                    "border border-primary/30 hover:border-primary/50",
-                                    "text-primary hover:text-white transition-all duration-300",
-                                    "hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]",
-                                    "backdrop-blur-sm hover:bg-gradient-to-r hover:from-primary/30 hover:to-accent/30"
+                                    "group relative px-8 py-3 overflow-hidden",
+                                    "bg-gradient-to-r from-emerald-600/20 via-green-500/20 to-emerald-600/20",
+                                    "border-2 border-emerald-400/40 rounded-xl",
+                                    "text-emerald-400 font-bold text-sm tracking-wide",
+                                    "hover:border-emerald-300/60 hover:text-white",
+                                    "hover:shadow-[0_0_30px_rgba(16,185,129,0.6)]",
+                                    "active:scale-95 transition-all duration-300",
+                                    "backdrop-blur-sm"
                                   )}
                                 >
-                                  <Check className="w-4 h-4 mr-2" />
-                                  CLEAR ALL
+                                  {/* Animated background */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-400/20 to-emerald-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+                                  
+                                  {/* Button content */}
+                                  <div className="relative flex items-center gap-2 z-10">
+                                    <Check className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                                    <span>CLEAR ALL</span>
+                                    <div className="w-1 h-1 bg-emerald-400 rounded-full animate-ping" />
+                                  </div>
+                                  
+                                  {/* Cyber corners */}
+                                  <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-400/60 transition-colors duration-300 group-hover:border-emerald-300" />
+                                  <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-emerald-400/60 transition-colors duration-300 group-hover:border-emerald-300" />
+                                  <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-emerald-400/60 transition-colors duration-300 group-hover:border-emerald-300" />
+                                  <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-400/60 transition-colors duration-300 group-hover:border-emerald-300" />
                                 </Button>
                               )}
                             </div>
@@ -725,7 +741,7 @@ export default function Index({ initialGame }: IndexProps) {
                                     <div
                                       key={notification.id}
                                       className={cn(
-                                        "group relative overflow-hidden rounded-2xl transition-all duration-500",
+                                        "group relative overflow-hidden rounded-2xl transition-all duration-500 w-full",
                                         "bg-gradient-to-r from-slate-900/60 via-slate-800/40 to-slate-900/60",
                                         "border backdrop-blur-sm cursor-pointer",
                                         notification.is_read 
@@ -783,11 +799,12 @@ export default function Index({ initialGame }: IndexProps) {
 
                                         </div>
                                         
-                                        {/* Content */}
-                                        <div className="flex-1 min-w-0 space-y-3">
+                                        {/* Content with proper text wrapping */}
+                                        <div className="flex-1 min-w-0 space-y-3 overflow-hidden">
                                           <div className="flex items-start justify-between gap-4">
                                             <h3 className={cn(
-                                              "font-bold text-lg leading-tight transition-all duration-300",
+                                              "font-bold text-lg leading-tight transition-all duration-300 break-words",
+                                              "flex-1 min-w-0 pr-3", // Ensure proper spacing from buttons
                                               notification.is_read 
                                                 ? "text-slate-400" 
                                                 : "text-white"
@@ -795,8 +812,8 @@ export default function Index({ initialGame }: IndexProps) {
                                               {notification.title}
                                             </h3>
                                             
-                                            {/* Action buttons */}
-                                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                            {/* Permanent action buttons with enhanced design */}
+                                            <div className="flex items-center gap-2 opacity-80 hover:opacity-100 transition-all duration-300 flex-shrink-0">
                                               {!notification.is_read && (
                                                 <Button
                                                   variant="ghost"
@@ -805,9 +822,10 @@ export default function Index({ initialGame }: IndexProps) {
                                                     e.stopPropagation();
                                                     markNotificationAsRead(notification.id);
                                                   }}
-                                                  className="h-9 w-9 p-0 bg-green-500/20 border border-green-400/30 hover:bg-green-500/30 hover:border-green-400/50 text-green-400 hover:shadow-[0_0_12px_rgba(34,197,94,0.4)] transition-all duration-300"
+                                                  className="group relative h-8 w-8 p-0 rounded-lg overflow-hidden bg-emerald-500/15 border border-emerald-400/30 hover:bg-emerald-500/25 hover:border-emerald-400/50 text-emerald-400 hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all duration-300"
                                                 >
-                                                  <Check className="w-4 h-4" />
+                                                  <div className="absolute inset-0 bg-emerald-400/20 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-lg" />
+                                                  <Check className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                                                 </Button>
                                               )}
                                               <Button
@@ -817,29 +835,30 @@ export default function Index({ initialGame }: IndexProps) {
                                                   e.stopPropagation();
                                                   deleteNotification(notification.id);
                                                 }}
-                                                className="h-9 w-9 p-0 bg-red-500/20 border border-red-400/30 hover:bg-red-500/30 hover:border-red-400/50 text-red-400 hover:shadow-[0_0_12px_rgba(239,68,68,0.4)] transition-all duration-300"
+                                                className="group relative h-8 w-8 p-0 rounded-lg overflow-hidden bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300"
                                               >
-                                                <X className="w-4 h-4" />
+                                                <div className="absolute inset-0 bg-red-400/20 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-lg" />
+                                                <X className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                                               </Button>
                                             </div>
                                           </div>
                                           
-                                          <p className={cn(
-                                            "text-base leading-relaxed transition-all duration-300",
-                                            notification.is_read ? "text-slate-500" : "text-slate-300"
-                                          )}>
-                                            {notification.message}
-                                          </p>
+                                                                    <p className={cn(
+                            "text-base leading-relaxed transition-all duration-300 break-words whitespace-pre-wrap",
+                            notification.is_read ? "text-slate-500" : "text-slate-300"
+                          )}>
+                            {notification.message}
+                          </p>
                                           
-                                          {/* Enhanced tip message */}
-                                          {notification.data?.tip_message && (
-                                            <div className="relative p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary/50 backdrop-blur-sm">
-                                              <div className="absolute top-2 right-2 text-primary/40">💬</div>
-                                              <p className="text-sm italic text-primary/90 font-medium pr-8">
-                                                "{notification.data.tip_message}"
-                                              </p>
-                                            </div>
-                                          )}
+                                                                                      {/* Enhanced tip message with proper wrapping */}
+                                            {notification.data?.tip_message && (
+                                              <div className="relative p-4 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary/50 backdrop-blur-sm overflow-hidden">
+                                                <div className="absolute top-2 right-2 text-primary/40">💬</div>
+                                                <p className="text-sm italic text-primary/90 font-medium pr-8 break-words whitespace-pre-wrap">
+                                                  "{notification.data.tip_message}"
+                                                </p>
+                                              </div>
+                                            )}
                                           
                                           {/* Timestamp with enhanced design */}
                                           <div className="flex items-center gap-3 pt-2">
