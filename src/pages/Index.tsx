@@ -694,17 +694,6 @@ export default function Index({ initialGame }: IndexProps) {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* XP Test Button (Development Only) */}
-      {process.env.NODE_ENV === 'development' && user && (
-        <button 
-          onClick={testXPIncrease}
-          className="fixed top-4 right-4 z-50 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-mono shadow-lg transition-colors"
-          title="Test XP increase by 0.5"
-        >
-          🧪 Test +0.5 XP
-        </button>
-      )}
-      
       {/* Cyberpunk Base Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
       
