@@ -6,7 +6,7 @@ import { Progress } from '@/components/ui/progress';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { User, Wallet, Gamepad2, LogOut, TrendingUp, Target, Building, Gift, LogIn, Bell, BellDot, Shield } from 'lucide-react';
+import { User, Wallet, Gamepad2, LogOut, TrendingUp, Target, Building, Gift, LogIn, Bell, BellDot, Shield, Star, Award, Megaphone, Clock, Sparkles, Zap, Users, DollarSign, AlertTriangle, Check, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,7 @@ import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
 import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
 import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
+import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 interface Notification {
@@ -54,6 +55,9 @@ export default function Index({ initialGame }: IndexProps) {
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationModalOpen, setNotificationModalOpen] = useState(false);
+  const [hoveredNotification, setHoveredNotification] = useState<string | null>(null);
+  const [newNotificationIds, setNewNotificationIds] = useState<Set<string>>(new Set());
+  const [isConnected, setIsConnected] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -68,6 +72,82 @@ export default function Index({ initialGame }: IndexProps) {
 
   const [currentGame, setCurrentGame] = useState(getCurrentGame());
   const { increases, checkBalanceChange } = useBalanceAnimation();
+
+  // Notification theme helper
+  const getNotificationTheme = (type: string) => {
+    switch (type) {
+      case 'tip_received':
+        return {
+          gradient: 'from-green-400/20 via-emerald-500/15 to-green-600/10',
+          border: 'border-green-400/40',
+          glow: 'shadow-[0_0_20px_rgba(34,197,94,0.3)]',
+          icon: 'text-green-400',
+          accent: 'bg-green-400/20',
+          emoji: '💰',
+          iconComponent: <DollarSign className="w-5 h-5" />
+        };
+      case 'tip_sent':
+        return {
+          gradient: 'from-blue-400/20 via-cyan-500/15 to-blue-600/10',
+          border: 'border-blue-400/40',
+          glow: 'shadow-[0_0_20px_rgba(59,130,246,0.3)]',
+          icon: 'text-blue-400',
+          accent: 'bg-blue-400/20',
+          emoji: '📤',
+          iconComponent: <TrendingUp className="w-5 h-5" />
+        };
+      case 'achievement_unlocked':
+        return {
+          gradient: 'from-purple-400/20 via-pink-500/15 to-purple-600/10',
+          border: 'border-purple-400/40',
+          glow: 'shadow-[0_0_20px_rgba(168,85,247,0.3)]',
+          icon: 'text-purple-400',
+          accent: 'bg-purple-400/20',
+          emoji: '🏆',
+          iconComponent: <Award className="w-5 h-5" />
+        };
+      case 'level_up':
+        return {
+          gradient: 'from-yellow-400/20 via-orange-500/15 to-yellow-600/10',
+          border: 'border-yellow-400/40',
+          glow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)]',
+          icon: 'text-yellow-400',
+          accent: 'bg-yellow-400/20',
+          emoji: '⭐',
+          iconComponent: <Star className="w-5 h-5" />
+        };
+      case 'level_reward_case':
+        return {
+          gradient: 'from-orange-400/20 via-red-500/15 to-orange-600/10',
+          border: 'border-orange-400/40',
+          glow: 'shadow-[0_0_20px_rgba(251,146,60,0.3)]',
+          icon: 'text-orange-400',
+          accent: 'bg-orange-400/20',
+          emoji: '🎁',
+          iconComponent: <Gift className="w-5 h-5" />
+        };
+      case 'admin_broadcast':
+        return {
+          gradient: 'from-red-400/20 via-rose-500/15 to-red-600/10',
+          border: 'border-red-400/40',
+          glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
+          icon: 'text-red-400',
+          accent: 'bg-red-400/20',
+          emoji: '📢',
+          iconComponent: <AlertTriangle className="w-5 h-5" />
+        };
+      default:
+        return {
+          gradient: 'from-gray-400/20 via-slate-500/15 to-gray-600/10',
+          border: 'border-gray-400/40',
+          glow: 'shadow-[0_0_20px_rgba(107,114,128,0.3)]',
+          icon: 'text-gray-400',
+          accent: 'bg-gray-400/20',
+          emoji: '🔔',
+          iconComponent: <Bell className="w-5 h-5" />
+        };
+    }
+  };
 
   // Notification functions
   const fetchNotifications = async () => {
@@ -116,6 +196,11 @@ export default function Index({ initialGame }: IndexProps) {
       setNotifications(prev =>
         prev.map(n => ({ ...n, is_read: true }))
       );
+      
+      toast({
+        title: "✅ All notifications marked as read",
+        description: "Your notification center is now clear",
+      });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
@@ -129,6 +214,12 @@ export default function Index({ initialGame }: IndexProps) {
         .eq('id', notificationId);
 
       setNotifications(prev => prev.filter(n => n.id !== notificationId));
+      
+      toast({
+        title: "🗑️ Notification deleted",
+        description: "Notification has been removed",
+        duration: 2000,
+      });
     } catch (error) {
       console.error('Error deleting notification:', error);
     }
@@ -156,22 +247,51 @@ export default function Index({ initialGame }: IndexProps) {
           (payload) => {
             if (payload.eventType === 'INSERT') {
               const newNotification = payload.new as Notification;
-              console.log('🔔 Received notification:', newNotification);
-              setNotifications(prev => [newNotification, ...prev]);
+              console.log('🔔 REAL-TIME NOTIFICATION RECEIVED:', newNotification);
               
-              // Show toast for admin broadcast notifications
-              if (newNotification.type === 'admin_broadcast') {
-                toast({
-                  title: newNotification.title,
-                  description: newNotification.message,
+              // Prevent duplicates with better logic
+              setNotifications(prev => {
+                const exists = prev.some(n => n.id === newNotification.id);
+                if (exists) {
+                  console.log('🚫 Duplicate notification prevented');
+                  return prev;
+                }
+                
+                console.log('✅ Adding new notification to UI with animation');
+                return [newNotification, ...prev];
+              });
+              
+              // Mark as new for animation
+              setNewNotificationIds(prev => new Set([...prev, newNotification.id]));
+              
+              // Remove new status after animation
+              setTimeout(() => {
+                setNewNotificationIds(prev => {
+                  const next = new Set(prev);
+                  next.delete(newNotification.id);
+                  return next;
                 });
-              }
+              }, 3000);
+
+              // Enhanced toast notification
+              toast({
+                title: `🔔 ${newNotification.title}`,
+                description: newNotification.message,
+                duration: 5000,
+              });
             }
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('🔔 Notifications subscription status:', status);
+          setIsConnected(status === 'SUBSCRIBED');
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Enhanced notifications subscription active for user:', user.id);
+          }
+        });
 
       return () => {
+        console.log('🔔 Cleaning up notifications subscription');
         supabase.removeChannel(channel);
       };
     }
@@ -245,98 +365,265 @@ export default function Index({ initialGame }: IndexProps) {
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Notification Button - Only show for authenticated users */}
+              {/* Enhanced Cyberpunk Notification Button - Only show for authenticated users */}
               {user && (
                 <Dialog open={notificationModalOpen} onOpenChange={setNotificationModalOpen}>
                   <DialogTrigger asChild>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="relative px-3 py-1 glass rounded-lg"
+                      className={cn(
+                        "relative px-3 py-1 glass rounded-lg transition-all duration-300",
+                        isConnected && unreadCount > 0 && "animate-pulse shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+                      )}
                     >
                       {unreadCount > 0 ? (
-                        <BellDot className="w-4 h-4" />
+                        <BellDot className="w-4 h-4 text-primary" />
                       ) : (
                         <Bell className="w-4 h-4" />
                       )}
                       {unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px]">
+                        <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center min-w-[20px] animate-bounce">
                           {unreadCount > 9 ? '9+' : unreadCount}
                         </span>
                       )}
+                      {/* Connection indicator */}
+                      <div className={cn(
+                        "absolute -bottom-1 -right-1 w-2 h-2 rounded-full border border-slate-900 transition-all",
+                        isConnected ? "bg-green-400 animate-pulse" : "bg-red-400"
+                      )} />
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-md">
-                    <DialogHeader>
+                  <DialogContent className="glass border-0 max-w-2xl bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl">
+                    {/* Animated background effects */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 opacity-60 rounded-lg" />
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-radial from-primary/20 to-transparent blur-3xl animate-pulse" />
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-radial from-accent/20 to-transparent blur-2xl animate-pulse delay-1000" />
+                    
+                    {/* Scanning line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent h-1 animate-pulse-scan rounded-lg" />
+                    
+                    <DialogHeader className="relative z-10 pb-4">
                       <DialogTitle className="flex items-center justify-between">
-                        <span>Notifications</span>
+                        <div className="flex items-center space-x-4">
+                          <div className="relative">
+                            <div className={cn(
+                              "w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center",
+                              "border border-primary/30 backdrop-blur-sm transition-all duration-300",
+                              isConnected ? "animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.4)]" : "opacity-60"
+                            )}>
+                              <Bell className="w-6 h-6 text-primary" />
+                              {unreadCount > 0 && (
+                                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center animate-bounce">
+                                  <span className="text-xs font-bold text-white">
+                                    {unreadCount > 9 ? '9+' : unreadCount}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            {/* Connection indicator */}
+                            <div className={cn(
+                              "absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-slate-900 transition-all",
+                              isConnected ? "bg-green-400 animate-pulse" : "bg-red-400"
+                            )} />
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                              Notifications
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {isConnected ? '🟢 Live updates active' : '🔴 Connecting...'}
+                            </p>
+                          </div>
+                          
+                          {unreadCount > 0 && (
+                            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white border-0 animate-pulse px-3 py-1 rounded-full text-xs font-bold">
+                              {unreadCount > 99 ? '99+' : unreadCount} new
+                            </div>
+                          )}
+                        </div>
+                        
                         {unreadCount > 0 && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={markAllNotificationsAsRead}
-                            className="text-xs"
+                            className="glass border-primary/30 hover:bg-primary/10 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]"
                           >
-                            Mark all read
+                            <Check className="w-4 h-4 mr-2" />
+                            Clear all
                           </Button>
                         )}
                       </DialogTitle>
                     </DialogHeader>
-                    <ScrollArea className="h-96">
+                    
+                    <ScrollArea className="h-[500px] relative z-10">
                       {notifications.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <Bell className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">No notifications yet</p>
+                        <div className="text-center py-16 px-6">
+                          <div className="relative mb-6">
+                            <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center border border-primary/30">
+                              <Bell className="w-10 h-10 text-primary/60" />
+                            </div>
+                            <div className="absolute top-0 right-1/2 transform translate-x-8 -translate-y-2">
+                              <Sparkles className="w-6 h-6 text-accent animate-pulse" />
+                            </div>
+                            <div className="absolute bottom-0 left-1/2 transform -translate-x-8 translate-y-2">
+                              <Zap className="w-4 h-4 text-primary animate-pulse delay-500" />
+                            </div>
+                          </div>
+                          
+                          <h4 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent mb-3">
+                            All Clear! 🎉
+                          </h4>
+                          <p className="text-muted-foreground text-lg mb-2">No new notifications</p>
+                          <p className="text-sm text-muted-foreground/75">
+                            You're all caught up with the latest updates
+                          </p>
                         </div>
                       ) : (
-                        <div className="space-y-2">
-                          {notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              className={`p-3 rounded-lg border transition-colors ${
-                                notification.is_read
-                                  ? 'bg-card/20 border-border/50'
-                                  : 'bg-primary/10 border-primary/20'
-                              }`}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="font-medium text-sm truncate">
-                                    {notification.title}
-                                  </h4>
-                                  <p className="text-sm text-muted-foreground mt-1">
-                                    {notification.message}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground mt-2">
-                                    {new Date(notification.created_at).toLocaleString()}
-                                  </p>
-                                </div>
-                                <div className="flex items-center gap-1 ml-2">
-                                  {!notification.is_read && (
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => markNotificationAsRead(notification.id)}
-                                      className="p-1 h-6 w-6"
-                                    >
-                                      ✓
-                                    </Button>
-                                  )}
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteNotification(notification.id)}
-                                    className="p-1 h-6 w-6 text-red-400 hover:text-red-300"
-                                  >
-                                    ×
-                                  </Button>
+                        <div className="space-y-3 p-4">
+                          {notifications.map((notification) => {
+                            const theme = getNotificationTheme(notification.type);
+                            const isNew = newNotificationIds.has(notification.id);
+                            
+                            return (
+                              <div
+                                key={notification.id}
+                                className={cn(
+                                  "group relative p-4 rounded-2xl border-2 backdrop-blur-md transition-all duration-500 cursor-pointer",
+                                  "bg-gradient-to-br", theme.gradient,
+                                  notification.is_read ? theme.border.replace('/40', '/20') : theme.border,
+                                  !notification.is_read && theme.glow,
+                                  "hover:scale-[1.02] hover:shadow-2xl",
+                                  isNew && "animate-slide-in-cyber ring-2 ring-primary/50 ring-offset-2 ring-offset-slate-900",
+                                  hoveredNotification === notification.id && "scale-[1.02] shadow-2xl"
+                                )}
+                                onMouseEnter={() => setHoveredNotification(notification.id)}
+                                onMouseLeave={() => setHoveredNotification(null)}
+                                onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
+                              >
+                                {/* Cyberpunk corner accents */}
+                                <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary/60 rounded-tl-2xl" />
+                                <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-accent/60 rounded-br-2xl" />
+                                
+                                {/* New notification pulse effect */}
+                                {isNew && (
+                                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20 rounded-2xl animate-pulse-wave" />
+                                )}
+                                
+                                {/* Shine effect for unread */}
+                                {!notification.is_read && (
+                                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -skew-x-12 animate-shine" />
+                                )}
+                                
+                                <div className="flex items-start gap-4 relative z-10">
+                                  {/* Enhanced icon with cyberpunk styling */}
+                                  <div className={cn(
+                                    "flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 relative",
+                                    "bg-gradient-to-br", theme.accent, "border border-current/30",
+                                    notification.is_read ? "opacity-60" : "animate-pulse-icon",
+                                    theme.icon
+                                  )}>
+                                    {theme.iconComponent}
+                                    
+                                    {/* Type emoji overlay */}
+                                    <div className="absolute -top-1 -right-1 text-xs">
+                                      {theme.emoji}
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex-1 min-w-0 space-y-3">
+                                    <div className="flex items-start justify-between gap-3">
+                                      <h4 className={cn(
+                                        "font-bold text-base leading-tight transition-colors",
+                                        notification.is_read 
+                                          ? "text-muted-foreground" 
+                                          : "text-white bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent"
+                                      )}>
+                                        {notification.title}
+                                      </h4>
+                                      
+                                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {!notification.is_read && (
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              markNotificationAsRead(notification.id);
+                                            }}
+                                            className="h-8 w-8 p-0 glass hover:bg-green-500/20 hover:text-green-400 hover:shadow-[0_0_10px_rgba(34,197,94,0.3)]"
+                                          >
+                                            <Check className="w-4 h-4" />
+                                          </Button>
+                                        )}
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            deleteNotification(notification.id);
+                                          }}
+                                          className="h-8 w-8 p-0 glass hover:bg-red-500/20 hover:text-red-400 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]"
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                    
+                                    <p className={cn(
+                                      "text-sm leading-relaxed",
+                                      notification.is_read ? "text-muted-foreground/75" : "text-gray-300"
+                                    )}>
+                                      {notification.message}
+                                    </p>
+                                    
+                                    {/* Enhanced tip message display */}
+                                    {notification.data?.tip_message && (
+                                      <div className="relative p-3 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 border-l-4 border-primary/50 backdrop-blur-sm">
+                                        <div className="absolute top-1 right-1 text-primary/40">💬</div>
+                                        <p className="text-sm italic text-primary/90 font-medium pr-6">
+                                          "{notification.data.tip_message}"
+                                        </p>
+                                      </div>
+                                    )}
+                                    
+                                    {/* Enhanced timestamp with cyberpunk styling */}
+                                    <div className="flex items-center gap-2 pt-2">
+                                      <div className="w-1 h-1 bg-accent rounded-full animate-pulse" />
+                                      <Clock className="w-3 h-3 text-accent/60" />
+                                      <p className="text-xs text-muted-foreground/75 font-mono">
+                                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                                      </p>
+                                      <div className="flex-1 h-px bg-gradient-to-r from-accent/20 to-transparent" />
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </ScrollArea>
+                    
+                    {/* Floating particles for added effect */}
+                    {unreadCount > 0 && (
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-lg">
+                        {[...Array(6)].map((_, i) => (
+                          <div
+                            key={i}
+                            className="absolute w-1 h-1 bg-primary/60 rounded-full animate-float-particle"
+                            style={{
+                              left: `${Math.random() * 100}%`,
+                              top: `${Math.random() * 100}%`,
+                              animationDelay: `${Math.random() * 3}s`,
+                              animationDuration: `${4 + Math.random() * 2}s`
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
               )}
