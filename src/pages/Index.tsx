@@ -540,8 +540,8 @@ export default function Index({ initialGame }: IndexProps) {
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
   
-  // Display lifetime_xp (main XP tracker) in header with live animations
-  const displayXP = xpIncreaseAnimation ? animatedXP : effectiveStats.lifetime_xp;
+  // Display current level XP progress (same as progress bar) in header with live animations
+  const displayXP = xpIncreaseAnimation ? animatedCurrentLevelXP : displayCurrentLevelXP;
   const displayProgress = xpIncreaseAnimation ? animatedProgress : xpProgress;
 
   // Smooth XP animation function
