@@ -1484,51 +1484,90 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
               <div className="grid grid-cols-3 gap-4">
                 {(['red', 'green', 'black'] as const).map((color) => (
                   <div key={color} className="space-y-2">
-                    <Button
-                      onClick={() => placeBet(color)}
-                      disabled={
-                        !user || 
-                        !profile || 
-                        currentRound.status !== 'betting' || 
-                        isPlacingBet ||
-                        betAmount === '' ||
-                        isNaN(Number(betAmount)) ||
-                        Number(betAmount) <= 0 ||
-                        Number(betAmount) < 0.01 ||
-                        Number(betAmount) > (profile?.balance || 0) ||
-                        userBetLimits.betCount >= MAX_BETS_PER_ROUND ||
-                        userBetLimits.totalThisRound + Number(betAmount) > MAX_TOTAL_BET_PER_ROUND ||
-                        Date.now() - lastBetTime < MIN_BET_INTERVAL
-                      }
-                      className={`w-full h-12 flex flex-col gap-1 border-2 transition-all duration-200 ${getBetColorClass(color)} ${
-                        isPlacingBet ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      title={
-                        !user ? 'Sign in to bet' :
-                        currentRound.status !== 'betting' ? 'Betting closed' :
-                        isPlacingBet ? 'Processing bet...' :
-                        betAmount === '' ? 'Enter bet amount' :
-                        isNaN(Number(betAmount)) ? 'Invalid bet amount' :
-                        Number(betAmount) <= 0 ? 'Bet amount must be greater than 0' :
-                        Number(betAmount) < 0.01 ? 'Minimum bet is $0.01' :
-                        Number(betAmount) > (profile?.balance || 0) ? 'Insufficient balance' :
-                        userBetLimits.betCount >= MAX_BETS_PER_ROUND ? 'Max bets reached' :
-                        userBetLimits.totalThisRound + Number(betAmount) > MAX_TOTAL_BET_PER_ROUND ? 'Round limit reached' :
-                        Date.now() - lastBetTime < MIN_BET_INTERVAL ? 'Rate limited' :
-                        `Bet $${Number(betAmount).toFixed(2)} on ${color}`
-                      }
-                    >
+                    {/* Cyberpunk Betting Button */}
+                    <div className="relative group/bet">
+                      {/* Holographic Scan Lines */}
+                      <div className="absolute inset-0 overflow-hidden">
+                        <div className={`absolute inset-0 transition-transform duration-1000 ease-out ${
+                          color === 'red' ? 'bg-gradient-to-r from-transparent via-red-400/20 to-transparent' :
+                          color === 'green' ? 'bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent' :
+                          'bg-gradient-to-r from-transparent via-slate-400/20 to-transparent'
+                        } translate-x-[-100%] group-hover/bet:translate-x-[100%]`}></div>
+                      </div>
+                      
+                      {/* Main Button Container */}
+                      <button
+                        onClick={() => placeBet(color)}
+                        disabled={
+                          !user || 
+                          !profile || 
+                          currentRound.status !== 'betting' || 
+                          isPlacingBet ||
+                          betAmount === '' ||
+                          isNaN(Number(betAmount)) ||
+                          Number(betAmount) <= 0 ||
+                          Number(betAmount) < 0.01 ||
+                          Number(betAmount) > (profile?.balance || 0) ||
+                          userBetLimits.betCount >= MAX_BETS_PER_ROUND ||
+                          userBetLimits.totalThisRound + Number(betAmount) > MAX_TOTAL_BET_PER_ROUND ||
+                          Date.now() - lastBetTime < MIN_BET_INTERVAL
+                        }
+                        className={`w-full h-12 relative overflow-hidden border transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${
+                          color === 'red' ? 'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-red-500/50 hover:border-red-400 text-red-100 hover:text-white' :
+                          color === 'green' ? 'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-emerald-500/50 hover:border-emerald-400 text-emerald-100 hover:text-white' :
+                          'bg-gradient-to-br from-slate-900/90 via-slate-800/80 to-slate-900/90 border-slate-500/50 hover:border-slate-400 text-slate-100 hover:text-white'
+                        } ${isPlacingBet ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{
+                          clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))'
+                        }}
+                        title={
+                          !user ? 'Sign in to bet' :
+                          currentRound.status !== 'betting' ? 'Betting closed' :
+                          isPlacingBet ? 'Processing bet...' :
+                          betAmount === '' ? 'Enter bet amount' :
+                          isNaN(Number(betAmount)) ? 'Invalid bet amount' :
+                          Number(betAmount) <= 0 ? 'Bet amount must be greater than 0' :
+                          Number(betAmount) < 0.01 ? 'Minimum bet is $0.01' :
+                          Number(betAmount) > (profile?.balance || 0) ? 'Insufficient balance' :
+                          userBetLimits.betCount >= MAX_BETS_PER_ROUND ? 'Max bets reached' :
+                          userBetLimits.totalThisRound + Number(betAmount) > MAX_TOTAL_BET_PER_ROUND ? 'Round limit reached' :
+                          Date.now() - lastBetTime < MIN_BET_INTERVAL ? 'Rate limited' :
+                          `Bet $${Number(betAmount).toFixed(2)} on ${color}`
+                        }
+                      >
+                        {/* Inner Glow Effect */}
+                        <div className={`absolute inset-0 opacity-0 group-hover/bet:opacity-100 transition-opacity duration-300 ${
+                          color === 'red' ? 'bg-gradient-to-r from-red-500/10 via-transparent to-red-500/10' :
+                          color === 'green' ? 'bg-gradient-to-r from-emerald-500/10 via-transparent to-emerald-500/10' :
+                          'bg-gradient-to-r from-slate-500/10 via-transparent to-slate-500/10'
+                        }`}></div>
+                        
+                        {/* Tech Corner Indicators */}
+                        <div className={`absolute top-0 right-0 w-2 h-2 animate-pulse ${
+                          color === 'red' ? 'bg-red-500/60' :
+                          color === 'green' ? 'bg-emerald-500/60' :
+                          'bg-slate-500/60'
+                        }`}></div>
+                        <div className={`absolute bottom-0 left-0 w-2 h-2 animate-pulse ${
+                          color === 'red' ? 'bg-red-500/60' :
+                          color === 'green' ? 'bg-emerald-500/60' :
+                          'bg-slate-500/60'
+                        }`} style={{ animationDelay: '0.5s' }}></div>
+                        
+                        <div className="flex flex-col gap-1 items-center justify-center relative z-10">
                       <div className="flex items-center gap-2">
                         <span className="text-base font-bold capitalize">{color}</span>
                         <span className="text-xs">{getMultiplierText(color)}</span>
                         {isPlacingBet && <div className="w-3 h-3 animate-spin rounded-full border-2 border-white border-t-transparent"></div>}
                       </div>
-                      {isolatedRoundTotals[color] && (
-                        <span className="text-xs opacity-90 bg-white/20 px-2 py-1 rounded">
-                          Total: ${isolatedRoundTotals[color].toFixed(2)}
-                        </span>
-                      )}
-                    </Button>
+                          {isolatedRoundTotals[color] && (
+                            <span className="text-xs opacity-90 bg-white/20 px-2 py-1 rounded">
+                              Total: ${isolatedRoundTotals[color].toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    </div>
                     
                     {/* Live totals calculated from live feed */}
                     <div className="text-center text-xs space-y-1">
