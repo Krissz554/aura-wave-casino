@@ -23,7 +23,9 @@ import { LiveLevelUpNotification } from '@/components/LiveLevelUpNotification';
 import { ProfileBorder } from '@/components/ProfileBorder';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
 import { useUserLevelStats } from '@/hooks/useUserLevelStats';
+import { useXPSync } from '@/contexts/XPSyncContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
 import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
@@ -483,6 +485,7 @@ export default function Index({ initialGame }: IndexProps) {
 
   const { levelStats } = useLevelSync();
   const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats(); // This is the working hook that profile uses
+  const { forceFullRefresh } = useXPSync();
 
   // Debug: Log when userLevelStats updates
   useEffect(() => {
@@ -590,6 +593,44 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [effectiveStats, xpProgress, animateToValue, isInitialized]);
 
+  // Debug: Add test XP function
+  const testXPIncrease = async () => {
+    if (!user) return;
+    
+    console.log('🧪 TESTING: Manual XP increase of 0.5 XP');
+    
+    try {
+      // Call the XP function directly
+      const { data, error } = await supabase.rpc('add_xp_and_check_levelup', {
+        user_uuid: user.id,
+        xp_amount: 0.5
+      });
+      
+      if (error) {
+        console.error('❌ XP TEST ERROR:', error);
+        toast({
+          title: "XP Test Failed",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        console.log('✅ XP TEST SUCCESS:', data);
+        toast({
+          title: "XP Test Success", 
+          description: "Added 0.5 XP manually",
+        });
+        
+        // Force refresh both data sources
+        setTimeout(() => {
+          console.log('🔄 Forcing refresh after manual XP test');
+          forceFullRefresh().catch(console.error);
+        }, 500);
+      }
+    } catch (error) {
+      console.error('❌ XP TEST EXCEPTION:', error);
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -603,6 +644,17 @@ export default function Index({ initialGame }: IndexProps) {
 
   return (
     <div className="min-h-screen relative overflow-hidden">
+      {/* XP Test Button (Development Only) */}
+      {process.env.NODE_ENV === 'development' && user && (
+        <button 
+          onClick={testXPIncrease}
+          className="fixed top-4 right-4 z-50 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm font-mono shadow-lg transition-colors"
+          title="Test XP increase by 0.5"
+        >
+          🧪 Test +0.5 XP
+        </button>
+      )}
+      
       {/* Cyberpunk Base Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
       
