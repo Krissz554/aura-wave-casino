@@ -12,7 +12,11 @@ import {
   Calculator, 
   Eye, 
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Terminal,
+  Cpu,
+  Database,
+  Zap
 } from 'lucide-react';
 
 export function ProvablyFair() {
@@ -23,122 +27,206 @@ export function ProvablyFair() {
     setIsPageVisible(true);
   }, []);
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 transition-all duration-700 ease-out ${
-      isPageVisible ? 'opacity-100' : 'opacity-0'
-    }`}>
-      <div className={`container mx-auto px-4 py-8 transition-all duration-600 ease-out delay-100 ${
-        isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-      }`}>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Cyberpunk Background Effects */}
+      <div className="fixed inset-0 z-0">
+        {/* Base gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
         
-        {/* Header */}
-        <div className={`mb-8 transition-all duration-500 ease-out delay-200 ${
-          isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-        }`}>
-          <Link to="/">
-            <Button variant="ghost" className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Games
-            </Button>
-          </Link>
-          
-          <div className={`text-center space-y-4 transition-all duration-500 ease-out delay-300 ${
-            isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}>
-            <div className="flex items-center justify-center gap-3">
-              <Shield className="w-12 h-12 text-emerald-400" />
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-                Provably Fair Gaming
-              </h1>
-            </div>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Complete transparency through cryptographic verification. Every game result is predetermined, 
-              verifiable, and impossible to manipulate.
-            </p>
-            <Badge variant="outline" className="text-emerald-400 border-emerald-400">
-              🛡️ Cryptographically Secure
-            </Badge>
-          </div>
-        </div>
+        {/* Circuit pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.03)_25%,rgba(99,102,241,0.03)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.03)_75%,rgba(99,102,241,0.03)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.03)_25%,rgba(99,102,241,0.03)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.03)_75%,rgba(99,102,241,0.03)_76%,transparent_77%,transparent)] bg-[length:20px_20px] opacity-50" />
+        
+        {/* Animated grid */}
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(99,102,241,0.05)_1px,transparent_1px),linear-gradient(rgba(99,102,241,0.05)_1px,transparent_1px)] bg-[length:100px_100px] animate-[grid-move-slow_30s_linear_infinite]" />
+        
+        {/* Floating particles */}
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-indigo-400/40 rounded-full animate-[float_6s_ease-in-out_infinite]" />
+        <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-cyan-400/60 rounded-full animate-[float_8s_ease-in-out_infinite_1s]" />
+        <div className="absolute bottom-1/4 left-1/3 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-[float_7s_ease-in-out_infinite_2s]" />
+        <div className="absolute top-2/3 right-1/4 w-1 h-1 bg-indigo-400/40 rounded-full animate-[float_9s_ease-in-out_infinite_3s]" />
+      </div>
+      
+      <div className="relative z-10 container mx-auto px-4 py-8">
+        
+         {/* Cyberpunk Header */}
+         <div className="mb-12">
+           <Link to="/">
+             <Button className="mb-6 bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 font-mono tracking-wider">
+               <ArrowLeft className="w-4 h-4 mr-2" />
+               RETURN_TO_PROTOCOL
+             </Button>
+           </Link>
+           
+           <div className="text-center space-y-6">
+             {/* Main Title */}
+             <div className="relative">
+               <div className="flex items-center justify-center gap-4 mb-4">
+                 <div className="relative">
+                   <Shield className="w-16 h-16 text-indigo-400 drop-shadow-[0_0_12px_rgba(99,102,241,0.8)]" />
+                   <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
+                   <div className="absolute -inset-2 border border-indigo-400/20 rounded-full animate-pulse" style={{ animationDelay: '1s' }} />
+                 </div>
+                 <h1 className="text-5xl font-bold font-mono tracking-wider bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent drop-shadow-sm">
+                   PROVABLY_FAIR_PROTOCOL
+                 </h1>
+               </div>
+               
+               {/* Subtitle */}
+               <p className="text-xl text-slate-300 max-w-4xl mx-auto font-mono leading-relaxed">
+                 <span className="text-indigo-400">//</span> CRYPTOGRAPHIC_VERIFICATION_SYSTEM<br />
+                 <span className="text-slate-400 text-lg">
+                   Complete transparency through mathematical proof. Every result predetermined, 
+                   verifiable, and mathematically impossible to manipulate.
+                 </span>
+               </p>
+               
+               {/* Status Badge */}
+               <div className="flex justify-center mt-6">
+                 <div className="relative">
+                   <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-green-500/15 to-emerald-500/20 rounded-lg" />
+                   <div className="relative border border-emerald-500/40 rounded-lg px-6 py-3">
+                     <div className="flex items-center gap-3">
+                       <div className="relative">
+                         <Terminal className="w-5 h-5 text-emerald-400 drop-shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                         <div className="absolute inset-0 border border-emerald-400/20 rounded animate-pulse" />
+                       </div>
+                       <span className="text-emerald-300 font-mono font-bold tracking-wider">
+                         CRYPTOGRAPHICALLY_SECURE
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
-          {/* How It Works */}
-          <Card className="glass border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="w-5 h-5 text-blue-400" />
-                How Provably Fair Works
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
+         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+           
+           {/* Cyberpunk How It Works */}
+           <div className="relative">
+             {/* Background Effects */}
+             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/15 to-cyan-500/20 rounded-lg" />
+             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40" />
+             
+             <div className="relative border border-indigo-500/30 rounded-lg p-6">
+               {/* Scan Line Animation */}
+               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite] rounded-lg" />
+               
+               {/* Header */}
+               <div className="relative z-10 mb-6">
+                 <div className="flex items-center gap-3 mb-4">
+                   <div className="relative">
+                     <Calculator className="w-6 h-6 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                     <div className="absolute inset-0 border border-indigo-400/20 rounded animate-pulse" />
+                   </div>
+                   <h2 className="text-xl font-bold font-mono tracking-wider text-white">
+                     SYSTEM_OPERATION_PROTOCOL
+                   </h2>
+                 </div>
+               </div>
+               
+               <div className="relative z-10 space-y-6">
               
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-emerald-400 font-bold text-sm">1</span>
+                <div className="space-y-5">
+                  {/* Step 1 */}
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-md bg-gradient-to-br from-emerald-500/20 to-green-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-emerald-300 font-bold font-mono">01</span>
+                      </div>
+                      <div className="absolute inset-0 border border-emerald-400/20 rounded-md animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-emerald-300 font-mono tracking-wider mb-2">DAILY_SEED_GENERATION</h4>
+                      <p className="text-sm text-slate-400 font-mono leading-relaxed">
+                        Every 24 hours, new server seed (64 chars) and lotto number (10 digits) 
+                        are generated. Immediately hashed with SHA-256 and published to blockchain.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-emerald-400">Daily Seed Generation</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Every 24 hours, we generate a new server seed (64 characters) and lotto number (10 digits). 
-                      These are immediately hashed with SHA-256 and published.
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-blue-400 font-bold text-sm">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-400">Result Pre-calculation</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Before any bets are placed, each round's result is calculated using: 
-                      <code className="bg-muted px-1 rounded text-xs ml-1">
+                  {/* Step 2 */}
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-md bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/40 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-blue-300 font-bold font-mono">02</span>
+                      </div>
+                      <div className="absolute inset-0 border border-blue-400/20 rounded-md animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-blue-300 font-mono tracking-wider mb-2">RESULT_PRE_CALCULATION</h4>
+                      <p className="text-sm text-slate-400 font-mono leading-relaxed mb-2">
+                        Before any bets are placed, each round's result is calculated using:
+                      </p>
+                      <code className="bg-slate-800/60 border border-slate-600/40 px-3 py-1 rounded text-xs text-cyan-300 font-mono block">
                         hash(server_seed + "-" + lotto + "-" + round_number)
                       </code>
-                    </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-orange-400 font-bold text-sm">3</span>
+                  {/* Step 3 */}
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-md bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/40 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-orange-300 font-bold font-mono">03</span>
+                      </div>
+                      <div className="absolute inset-0 border border-orange-400/20 rounded-md animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-orange-300 font-mono tracking-wider mb-2">CRYPTOGRAPHIC_PROOF</h4>
+                      <p className="text-sm text-slate-400 font-mono leading-relaxed">
+                        SHA-256 hash creates irreversible mathematical proof. First 8 characters 
+                        converted to number, then modulo 15 gives final result (0-14).
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-semibold text-orange-400">Cryptographic Proof</h4>
-                    <p className="text-sm text-muted-foreground">
-                      The SHA-256 hash creates an irreversible mathematical proof. The first 8 characters 
-                      are converted to a number, then modulo 15 gives the final result (0-14).
-                    </p>
-                  </div>
-                </div>
 
-                <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-purple-400 font-bold text-sm">4</span>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-purple-400">Public Verification</h4>
-                    <p className="text-sm text-muted-foreground">
-                      After each round, the server seed is revealed. Anyone can verify the result 
-                      using the same mathematical formula.
-                    </p>
+                  {/* Step 4 */}
+                  <div className="flex items-start gap-4">
+                    <div className="relative">
+                      <div className="w-10 h-10 rounded-md bg-gradient-to-br from-purple-500/20 to-indigo-500/20 border border-purple-500/40 flex items-center justify-center flex-shrink-0 mt-1">
+                        <span className="text-purple-300 font-bold font-mono">04</span>
+                      </div>
+                      <div className="absolute inset-0 border border-purple-400/20 rounded-md animate-pulse" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-purple-300 font-mono tracking-wider mb-2">PUBLIC_VERIFICATION</h4>
+                      <p className="text-sm text-slate-400 font-mono leading-relaxed">
+                        After each round, server seed is revealed. Anyone can verify result 
+                        using same mathematical formula. Zero trust required.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          {/* Why Trust It */}
-          <Card className="glass border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="w-5 h-5 text-emerald-400" />
-                Why You Can Trust It
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+           {/* Cyberpunk Why Trust It */}
+           <div className="relative">
+             {/* Background Effects */}
+             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 via-green-500/15 to-emerald-500/20 rounded-lg" />
+             <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(34,197,94,0.1)_25%,rgba(34,197,94,0.1)_26%,transparent_27%,transparent_74%,rgba(34,197,94,0.1)_75%,rgba(34,197,94,0.1)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-40" />
+             
+             <div className="relative border border-emerald-500/30 rounded-lg p-6">
+               {/* Scan Line Animation */}
+               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite_1s] rounded-lg" />
+               
+               {/* Header */}
+               <div className="relative z-10 mb-6">
+                 <div className="flex items-center gap-3 mb-4">
+                   <div className="relative">
+                     <Lock className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+                     <div className="absolute inset-0 border border-emerald-400/20 rounded animate-pulse" />
+                   </div>
+                   <h2 className="text-xl font-bold font-mono tracking-wider text-white">
+                     TRUST_VERIFICATION_SYSTEM
+                   </h2>
+                 </div>
+               </div>
+               
+               <div className="relative z-10 space-y-4">
               
               <div className="flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-400 mt-1 flex-shrink-0" />
