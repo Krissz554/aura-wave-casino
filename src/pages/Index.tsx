@@ -1370,7 +1370,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300 rounded-lg" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1420,7 +1420,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300 rounded-lg" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1470,7 +1470,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300 rounded-lg" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1508,21 +1508,21 @@ export default function Index({ initialGame }: IndexProps) {
                     variant="ghost"
                     className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed border border-slate-600/20 bg-transparent"
                   >
-                    <div className="flex items-center gap-3 relative z-10">
-                      <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
-                        <TrendingUp className="w-4 h-4" />
-                      </div>
-                      <div className="text-left">
-                        <span className="font-bold text-sm font-mono text-slate-400 block">
-                          CRASH
-                        </span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <div className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
-                          <span className="text-xs text-slate-500 font-mono">COMING SOON</span>
-                          <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse delay-500" />
-                        </div>
-                      </div>
-                    </div>
+                                         <div className="flex items-center gap-3 relative z-10 w-full">
+                       <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
+                         <TrendingUp className="w-4 h-4" />
+                       </div>
+                       <div className="flex-1 min-w-0">
+                         <span className="font-bold text-sm font-mono text-slate-400 block">
+                           CRASH
+                         </span>
+                         <div className="flex items-center gap-1.5 mt-0.5">
+                           <div className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
+                           <span className="text-[10px] text-slate-500 font-mono">COMING SOON</span>
+                           <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse delay-500" />
+                         </div>
+                       </div>
+                     </div>
                     
                     {/* Tech corner indicators - dimmed */}
                     <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-slate-600/30" />
