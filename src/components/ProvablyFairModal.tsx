@@ -83,7 +83,12 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
   }, [isOpen, roundData]);
 
   const fetchRoundDetails = async () => {
-    if (!roundData || !user) return;
+    if (!roundData) return;
+    if (!user) {
+      // For guest users, just show the round result without fetching verification data
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     try {
@@ -267,8 +272,74 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
               </Card>
             )}
 
+            {/* Guest User Notification */}
+            {!user && (
+              <Card className="relative overflow-hidden">
+                {/* Multi-layer cyberpunk background */}
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95" />
+                <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-50" />
+                
+                {/* Angular clipping */}
+                <div className="relative border border-indigo-500/30">
+                  {/* Scan line animation */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite]" />
+                  
+                  {/* Tech corners */}
+                  <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-indigo-400/60" />
+                  <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-400/60" />
+                  <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-purple-400/60" />
+                  <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-indigo-400/60" />
+                  
+                  <CardHeader className="relative z-10">
+                    <CardTitle className="flex items-center gap-2 text-center justify-center">
+                      <div className="relative">
+                        <Shield className="w-6 h-6 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                        <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
+                      </div>
+                      <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent font-mono tracking-wider">
+                        AUTHENTICATION_REQUIRED
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="relative z-10 space-y-4 text-center">
+                    <div className="space-y-3">
+                      <p className="text-slate-300 font-mono text-sm leading-relaxed">
+                        Access to provably fair verification records requires system authentication.
+                      </p>
+                      
+                      <div className="bg-gradient-to-r from-slate-800/80 via-slate-700/60 to-slate-800/80 rounded-lg p-4 space-y-2 border border-indigo-500/30">
+                        <div className="text-sm text-indigo-300 font-mono tracking-wider">VERIFICATION_FEATURES:</div>
+                        <div className="grid grid-cols-1 gap-2 text-xs font-mono">
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Eye className="w-3 h-3" />
+                            » ROUND_HISTORY_ACCESS
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Calculator className="w-3 h-3" />
+                            » PERSONAL_BET_VERIFICATION
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Dice6 className="w-3 h-3" />
+                            » CRYPTOGRAPHIC_VALIDATION
+                          </div>
+                          <div className="text-cyan-300 flex items-center justify-center gap-2">
+                            <Shield className="w-3 h-3" />
+                            » FAIRNESS_TRANSPARENCY
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-slate-400 font-mono tracking-wide">
+                        ENGAGE_SYSTEM_TO_ACCESS_VERIFICATION_PROTOCOL
+                      </p>
+                    </div>
+                  </CardContent>
+                </div>
+              </Card>
+            )}
+
             {/* User's Bets */}
-            {userBets.length > 0 && (
+            {user && userBets.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -302,7 +373,7 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
             )}
 
             {/* Error Display */}
-            {verificationData?.error && (
+            {user && verificationData?.error && (
               <Card>
                 <CardContent className="pt-6">
                   <div className="text-center text-red-500">
@@ -314,7 +385,7 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
             )}
 
             {/* Provably Fair Verification */}
-            {verificationData && !verificationData.error && (
+            {user && verificationData && !verificationData.error && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
