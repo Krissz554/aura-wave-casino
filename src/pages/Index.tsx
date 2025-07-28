@@ -522,8 +522,14 @@ export default function Index({ initialGame }: IndexProps) {
     xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
-  // Calculate XP progress using current_level_xp for progress bar
-  const xpProgress = calculateXPProgress(effectiveStats.current_level_xp, effectiveStats.xp_to_next_level);
+  // For consistent decimal display, calculate current level XP from lifetime XP if available
+  // This ensures both profile and progress bar show the same decimal precision
+  const displayCurrentLevelXP = levelStats?.lifetime_xp ? 
+    (levelStats.current_level_xp || 0) : // Use current_level_xp from profiles if available
+    effectiveStats.current_level_xp; // Fallback to calculated value
+
+  // Calculate XP progress using consistent decimal current level XP for progress bar
+  const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
   
   // Display lifetime_xp (main XP tracker) in header with live animations
   const displayXP = xpIncreaseAnimation ? animatedXP : effectiveStats.lifetime_xp;
@@ -556,7 +562,7 @@ export default function Index({ initialGame }: IndexProps) {
   useEffect(() => {
     if (effectiveStats) {
       const currentXP = effectiveStats.lifetime_xp; // Use lifetime_xp for main tracking
-      const currentLevelXP = effectiveStats.current_level_xp; // XP within current level
+      const currentLevelXP = displayCurrentLevelXP; // Use consistent decimal XP for progress bar
       const currentProgress = xpProgress;
       
       // Initialize on first load
@@ -1646,7 +1652,7 @@ export default function Index({ initialGame }: IndexProps) {
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
                       <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
-                        {formatXP(xpIncreaseAnimation ? animatedCurrentLevelXP : effectiveStats.current_level_xp)}
+                        {formatXP(xpIncreaseAnimation ? animatedCurrentLevelXP : displayCurrentLevelXP)}
                       </span>
                       <span className="text-slate-500">/</span>
                       <span className="text-primary">{formatXP(effectiveStats.current_level_xp + effectiveStats.xp_to_next_level)}</span>
