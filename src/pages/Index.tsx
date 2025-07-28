@@ -1302,98 +1302,236 @@ export default function Index({ initialGame }: IndexProps) {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 pb-8">
-        {/* Left Sidebar - Games Navigation */}
+        {/* Left Sidebar - Cyberpunk Games Navigation */}
         <div className="lg:col-span-1 space-y-4">
-          <Card className="glass border-0 bg-gradient-to-br from-card/50 to-card/30">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-                  <Gamepad2 className="w-4 h-4 text-primary" />
-                </div>
-                Games
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <Button
-                onClick={() => handleGameChange('coinflip')}
-                variant={currentGame === 'coinflip' ? 'default' : 'ghost'}
-                className={`w-full justify-start px-3 py-2 h-10 transition-all duration-200 hover:scale-[1.02] ${
-                  currentGame === 'coinflip' 
-                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-xl' 
-                    : 'hover:bg-primary/10 hover:text-primary border-0'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-md ${
+          <div className="relative overflow-hidden group">
+            {/* Cyberpunk Background with Advanced Effects */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-2xl" />
+            
+            {/* Animated Circuit Board Pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.3)_25%,rgba(99,102,241,0.3)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.3)_75%,rgba(99,102,241,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-grid-move-slow" />
+            </div>
+            
+            {/* Animated Border Glow */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-sm group-hover:blur-md transition-all duration-500" />
+            
+            {/* Scan Line Effects */}
+            <div className="absolute inset-0 overflow-hidden rounded-2xl">
+              <div className="absolute w-full h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent animate-cyber-scan-horizontal" />
+              <div className="absolute w-px h-full bg-gradient-to-b from-transparent via-accent/40 to-transparent animate-cyber-scan left-1/4" />
+            </div>
+            
+            {/* Tech Corner Details */}
+            <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-primary/60" />
+            <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-accent/60" />
+            <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-accent/60" />
+            <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-primary/60" />
+            
+            {/* Main Content Container */}
+            <Card className="relative z-10 bg-transparent border-0">
+              <CardHeader className="pb-3 border-b border-primary/20">
+                <CardTitle className="flex items-center gap-3 text-lg">
+                  <div className="relative">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-primary/30 to-accent/30 border border-primary/40">
+                      <Gamepad2 className="w-5 h-5 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                    </div>
+                    <div className="absolute inset-0 animate-ping">
+                      <div className="p-2 rounded-lg bg-primary/20">
+                        <Gamepad2 className="w-5 h-5 text-primary/40" />
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-white font-bold drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]">
+                    Games
+                  </span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 p-4">
+                {/* Coinflip Game Button */}
+                <div className="relative group/coinflip overflow-hidden">
+                  <div className={`absolute inset-0 ${
                     currentGame === 'coinflip' 
-                      ? 'bg-white/20' 
-                      : 'bg-primary/10'
-                  }`}>
-                    <Gamepad2 className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="font-medium text-sm">Coinflip</span>
+                      ? 'bg-gradient-to-r from-blue-900/80 to-purple-900/80' 
+                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
+                  } backdrop-blur-md rounded-lg`} />
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
+                    currentGame === 'coinflip' 
+                      ? 'from-blue-500/40 via-purple-500/40 to-blue-500/40' 
+                      : 'from-primary/0 via-primary/20 to-primary/0'
+                  } rounded-lg blur-sm group-hover/coinflip:blur-md transition-all duration-300`} />
+                  
+                  <Button
+                    onClick={() => handleGameChange('coinflip')}
+                    variant="ghost"
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                      currentGame === 'coinflip' 
+                        ? 'border-blue-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]' 
+                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300" />
+                    
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className={`p-2 rounded-md border ${
+                        currentGame === 'coinflip' 
+                          ? 'bg-blue-900/50 border-blue-400/60 text-blue-300' 
+                          : 'bg-slate-800/50 border-primary/30 text-primary'
+                      } transition-all duration-300`}>
+                        <Gamepad2 className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                      </div>
+                      <span className={`font-bold text-sm font-mono ${
+                        currentGame === 'coinflip' ? 'text-blue-200' : 'text-slate-200'
+                      }`}>
+                        COINFLIP
+                      </span>
+                      {currentGame === 'coinflip' && (
+                        <div className="ml-auto">
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tech corner indicators */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 group-hover/coinflip:border-primary" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 group-hover/coinflip:border-accent" />
+                  </Button>
                 </div>
-              </Button>
               
-              <Button
-                onClick={() => handleGameChange('roulette')}
-                variant={currentGame === 'roulette' ? 'default' : 'ghost'}
-                className={`w-full justify-start px-3 py-2 h-10 transition-all duration-200 hover:scale-[1.02] ${
-                  currentGame === 'roulette' 
-                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-xl' 
-                    : 'hover:bg-primary/10 hover:text-primary border-0'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-md ${
+                {/* Roulette Game Button */}
+                <div className="relative group/roulette overflow-hidden">
+                  <div className={`absolute inset-0 ${
                     currentGame === 'roulette' 
-                      ? 'bg-white/20' 
-                      : 'bg-primary/10'
-                  }`}>
-                    <Target className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="font-medium text-sm">Roulette</span>
+                      ? 'bg-gradient-to-r from-red-900/80 to-orange-900/80' 
+                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
+                  } backdrop-blur-md rounded-lg`} />
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
+                    currentGame === 'roulette' 
+                      ? 'from-red-500/40 via-orange-500/40 to-red-500/40' 
+                      : 'from-primary/0 via-primary/20 to-primary/0'
+                  } rounded-lg blur-sm group-hover/roulette:blur-md transition-all duration-300`} />
+                  
+                  <Button
+                    onClick={() => handleGameChange('roulette')}
+                    variant="ghost"
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                      currentGame === 'roulette' 
+                        ? 'border-red-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
+                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300" />
+                    
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className={`p-2 rounded-md border ${
+                        currentGame === 'roulette' 
+                          ? 'bg-red-900/50 border-red-400/60 text-red-300' 
+                          : 'bg-slate-800/50 border-primary/30 text-primary'
+                      } transition-all duration-300`}>
+                        <Target className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                      </div>
+                      <span className={`font-bold text-sm font-mono ${
+                        currentGame === 'roulette' ? 'text-red-200' : 'text-slate-200'
+                      }`}>
+                        ROULETTE
+                      </span>
+                      {currentGame === 'roulette' && (
+                        <div className="ml-auto">
+                          <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tech corner indicators */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 group-hover/roulette:border-primary" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 group-hover/roulette:border-accent" />
+                  </Button>
                 </div>
-              </Button>
               
-              <Button
-                onClick={() => handleGameChange('tower')}
-                variant={currentGame === 'tower' ? 'default' : 'ghost'}
-                className={`w-full justify-start px-3 py-2 h-10 transition-all duration-200 hover:scale-[1.02] ${
-                  currentGame === 'tower' 
-                    ? 'bg-gradient-to-r from-primary to-accent text-white shadow-lg hover:shadow-xl' 
-                    : 'hover:bg-primary/10 hover:text-primary border-0'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`p-1.5 rounded-md ${
+                {/* Tower Game Button */}
+                <div className="relative group/tower overflow-hidden">
+                  <div className={`absolute inset-0 ${
                     currentGame === 'tower' 
-                      ? 'bg-white/20' 
-                      : 'bg-primary/10'
-                  }`}>
-                    <Building className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="font-medium text-sm">Tower</span>
+                      ? 'bg-gradient-to-r from-emerald-900/80 to-teal-900/80' 
+                      : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
+                  } backdrop-blur-md rounded-lg`} />
+                  <div className={`absolute -inset-0.5 bg-gradient-to-r ${
+                    currentGame === 'tower' 
+                      ? 'from-emerald-500/40 via-teal-500/40 to-emerald-500/40' 
+                      : 'from-primary/0 via-primary/20 to-primary/0'
+                  } rounded-lg blur-sm group-hover/tower:blur-md transition-all duration-300`} />
+                  
+                  <Button
+                    onClick={() => handleGameChange('tower')}
+                    variant="ghost"
+                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 border ${
+                      currentGame === 'tower' 
+                        ? 'border-emerald-400/60 bg-transparent text-white shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                        : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
+                    
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className={`p-2 rounded-md border ${
+                        currentGame === 'tower' 
+                          ? 'bg-emerald-900/50 border-emerald-400/60 text-emerald-300' 
+                          : 'bg-slate-800/50 border-primary/30 text-primary'
+                      } transition-all duration-300`}>
+                        <Building className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                      </div>
+                      <span className={`font-bold text-sm font-mono ${
+                        currentGame === 'tower' ? 'text-emerald-200' : 'text-slate-200'
+                      }`}>
+                        TOWER
+                      </span>
+                      {currentGame === 'tower' && (
+                        <div className="ml-auto">
+                          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Tech corner indicators */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 group-hover/tower:border-primary" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 group-hover/tower:border-accent" />
+                  </Button>
                 </div>
-              </Button>
               
-              <Button
-                disabled
-                variant="ghost"
-                className="w-full justify-start px-3 py-2 h-10 opacity-50 cursor-not-allowed hover:bg-muted/10 border-0"
-              >
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-muted/20">
-                    <TrendingUp className="w-3.5 h-3.5 text-muted-foreground" />
-                  </div>
-                  <div className="text-left">
-                    <div className="font-medium text-sm text-muted-foreground">Crash</div>
-                    <div className="text-xs text-muted-foreground/70 leading-tight">Coming Soon</div>
-                  </div>
-                </div>
-              </Button>
-            </CardContent>
-          </Card>
+                {/* Crash Game Button - Coming Soon */}
+                <div className="relative group/crash overflow-hidden opacity-60">
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-slate-800/40 backdrop-blur-md rounded-lg" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 rounded-lg blur-sm" />
+                  
+                  <Button
+                    disabled
+                    variant="ghost"
+                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed border border-slate-600/20 bg-transparent"
+                  >
+                    <div className="flex items-center gap-3 relative z-10">
+                      <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
+                        <TrendingUp className="w-4 h-4" />
+                      </div>
+                      <div className="text-left">
+                        <span className="font-bold text-sm font-mono text-slate-400 block">
+                          CRASH
+                        </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <div className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
+                          <span className="text-xs text-slate-500 font-mono">COMING SOON</span>
+                          <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse delay-500" />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Tech corner indicators - dimmed */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-slate-600/30" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-slate-600/30" />
+                  </Button>
+                                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Games Area */}
