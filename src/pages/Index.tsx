@@ -63,6 +63,11 @@ export default function Index({ initialGame }: IndexProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const [notificationLoading, setNotificationLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
+  const [adminPanelLoading, setAdminPanelLoading] = useState(false);
+  const [rewardsLoading, setRewardsLoading] = useState(false);
+  const [profileModalLoading, setProfileModalLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -398,16 +403,22 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [userData?.balance, checkBalanceChange]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    await new Promise(resolve => setTimeout(resolve, 200)); // Brief loading indication
+    setLogoutLoading(false);
     setShowLogoutConfirmation(true);
   };
 
   const confirmLogout = async () => {
     try {
+      setLogoutLoading(true);
       await signOut();
       setShowLogoutConfirmation(false);
     } catch (error) {
       console.error('Error signing out:', error);
+    } finally {
+      setLogoutLoading(false);
     }
   };
 
@@ -594,14 +605,20 @@ export default function Index({ initialGame }: IndexProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      disabled={notificationLoading}
                       data-notification-button="true"
-                      onClick={() => {
+                      onClick={async () => {
                         // Add button press animation class temporarily
                         const button = document.activeElement as HTMLElement;
                         if (button) {
                           button.classList.add('animate-cyber-button-press');
                           setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
                         }
+                        
+                        // Show loading state briefly
+                        setNotificationLoading(true);
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                        setNotificationLoading(false);
                       }}
                       className={cn(
                         "relative px-3 py-2 overflow-hidden transition-all duration-300 backdrop-blur-sm active:scale-95 group",
@@ -644,7 +661,11 @@ export default function Index({ initialGame }: IndexProps) {
                       {/* Icon with advanced animations */}
                       <div className="relative z-10 flex items-center gap-2">
                         <div className="relative">
-                          {unreadCount > 0 ? (
+                          {notificationLoading ? (
+                            <div className="w-5 h-5 flex items-center justify-center">
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            </div>
+                          ) : unreadCount > 0 ? (
                             <BellDot className="w-5 h-5 transition-all duration-300 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-cyber-glow" />
                           ) : (
                             <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-all duration-300" />
@@ -1126,8 +1147,14 @@ export default function Index({ initialGame }: IndexProps) {
                     <div className="relative group/rewards">
                       <Button
                         variant="ghost"
-                        onClick={() => navigate('/rewards')}
-                        className="relative overflow-hidden border border-purple-500/40 bg-purple-950/30 hover:bg-purple-900/50 backdrop-blur-sm transition-all duration-300"
+                        disabled={rewardsLoading}
+                        onClick={async () => {
+                          setRewardsLoading(true);
+                          await new Promise(resolve => setTimeout(resolve, 200));
+                          navigate('/rewards');
+                          setRewardsLoading(false);
+                        }}
+                        className="relative overflow-hidden border border-purple-500/40 bg-purple-950/30 hover:bg-purple-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
                       >
                         {/* Cyberpunk scan line effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-400/20 to-transparent translate-x-[-100%] group-hover/rewards:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -1138,7 +1165,13 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-purple-400/0 group-hover/rewards:border-purple-400/30 rounded-md transition-all duration-300" />
                         
-                        <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)] relative z-10" />
+                        {rewardsLoading ? (
+                          <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
+                            <div className="w-3 h-3 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)] relative z-10" />
+                        )}
                         <span className="relative z-10 font-semibold bg-gradient-to-r from-purple-200 to-purple-400 bg-clip-text text-transparent">
                           Rewards
                         </span>
@@ -1155,8 +1188,14 @@ export default function Index({ initialGame }: IndexProps) {
                     <div className="relative group/admin">
                       <Button
                         variant="ghost"
-                        onClick={() => setShowAdminPanel(true)}
-                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300"
+                        disabled={adminPanelLoading}
+                        onClick={async () => {
+                          setAdminPanelLoading(true);
+                          await new Promise(resolve => setTimeout(resolve, 200));
+                          setAdminPanelLoading(false);
+                          setShowAdminPanel(true);
+                        }}
+                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
                       >
                         {/* Cyberpunk scan line effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/admin:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -1167,7 +1206,13 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-red-400/0 group-hover/admin:border-red-400/30 rounded-md transition-all duration-300" />
                         
-                        <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
+                        {adminPanelLoading ? (
+                          <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
+                            <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
+                        )}
                         <span className="relative font-semibold bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">
                           Admin
                         </span>
@@ -1183,7 +1228,12 @@ export default function Index({ initialGame }: IndexProps) {
                   {user && userData && (
                     <>
                       {/* Desktop Version */}
-                      <div className="hidden md:block relative group/profile overflow-hidden cursor-pointer" onClick={() => setShowProfile(true)}>
+                      <div className="hidden md:block relative group/profile overflow-hidden cursor-pointer" onClick={async () => {
+                        setProfileModalLoading(true);
+                        await new Promise(resolve => setTimeout(resolve, 200));
+                        setProfileModalLoading(false);
+                        setShowProfile(true);
+                      }}>
                         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-xl" />
                         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-xl blur-sm group-hover/profile:blur-md transition-all duration-300" />
                         
@@ -1210,6 +1260,12 @@ export default function Index({ initialGame }: IndexProps) {
                                     {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
                                   </span>
                                 </div>
+                                {/* Loading overlay */}
+                                {profileModalLoading && (
+                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
+                                    <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                  </div>
+                                )}
                               </div>
                             </ProfileBorder>
                           </div>
@@ -1248,7 +1304,12 @@ export default function Index({ initialGame }: IndexProps) {
                       {/* Mobile Version */}
                       <div 
                         className="flex md:hidden items-center gap-2 cursor-pointer hover:bg-primary/10 rounded-lg p-2 -m-2 transition-all duration-200 hover:scale-[1.02]"
-                        onClick={() => setShowProfile(true)}
+                        onClick={async () => {
+                          setProfileModalLoading(true);
+                          await new Promise(resolve => setTimeout(resolve, 200));
+                          setProfileModalLoading(false);
+                          setShowProfile(true);
+                        }}
                       >
                         <div className="relative">
                           <ProfileBorder level={levelStats?.current_level || 1} size="sm">
@@ -1263,6 +1324,12 @@ export default function Index({ initialGame }: IndexProps) {
                                   {(levelStats?.current_level || 1) >= 100 ? '👑' : (levelStats?.current_level || 1)}
                                 </span>
                               </div>
+                              {/* Loading overlay */}
+                              {profileModalLoading && (
+                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
+                                  <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                                </div>
+                              )}
                             </div>
                           </ProfileBorder>
                         </div>
@@ -1277,8 +1344,9 @@ export default function Index({ initialGame }: IndexProps) {
                       <Button
                         variant="ghost"
                         size="sm"
+                        disabled={logoutLoading}
                         onClick={handleLogout}
-                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300"
+                        className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
                       >
                         {/* Cyberpunk scan line effect */}
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/logout:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -1289,7 +1357,13 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-red-400/0 group-hover/logout:border-red-400/30 rounded-md transition-all duration-300" />
                         
-                        <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
+                        {logoutLoading ? (
+                          <div className="w-4 h-4 flex items-center justify-center relative z-10">
+                            <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
+                        )}
                         
                         {/* Tech corner indicators */}
                         <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-red-400/60 group-hover/logout:border-red-300" />
@@ -1790,15 +1864,24 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative group/confirm flex-1">
                   <Button
                     onClick={confirmLogout}
-                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300"
+                    disabled={logoutLoading}
+                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300 disabled:opacity-60"
                     style={{
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
                     {/* Scan line effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/confirm:translate-x-[100%] transition-transform duration-500" />
-                    <LogOut className="w-4 h-4 mr-2 text-red-300 relative z-10" />
-                    <span className="relative z-10 font-semibold text-red-200">Sign Out</span>
+                    {logoutLoading ? (
+                      <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
+                        <div className="w-3 h-3 border-2 border-red-300/30 border-t-red-300 rounded-full animate-spin" />
+                      </div>
+                    ) : (
+                      <LogOut className="w-4 h-4 mr-2 text-red-300 relative z-10" />
+                    )}
+                    <span className="relative z-10 font-semibold text-red-200">
+                      {logoutLoading ? 'Signing Out...' : 'Sign Out'}
+                    </span>
                   </Button>
                 </div>
               </div>

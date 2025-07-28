@@ -344,7 +344,13 @@ export const RealtimeChat = () => {
                     {/* Edge pulse effect */}
                     <div className="absolute inset-0 border border-primary/0 group-hover/send:border-primary/30 rounded-md transition-all duration-300" />
                     
-                    <Send className="w-4 h-4 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
+                    {loading ? (
+                      <div className="w-4 h-4 flex items-center justify-center relative z-10">
+                        <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      </div>
+                    ) : (
+                      <Send className="w-4 h-4 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
+                    )}
                     
                     {/* Tech corner indicators */}
                     <div className="absolute top-1 left-1 w-1 h-1 border-l border-t border-primary/60 group-hover/send:border-primary" />
