@@ -264,9 +264,11 @@ export const RealtimeChat = () => {
                           >
                             {msg.username}
                           </ClickableUsername>
-                         <Badge variant="outline" className={`text-xs px-2 py-0.5 text-[10px] font-mono border-primary/30 ${
-                           isOwnMessage ? 'bg-primary/20 text-blue-200' : 'bg-slate-800/50 text-green-300'
-                         }`}>
+                         <Badge variant="outline" className={`text-xs px-1.5 py-0.5 text-[9px] font-mono border ${
+                           isOwnMessage 
+                             ? 'border-blue-400/60 bg-blue-900/40 text-blue-300 shadow-[0_0_8px_rgba(59,130,246,0.3)]' 
+                             : 'border-emerald-400/60 bg-emerald-900/40 text-emerald-300 shadow-[0_0_8px_rgba(16,185,129,0.3)]'
+                         } rounded-md`}>
                            L{msg.user_level}
                          </Badge>
                          {badge && (
