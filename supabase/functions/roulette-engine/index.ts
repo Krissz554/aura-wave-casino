@@ -30,7 +30,7 @@ const WHEEL_SLOTS = [
   { slot: 4, color: 'red', multiplier: 2 }
 ];
 
-const BETTING_DURATION = 15000; // 15 seconds betting
+const BETTING_DURATION = 25000; // 25 seconds betting
 const SPINNING_DURATION = 4000; // 4 seconds spinning animation
 
 // Advanced Provably Fair Constants
