@@ -68,6 +68,7 @@ export default function Index({ initialGame }: IndexProps) {
   const [adminPanelLoading, setAdminPanelLoading] = useState(false);
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [profileModalLoading, setProfileModalLoading] = useState(false);
+  const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -422,7 +423,9 @@ export default function Index({ initialGame }: IndexProps) {
     }
   };
 
-  const handleGameChange = (game: string) => {
+  const handleGameChange = async (game: string) => {
+    setGameSelectionLoading(game);
+    await new Promise(resolve => setTimeout(resolve, 300));
     setCurrentGame(game);
     // Update URL without page reload
     if (game === 'coinflip' && location.pathname !== '/coinflip') {
@@ -434,6 +437,7 @@ export default function Index({ initialGame }: IndexProps) {
     } else if (game === 'coinflip' && location.pathname === '/') {
       navigate('/coinflip', { replace: true });
     }
+    setGameSelectionLoading(null);
   };
 
   const { levelStats } = useLevelSync();
@@ -622,26 +626,32 @@ export default function Index({ initialGame }: IndexProps) {
                       }}
                       className={cn(
                         "relative px-3 py-2 overflow-hidden transition-all duration-300 backdrop-blur-sm active:scale-95 group",
-                        // Dynamic styling based on unread count
-                        unreadCount === 0 && [
+                        // Loading state styling
+                        notificationLoading && [
+                          "border-2 border-primary/60 bg-gradient-to-r from-primary/20 to-accent/20 animate-pulse"
+                        ],
+                        // Dynamic styling based on unread count (only when not loading)
+                        !notificationLoading && unreadCount === 0 && [
                           "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50"
                         ],
-                        unreadCount > 0 && unreadCount <= 5 && [
+                        !notificationLoading && unreadCount > 0 && unreadCount <= 5 && [
                           "border-2 border-orange-400/60 bg-gradient-to-r from-orange-950/50 to-red-950/50"
                         ],
-                        unreadCount > 5 && unreadCount <= 10 && [
+                        !notificationLoading && unreadCount > 5 && unreadCount <= 10 && [
                           "border-2 border-red-400/80 bg-gradient-to-r from-red-950/60 to-pink-950/60"
                         ],
-                        unreadCount > 10 && [
+                        !notificationLoading && unreadCount > 10 && [
                           "border-2 border-red-500/90 bg-gradient-to-r from-red-950/70 to-pink-950/70 shadow-[0_0_20px_rgba(239,68,68,0.6)]"
                         ]
                       )}
                     >
                       {/* Cyberpunk scan line effect */}
                       <div className={cn(
-                        "absolute inset-0 bg-gradient-to-r from-transparent to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out",
-                        unreadCount === 0 && "via-primary/20",
-                        unreadCount > 0 && "via-orange-400/30"
+                        "absolute inset-0 bg-gradient-to-r from-transparent to-transparent transition-transform duration-700 ease-out",
+                        notificationLoading && "via-primary/40 animate-[slideInOut_1.5s_ease-in-out_infinite]",
+                        !notificationLoading && "translate-x-[-100%] group-hover:translate-x-[100%]",
+                        !notificationLoading && unreadCount === 0 && "via-primary/20",
+                        !notificationLoading && unreadCount > 0 && "via-orange-400/30"
                       )} />
                       
                       {/* Subtle inner glow on hover */}
@@ -662,8 +672,17 @@ export default function Index({ initialGame }: IndexProps) {
                       <div className="relative z-10 flex items-center gap-2">
                         <div className="relative">
                           {notificationLoading ? (
-                            <div className="w-5 h-5 flex items-center justify-center">
-                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            <div className="w-5 h-5 flex items-center justify-center relative">
+                              {/* Outer pulse ring */}
+                              <div className="absolute inset-0 w-5 h-5 border border-primary/20 rounded-full animate-ping" />
+                              
+                              {/* Inner spinning loader with glow */}
+                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                              
+                              {/* Central glow dot */}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-1 h-1 bg-primary/80 rounded-full animate-pulse" />
+                              </div>
                             </div>
                           ) : unreadCount > 0 ? (
                             <BellDot className="w-5 h-5 transition-all duration-300 text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.6)] animate-cyber-glow" />
@@ -1556,11 +1575,13 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative group/coinflip">
                   <Button
                     onClick={() => handleGameChange('coinflip')}
+                    disabled={gameSelectionLoading === 'coinflip'}
                     variant="ghost"
                     className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'coinflip' 
                         ? 'border-2 border-blue-400/80 bg-gradient-to-r from-blue-950/50 to-purple-950/50 text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] backdrop-blur-sm' 
                         : 'border border-slate-600/40 bg-slate-900/30 hover:border-primary/60 hover:bg-slate-800/50 backdrop-blur-sm'
+                    } ${gameSelectionLoading === 'coinflip' ? 'opacity-60' : ''}
                     }`}
                   >
                     {/* Cyberpunk scan line effect */}
@@ -1578,7 +1599,13 @@ export default function Index({ initialGame }: IndexProps) {
                           ? 'bg-blue-900/50 border-blue-400/60 text-blue-300' 
                           : 'bg-slate-800/50 border-primary/30 text-primary'
                       } transition-all duration-300`}>
-                        <Gamepad2 className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        {gameSelectionLoading === 'coinflip' ? (
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <Gamepad2 className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        )}
                       </div>
                       <span className={`font-bold text-sm font-mono ${
                         currentGame === 'coinflip' ? 'text-blue-200' : 'text-slate-200'
@@ -1598,12 +1625,13 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative group/roulette">
                   <Button
                     onClick={() => handleGameChange('roulette')}
+                    disabled={gameSelectionLoading === 'roulette'}
                     variant="ghost"
                     className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'roulette' 
                         ? 'border-2 border-red-400/80 bg-gradient-to-r from-red-950/50 to-orange-950/50 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] backdrop-blur-sm' 
                         : 'border border-slate-600/40 bg-slate-900/30 hover:border-red-400/60 hover:bg-slate-800/50 backdrop-blur-sm'
-                    }`}
+                    } ${gameSelectionLoading === 'roulette' ? 'opacity-60' : ''}`}
                   >
                     {/* Cyberpunk scan line effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/roulette:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -1620,7 +1648,13 @@ export default function Index({ initialGame }: IndexProps) {
                           ? 'bg-red-900/50 border-red-400/60 text-red-300' 
                           : 'bg-slate-800/50 border-primary/30 text-primary'
                       } transition-all duration-300`}>
-                        <Target className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        {gameSelectionLoading === 'roulette' ? (
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <Target className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        )}
                       </div>
                       <span className={`font-bold text-sm font-mono ${
                         currentGame === 'roulette' ? 'text-red-200' : 'text-slate-200'
@@ -1640,12 +1674,13 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative group/tower">
                   <Button
                     onClick={() => handleGameChange('tower')}
+                    disabled={gameSelectionLoading === 'tower'}
                     variant="ghost"
                     className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
                       currentGame === 'tower' 
                         ? 'border-2 border-emerald-400/80 bg-gradient-to-r from-emerald-950/50 to-teal-950/50 text-white shadow-[0_0_20px_rgba(16,185,129,0.6)] backdrop-blur-sm' 
                         : 'border border-slate-600/40 bg-slate-900/30 hover:border-emerald-400/60 hover:bg-slate-800/50 backdrop-blur-sm'
-                    }`}
+                    } ${gameSelectionLoading === 'tower' ? 'opacity-60' : ''}`}
                   >
                     {/* Cyberpunk scan line effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] group-hover/tower:translate-x-[100%] transition-transform duration-700 ease-out" />
@@ -1662,7 +1697,13 @@ export default function Index({ initialGame }: IndexProps) {
                           ? 'bg-emerald-900/50 border-emerald-400/60 text-emerald-300' 
                           : 'bg-slate-800/50 border-primary/30 text-primary'
                       } transition-all duration-300`}>
-                        <Building className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        {gameSelectionLoading === 'tower' ? (
+                          <div className="w-4 h-4 flex items-center justify-center">
+                            <div className="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
+                          </div>
+                        ) : (
+                          <Building className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
+                        )}
                       </div>
                       <span className={`font-bold text-sm font-mono ${
                         currentGame === 'tower' ? 'text-emerald-200' : 'text-slate-200'

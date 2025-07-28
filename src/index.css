@@ -1421,3 +1421,10 @@
   border-right: 2px solid rgba(99, 102, 241, 0.6);
   border-bottom: 2px solid rgba(99, 102, 241, 0.6);
 }
+
+/* Loading Animation for Notifications */
+@keyframes slideInOut {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
