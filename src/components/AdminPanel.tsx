@@ -27,17 +27,27 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
 
       try {
-        const { data, error } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+        // Try the new admin check function first
+        const { data: adminCheck, error: adminError } = await supabase.rpc('check_admin_status');
+        
+        if (adminError) {
+          console.log('Admin check function failed, trying direct table access:', adminError);
+          
+          // Fallback to direct table access
+          const { data, error } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('user_id', user.id)
+            .single();
 
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking admin status:', error);
+          if (error && error.code !== 'PGRST116') {
+            console.error('Error checking admin status:', error);
+          }
+
+          setIsAdmin(!!data);
+        } else {
+          setIsAdmin(adminCheck);
         }
-
-        setIsAdmin(!!data);
       } catch (err) {
         console.error('Error checking admin status:', err);
         setIsAdmin(false);
