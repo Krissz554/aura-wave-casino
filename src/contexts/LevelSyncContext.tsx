@@ -4,8 +4,8 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface LevelStats {
   current_level: number;
-  lifetime_xp: number;
-  current_level_xp: number;
+  lifetime_xp: number; // Main XP tracker with decimal precision
+  current_level_xp: number; // XP within current level (decimal precision)
   xp_to_next_level: number;
   border_tier: number;
 }
@@ -31,7 +31,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Get stats from profiles table (has 3-decimal precision for lifetime_xp)
+      // Get stats from profiles table with decimal precision support
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('current_level, lifetime_xp, current_xp, xp_to_next_level, border_tier')
@@ -46,8 +46,8 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         setLevelStats({
           current_level: profileData.current_level || 1,
-          lifetime_xp: profileData.lifetime_xp || 0, // This has 3 decimal precision
-          current_level_xp: profileData.current_xp || 0, // Map current_xp to current_level_xp
+          lifetime_xp: Number(profileData.lifetime_xp || 0), // Ensure it's a number with decimal precision
+          current_level_xp: Number(profileData.current_xp || 0), // Map current_xp to current_level_xp with decimals
           xp_to_next_level: profileData.xp_to_next_level || 100,
           border_tier: profileData.border_tier || 1
         });
@@ -85,39 +85,48 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
 
     fetchStats();
     
-    // Set up real-time subscription for level stats (profiles table for 3-decimal precision)
-    console.log('📊 Setting up level stats subscription for user:', user.id);
+    // Set up real-time subscription for level stats with enhanced logging
+    console.log('📊 Setting up enhanced XP tracking subscription for user:', user.id);
     const subscription = supabase
-      .channel(`level_stats_${user.id}_${Date.now()}`)
-              .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'profiles',
-            filter: `id=eq.${user.id}`
-          },
+      .channel(`xp_tracking_${user.id}_${Date.now()}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `id=eq.${user.id}`
+        },
         (payload) => {
-          console.log('📊 LEVEL STATS UPDATE:', payload);
+          console.log('📊 LIVE XP UPDATE RECEIVED:', payload);
           if (payload.new) {
             const newData = payload.new as any;
-            setLevelStats({
+            const newStats = {
               current_level: newData.current_level || 1,
-              lifetime_xp: newData.lifetime_xp || 0, // This has 3 decimal precision
-              current_level_xp: newData.current_xp || 0, // Map current_xp to current_level_xp
+              lifetime_xp: Number(newData.lifetime_xp || 0), // Ensure decimal precision
+              current_level_xp: Number(newData.current_xp || 0), // Map current_xp with decimals
               xp_to_next_level: newData.xp_to_next_level || 100,
               border_tier: newData.border_tier || 1
+            };
+            
+            console.log('📊 UPDATING XP DISPLAY:', {
+              old_lifetime_xp: levelStats?.lifetime_xp,
+              new_lifetime_xp: newStats.lifetime_xp,
+              old_current_level_xp: levelStats?.current_level_xp,
+              new_current_level_xp: newStats.current_level_xp
             });
+            
+            setLevelStats(newStats);
           }
         }
       )
       .subscribe((status, err) => {
-        console.log('📊 Level stats subscription status:', status);
+        console.log('📊 XP tracking subscription status:', status);
         if (err) console.error('📊 Subscription error:', err);
       });
 
     return () => {
-      console.log('📊 Cleaning up level stats subscription');
+      console.log('📊 Cleaning up XP tracking subscription');
       supabase.removeChannel(subscription);
     };
   }, [user]);

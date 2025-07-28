@@ -240,7 +240,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
       animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
       );
-      animateValue(0, currentXP, 1000, (val) => 
+      animateValue(0, lifetimeXP, 1000, (val) => 
         setAnimatedStats(prev => ({ ...prev, xp: val }))
       );
       animateValue(0, userData.balance, 1200, (val) => 
@@ -270,7 +270,8 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   if (!userData) return null;
 
   const currentLevel = stats?.current_level || userData.current_level;
-  const currentXP = stats?.current_level_xp || userData.current_xp;
+  const lifetimeXP = userData.lifetime_xp || 0; // Main XP display (decimal precision)
+  const currentXP = stats?.current_level_xp || userData.current_xp; // XP within current level
   const xpToNext = stats?.xp_to_next_level || userData.xp_to_next_level;
   const totalXP = currentXP + xpToNext;
   const xpProgress = calculateXPProgress(currentXP, xpToNext);

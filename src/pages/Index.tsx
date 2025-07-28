@@ -480,11 +480,11 @@ export default function Index({ initialGame }: IndexProps) {
 
   const { levelStats } = useLevelSync();
 
-  const getXpForNextLevel = (level: number) => level * 100;
+  // Calculate XP progress using current_level_xp for progress bar
   const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
   
-  // Use current values when not animating, animated values when animating
-  const displayXP = xpIncreaseAnimation ? animatedXP : (levelStats?.current_level_xp || 0);
+  // Display lifetime_xp (main XP tracker) in header with live animations
+  const displayXP = xpIncreaseAnimation ? animatedXP : (levelStats?.lifetime_xp || 0);
   const displayProgress = xpIncreaseAnimation ? animatedProgress : xpProgress;
 
   // Smooth XP animation function
@@ -513,7 +513,7 @@ export default function Index({ initialGame }: IndexProps) {
   // Handle XP changes with animations
   useEffect(() => {
     if (levelStats) {
-      const currentXP = levelStats.current_level_xp;
+      const currentXP = levelStats.lifetime_xp; // Use lifetime_xp for main tracking
       const currentProgress = xpProgress;
       
       // Initialize on first load
@@ -1520,7 +1520,7 @@ export default function Index({ initialGame }: IndexProps) {
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
                       <span className={`text-accent transition-all duration-300 ${xpIncreaseAnimation ? 'scale-110 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]' : ''}`}>
-                        {formatXP(displayXP)}
+                        {formatXP(levelStats.current_level_xp)}
                       </span>
                       <span className="text-slate-500">/</span>
                       <span className="text-primary">{formatXP(levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
