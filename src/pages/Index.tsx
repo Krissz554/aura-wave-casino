@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -511,7 +511,7 @@ export default function Index({ initialGame }: IndexProps) {
         timestamp: new Date().toISOString()
       });
     }
-  }, [levelStats, displayCurrentLevelXP]);
+  }, [levelStats, effectiveStats.lifetime_xp, displayCurrentLevelXP]);
 
 
 
@@ -526,7 +526,7 @@ export default function Index({ initialGame }: IndexProps) {
 
   // For consistent decimal display, use the same decimal source as profile section
   // The profile section correctly shows 3 decimals, so let's use the exact same data
-  const displayCurrentLevelXP = (() => {
+  const displayCurrentLevelXP = useMemo(() => {
     if (levelStats?.lifetime_xp !== undefined && levelStats?.current_level_xp !== undefined) {
       // Use the current_level_xp from profiles but ensure it's treated as decimal
       return Number(levelStats.current_level_xp);
@@ -543,7 +543,7 @@ export default function Index({ initialGame }: IndexProps) {
       const xpPerLevel = effectiveStats.xp_to_next_level + (effectiveStats.current_level_xp || 0);
       return lifetimeXP % xpPerLevel;
     }
-  })();
+  }, [levelStats?.lifetime_xp, levelStats?.current_level_xp, effectiveStats.lifetime_xp, effectiveStats.current_level, effectiveStats.xp_to_next_level, effectiveStats.current_level_xp]);
 
   // Calculate XP progress using consistent decimal current level XP for progress bar
   const xpProgress = calculateXPProgress(displayCurrentLevelXP, effectiveStats.xp_to_next_level);
