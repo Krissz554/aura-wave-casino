@@ -722,7 +722,20 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                          clipPath: 'polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))'
                        }} />
                  
-                 <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl overflow-visible">
+                                   <div className="relative">
+                    <TabsList className="relative grid w-full grid-cols-4 bg-transparent border border-slate-600/50 p-2 backdrop-blur-sm rounded-xl overflow-visible">
+                    
+                                         {/* Notification Badge - Positioned Over Achievements Tab */}
+                     {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
+                       <div className="absolute top-0 left-1/2 transform translate-x-1/4 -translate-y-2 group/badge z-[9999]">
+                        <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
+                        <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                          <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
+                            {notificationClaimable.length}
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   <TabsTrigger 
                     value="overview" 
                     className="relative overflow-hidden border border-transparent bg-slate-800/50 data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary/80 data-[state=active]:to-primary/60 data-[state=active]:border-primary/60 data-[state=active]:text-white text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-300"
@@ -770,18 +783,6 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                      </div>
                      <Award className="w-4 h-4 mr-2 drop-shadow-sm relative z-10" />
                      <span className="font-mono tracking-wide relative z-10">ACHIEVEMENTS</span>
-                    
-                                                                                   {/* Enhanced Notification Badge */}
-                      {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                        <div className="absolute -top-2 -right-2 group/badge z-[9999]">
-                         <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
-                         <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                           <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
-                             {notificationClaimable.length}
-                           </span>
-                         </div>
-                       </div>
-                     )}
                   </TabsTrigger>
                   
                   <TabsTrigger 
@@ -799,6 +800,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                      <span className="font-mono tracking-wide">STATISTICS</span>
                   </TabsTrigger>
                 </TabsList>
+              </div>
               </div>
 
               {/* Overview Tab */}
