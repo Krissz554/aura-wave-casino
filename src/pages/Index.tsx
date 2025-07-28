@@ -404,6 +404,14 @@ export default function Index({ initialGame }: IndexProps) {
     }
   }, [userData?.balance, checkBalanceChange]);
 
+  // Handle notification modal loading state
+  useEffect(() => {
+    if (notificationModalOpen) {
+      // Modal has opened, stop loading
+      setNotificationLoading(false);
+    }
+  }, [notificationModalOpen]);
+
   const handleLogout = async () => {
     setLogoutLoading(true);
     await new Promise(resolve => setTimeout(resolve, 200)); // Brief loading indication
@@ -623,13 +631,11 @@ export default function Index({ initialGame }: IndexProps) {
                             setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
                           }
                           
-                          // Show loading state briefly
+                          // Show loading state until modal opens
                           setNotificationLoading(true);
-                          await new Promise(resolve => setTimeout(resolve, 200));
-                          setNotificationLoading(false);
                         }}
                         className={cn(
-                          "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60",
+                          "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60 p-2 aspect-square",
                           // Dynamic styling based on unread count and loading state
                           unreadCount === 0 && !notificationLoading && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
                           unreadCount > 0 && unreadCount <= 5 && !notificationLoading && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
@@ -661,20 +667,38 @@ export default function Index({ initialGame }: IndexProps) {
                           unreadCount > 5 && "group-hover/notifications:border-red-400/30"
                         )} />
                         
-                        {/* Icon with proper loading state */}
+                        {/* Icon with cyberpunk loading state */}
                         <div className="relative">
                           {notificationLoading ? (
-                            <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
-                              <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                            <div className="w-5 h-5 flex items-center justify-center relative z-10">
+                              {/* Outer pulse ring */}
+                              <div className="absolute inset-0 w-5 h-5 border border-primary/20 rounded-full animate-ping" />
+                              
+                              {/* Multiple rotating rings */}
+                              <div className="absolute inset-0 w-5 h-5 border-2 border-transparent border-t-primary border-r-primary/50 rounded-full animate-spin" />
+                              <div className="absolute inset-1 w-3 h-3 border border-transparent border-b-accent border-l-accent/50 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '0.8s' }} />
+                              
+                              {/* Central pulsing core */}
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse drop-shadow-[0_0_4px_rgba(99,102,241,0.8)]" />
+                              </div>
+                              
+                              {/* Energy particles */}
+                              <div className="absolute inset-0">
+                                <div className="absolute top-0 left-1/2 w-0.5 h-0.5 bg-accent rounded-full animate-ping" style={{ animationDelay: '0.2s' }} />
+                                <div className="absolute bottom-0 right-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.4s' }} />
+                                <div className="absolute left-0 top-1/2 w-0.5 h-0.5 bg-accent rounded-full animate-ping" style={{ animationDelay: '0.6s' }} />
+                                <div className="absolute right-0 bottom-1/2 w-0.5 h-0.5 bg-primary rounded-full animate-ping" style={{ animationDelay: '0.8s' }} />
+                              </div>
                             </div>
                           ) : unreadCount > 0 ? (
                             <BellDot className={cn(
-                              "w-4 h-4 mr-2 transition-all duration-300 relative z-10",
+                              "w-5 h-5 transition-all duration-300 relative z-10",
                               unreadCount <= 5 && "text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]",
                               unreadCount > 5 && "text-red-400 drop-shadow-[0_0_6px_rgba(248,113,113,0.6)]"
                             )} />
                           ) : (
-                            <Bell className="w-4 h-4 mr-2 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
+                            <Bell className="w-5 h-5 text-primary drop-shadow-[0_0_6px_rgba(99,102,241,0.6)] relative z-10" />
                           )}
                           
                           {/* Notification counter badge */}
@@ -689,15 +713,6 @@ export default function Index({ initialGame }: IndexProps) {
                             </div>
                           )}
                         </div>
-                        
-                        <span className={cn(
-                          "relative z-10 font-semibold bg-gradient-to-r bg-clip-text text-transparent",
-                          unreadCount === 0 && "from-primary to-accent",
-                          unreadCount > 0 && unreadCount <= 5 && "from-orange-300 to-orange-500",
-                          unreadCount > 5 && "from-red-300 to-red-500"
-                        )}>
-                          {notificationLoading ? 'Loading...' : 'Notifications'}
-                        </span>
                         
                         {/* Tech corner indicators */}
                         <div className={cn(
