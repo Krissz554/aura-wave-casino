@@ -133,7 +133,7 @@ export default function Index({ initialGame }: IndexProps) {
           glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
           icon: 'text-red-400',
           accent: 'bg-red-400/20',
-          emoji: '🚨',
+          emoji: '',
           iconComponent: <AlertTriangle className="w-5 h-5" />
         };
       default:
@@ -695,10 +695,10 @@ export default function Index({ initialGame }: IndexProps) {
                           </div>
                         </div>
                         
-                        {/* Content area with reveal animation */}
+                        {/* Content area with enhanced panel animations */}
                         <div className={cn(
                           "flex-1 overflow-hidden relative",
-                          notificationModalOpen ? "animate-cyber-content-in" : "animate-cyber-content-out"
+                          notificationModalOpen ? "animate-notification-panel-open" : "animate-notification-panel-close"
                         )}>
                           <ScrollArea className="h-full">
                             {notifications.length === 0 ? (
@@ -732,7 +732,10 @@ export default function Index({ initialGame }: IndexProps) {
                                 </div>
                               </div>
                             ) : (
-                              <div className="p-6 space-y-4">
+                              <div className={cn(
+                                "p-6 space-y-4",
+                                notificationModalOpen && "animate-notification-list-stagger"
+                              )}>
                                 {notifications.map((notification, index) => {
                                   const theme = getNotificationTheme(notification.type);
                                   const isNew = newNotificationIds.has(notification.id);
@@ -749,9 +752,13 @@ export default function Index({ initialGame }: IndexProps) {
                                           : `border-primary/30 hover:border-primary/50 ${theme.glow}`,
                                         "hover:scale-[1.02] hover:shadow-2xl",
                                         isNew && "animate-cyber-notification-in",
-                                        hoveredNotification === notification.id && "scale-[1.02]"
+                                        hoveredNotification === notification.id && "scale-[1.02]",
+                                        // Add staggered entrance animation
+                                        notificationModalOpen && "animate-notification-item-enter"
                                       )}
-                                      style={{ animationDelay: `${index * 100}ms` }}
+                                      style={{ 
+                                        animationDelay: isNew ? `${index * 100}ms` : `${index * 50 + 300}ms`
+                                      }}
                                       onMouseEnter={() => setHoveredNotification(notification.id)}
                                       onMouseLeave={() => setHoveredNotification(null)}
                                       onClick={() => !notification.is_read && markNotificationAsRead(notification.id)}
@@ -835,10 +842,22 @@ export default function Index({ initialGame }: IndexProps) {
                                                   e.stopPropagation();
                                                   deleteNotification(notification.id);
                                                 }}
-                                                className="group relative h-8 w-8 p-0 rounded-lg overflow-hidden bg-red-500/15 border border-red-400/30 hover:bg-red-500/25 hover:border-red-400/50 text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.5)] transition-all duration-300"
+                                                className="group relative h-8 w-8 p-0 rounded-lg overflow-hidden bg-red-500/10 border border-red-400/25 hover:bg-red-500/20 hover:border-red-400/60 text-red-400 hover:text-red-300 hover:shadow-[0_0_20px_rgba(239,68,68,0.6)] transition-all duration-300 active:scale-95"
                                               >
-                                                <div className="absolute inset-0 bg-red-400/20 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-lg" />
-                                                <X className="relative z-10 w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
+                                                {/* Enhanced background animation */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-400/30 to-red-500/0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-lg" />
+                                                
+                                                {/* Subtle pulse ring */}
+                                                <div className="absolute inset-0 bg-red-400/20 rounded-lg scale-75 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300" />
+                                                
+                                                {/* Icon with enhanced animation */}
+                                                <X className="relative z-10 w-4 h-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-90" />
+                                                
+                                                {/* Corner accents */}
+                                                <div className="absolute top-0 left-0 w-1 h-1 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100" />
+                                                <div className="absolute top-0 right-0 w-1 h-1 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-150" />
+                                                <div className="absolute bottom-0 left-0 w-1 h-1 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-200" />
+                                                <div className="absolute bottom-0 right-0 w-1 h-1 bg-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-250" />
                                               </Button>
                                             </div>
                                           </div>
