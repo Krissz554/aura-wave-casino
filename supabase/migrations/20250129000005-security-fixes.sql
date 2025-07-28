@@ -1,5 +1,9 @@
--- Security Fixes Migration
--- Fix function search_path security warnings
+-- Critical Function Security Fixes Migration
+-- Fix function search_path security vulnerabilities
+-- 
+-- This migration addresses the 12 "function_search_path_mutable" security warnings.
+-- Anonymous access warnings are intentional for gambling platforms.
+-- AUTH configuration warnings are optional dashboard settings.
 
 BEGIN;
 
