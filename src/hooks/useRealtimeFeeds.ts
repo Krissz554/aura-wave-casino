@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -52,17 +52,29 @@ export const useRealtimeFeeds = () => {
   const [crashBets, setCrashBets] = useState<CrashBet[]>([]);
   const [loading, setLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
+  
+  const channelsRef = useRef<{
+    liveFeed?: RealtimeChannel;
+    crashRound?: RealtimeChannel;
+    crashBets?: RealtimeChannel;
+  }>({});
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
+  const maxRetries = 5;
 
   useEffect(() => {
-    let liveFeedChannel: RealtimeChannel;
-    let crashRoundChannel: RealtimeChannel;
-    let crashBetsChannel: RealtimeChannel;
-
     const setupRealtimeSubscriptions = async () => {
       try {
-        // Initial data fetch
+        // Clear any existing reconnection timeout
+        if (reconnectTimeoutRef.current) {
+          clearTimeout(reconnectTimeoutRef.current);
+        }
+
         console.log('🔍 Fetching initial live bet feed data...');
-        const [liveFeedData, crashRoundData, crashBetsData] = await Promise.all([
+        
+        // Initial data fetch with timeout
+        const fetchPromise = Promise.all([
           supabase
             .from('live_bet_feed')
             .select('*')
@@ -81,6 +93,16 @@ export const useRealtimeFeeds = () => {
             .limit(100)
         ]);
 
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Database fetch timeout')), 10000);
+        });
+
+        const [liveFeedData, crashRoundData, crashBetsData] = await Promise.race([
+          fetchPromise,
+          timeoutPromise
+        ]) as any;
+
         console.log('📊 Initial data fetch results:', {
           liveFeedCount: liveFeedData.data?.length || 0,
           liveFeedError: liveFeedData.error,
@@ -93,15 +115,24 @@ export const useRealtimeFeeds = () => {
           setLiveBetFeed(liveFeedData.data as LiveBetFeed[]);
         } else if (liveFeedData.error) {
           console.error('❌ Error fetching live bet feed:', liveFeedData.error);
+          setLastError(`Database error: ${liveFeedData.error.message}`);
         }
         
         if (crashRoundData.data?.[0]) setCurrentCrashRound(crashRoundData.data[0] as CrashRound);
         if (crashBetsData.data) setCrashBets(crashBetsData.data as CrashBet[]);
 
-        // Set up live bet feed subscription with the most basic approach
+        // Cleanup existing channels before creating new ones
+        Object.values(channelsRef.current).forEach(channel => {
+          if (channel) {
+            supabase.removeChannel(channel);
+          }
+        });
+        channelsRef.current = {};
+
+        // Set up live bet feed subscription with improved error handling
         console.log('🔗 Setting up live bet feed subscription...');
-        liveFeedChannel = supabase
-          .channel('live_bet_feed_changes')
+        channelsRef.current.liveFeed = supabase
+          .channel(`live_bet_feed_${Date.now()}`) // Unique channel name
           .on(
             'postgres_changes',
             {
@@ -130,24 +161,38 @@ export const useRealtimeFeeds = () => {
           )
           .subscribe((status) => {
             console.log('📡 Live bet feed status change:', status);
-            setIsConnected(status === 'SUBSCRIBED');
             
             if (status === 'SUBSCRIBED') {
               console.log('✅ CONNECTED: Live bet feed is now listening for changes');
-            } else if (status === 'CHANNEL_ERROR') {
-              console.error('❌ ERROR: Live bet feed subscription failed');
-              setTimeout(() => {
-                console.log('🔄 RETRY: Attempting to reconnect live bet feed...');
-                liveFeedChannel?.unsubscribe();
-                setupRealtimeSubscriptions();
-              }, 3000);
+              setIsConnected(true);
+              setConnectionAttempts(0);
+              setLastError(null);
+            } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+              console.error('❌ ERROR: Live bet feed subscription failed with status:', status);
+              setIsConnected(false);
+              setLastError(`Connection failed: ${status}`);
+              
+              // Only retry if we haven't exceeded max attempts
+              if (connectionAttempts < maxRetries) {
+                const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000); // Exponential backoff, max 30s
+                console.log(`🔄 RETRY: Attempting to reconnect in ${retryDelay}ms (attempt ${connectionAttempts + 1}/${maxRetries})`);
+                
+                setConnectionAttempts(prev => prev + 1);
+                
+                reconnectTimeoutRef.current = setTimeout(() => {
+                  setupRealtimeSubscriptions();
+                }, retryDelay);
+              } else {
+                console.error('❌ MAX RETRIES: Giving up on real-time connection after', maxRetries, 'attempts');
+                setLastError('Real-time connection failed after multiple retries');
+              }
             }
           });
 
-        // Set up crash rounds subscription
+        // Set up crash rounds subscription with same improvements
         console.log('🎰 Setting up crash rounds subscription...');
-        crashRoundChannel = supabase
-          .channel('crash_rounds_changes')
+        channelsRef.current.crashRound = supabase
+          .channel(`crash_rounds_${Date.now()}`)
           .on(
             'postgres_changes',
             {
@@ -167,10 +212,10 @@ export const useRealtimeFeeds = () => {
             console.log('🎰 Crash rounds status change:', status);
           });
 
-        // Set up crash bets subscription
+        // Set up crash bets subscription with same improvements
         console.log('💰 Setting up crash bets subscription...');
-        crashBetsChannel = supabase
-          .channel('crash_bets_changes')
+        channelsRef.current.crashBets = supabase
+          .channel(`crash_bets_${Date.now()}`)
           .on(
             'postgres_changes',
             {
@@ -210,36 +255,60 @@ export const useRealtimeFeeds = () => {
 
       } catch (error) {
         console.error('❌ Error setting up realtime subscriptions:', error);
+        setLastError(`Setup error: ${error instanceof Error ? error.message : 'Unknown error'}`);
         setLoading(false);
+        setIsConnected(false);
+        
+        // Retry with backoff if we haven't hit max retries
+        if (connectionAttempts < maxRetries) {
+          const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000);
+          console.log(`🔄 RETRY: Attempting to reconnect after error in ${retryDelay}ms`);
+          
+          setConnectionAttempts(prev => prev + 1);
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            setupRealtimeSubscriptions();
+          }, retryDelay);
+        }
       }
     };
 
     setupRealtimeSubscriptions();
 
-    // Cleanup subscriptions
+    // Cleanup subscriptions and timeouts
     return () => {
       console.log('🧹 Cleaning up realtime subscriptions...');
-      if (liveFeedChannel) {
-        supabase.removeChannel(liveFeedChannel);
-        console.log('🧹 Removed live feed channel');
+      
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
       }
-      if (crashRoundChannel) {
-        supabase.removeChannel(crashRoundChannel);
-        console.log('🧹 Removed crash round channel');
-      }
-      if (crashBetsChannel) {
-        supabase.removeChannel(crashBetsChannel);
-        console.log('🧹 Removed crash bets channel');
-      }
+      
+      Object.entries(channelsRef.current).forEach(([name, channel]) => {
+        if (channel) {
+          supabase.removeChannel(channel);
+          console.log(`🧹 Removed ${name} channel`);
+        }
+      });
+      
+      channelsRef.current = {};
     };
   }, []);
+
+  // Reset connection attempts when component unmounts or retries succeed
+  useEffect(() => {
+    if (isConnected) {
+      setConnectionAttempts(0);
+    }
+  }, [isConnected]);
 
   return {
     liveBetFeed,
     currentCrashRound,
     crashBets,
     loading,
-    isConnected
+    isConnected,
+    connectionAttempts,
+    lastError
   };
 };
 

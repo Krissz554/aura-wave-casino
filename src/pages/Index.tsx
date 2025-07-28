@@ -31,6 +31,7 @@ import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useConnectionMonitor } from '@/hooks/useConnectionMonitor';
 
 interface Notification {
   id: string;
@@ -51,6 +52,7 @@ export default function Index({ initialGame }: IndexProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { userData, loading: profileLoading, updateUserProfile } = useUserProfile();
   const { toast } = useToast();
+  const { connectionStatus, handleGameError, isHealthy } = useConnectionMonitor();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -339,6 +341,9 @@ export default function Index({ initialGame }: IndexProps) {
           console.log('🔔 Notifications subscription status:', status);
           if (status === 'SUBSCRIBED') {
             console.log('✅ Enhanced notifications subscription active for user:', user.id);
+          } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+            console.error('❌ Notifications subscription failed:', status);
+            handleGameError(new Error(`Notification subscription failed: ${status}`), 'Notifications');
           }
         });
 
@@ -917,6 +922,21 @@ export default function Index({ initialGame }: IndexProps) {
                     className="font-semibold"
                   />
                   <FloatingBalanceIncrease increases={increases} />
+                  
+                  {/* Connection status indicator */}
+                  <div 
+                    className={cn(
+                      "w-2 h-2 rounded-full transition-all duration-300",
+                      isHealthy 
+                        ? "bg-green-400 shadow-[0_0_8px_rgba(34,197,94,0.6)]" 
+                        : "bg-red-400 shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-pulse"
+                    )}
+                    title={
+                      isHealthy 
+                        ? "Connected to game servers" 
+                        : `Connection issue: ${connectionStatus.lastError || 'Checking connection...'}`
+                    }
+                  />
                 </div>
               )}
 
