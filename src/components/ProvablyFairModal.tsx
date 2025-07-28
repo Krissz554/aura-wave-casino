@@ -224,17 +224,27 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={`max-w-4xl max-h-[90vh] overflow-y-auto transition-all duration-500 ease-out ${
-        isModalVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-      }`}>
-        <DialogHeader className={`transition-all duration-300 ease-out delay-100 ${
-          isModalVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}>
-          <DialogTitle className="flex items-center gap-2">
-            <Shield className="w-5 h-5" />
-            {showCurrentRound ? 'Current Round - Provably Fair' : `Round #${roundData?.round_number} - Details`}
-          </DialogTitle>
-        </DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 border-0 bg-transparent overflow-hidden">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl" />
+          <div className="relative border border-indigo-500/30 shadow-2xl shadow-indigo-500/20 rounded-lg">
+            <div className="relative z-10 p-8 max-h-[90vh] overflow-y-auto cyberpunk-scrollbar">
+              <DialogHeader className="text-center mb-6">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="relative">
+                    <Shield className="w-12 h-12 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                    <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
+                  </div>
+                </div>
+                <DialogTitle className="text-2xl font-bold font-mono tracking-wider text-white drop-shadow-sm">
+                  <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    {showCurrentRound ? 'CURRENT_ROUND_VERIFICATION' : `ROUND_${roundData?.round_number || 'UNKNOWN'}_ANALYSIS`}
+                  </span>
+                </DialogTitle>
+                <p className="text-slate-400 text-sm font-mono tracking-wider mt-2">
+                  // CRYPTOGRAPHIC_PROOF_VALIDATION
+                </p>
+              </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
@@ -572,7 +582,10 @@ export function ProvablyFairModal({ isOpen, onClose, roundData, showCurrentRound
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
+  </div>
+</DialogContent>
+</Dialog>
   );
 }
