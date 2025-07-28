@@ -167,10 +167,10 @@ export const useRealtimeFeeds = () => {
               setIsConnected(true);
               setConnectionAttempts(0);
               setLastError(null);
-            } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-              console.error('❌ ERROR: Live bet feed subscription failed with status:', status);
+            } else if (status === 'CHANNEL_ERROR') {
+              console.error('❌ ERROR: Live bet feed subscription failed with error:', status);
               setIsConnected(false);
-              setLastError(`Connection failed: ${status}`);
+              setLastError(`Connection error: ${status}`);
               
               // Only retry if we haven't exceeded max attempts
               if (connectionAttempts < maxRetries) {
@@ -186,6 +186,10 @@ export const useRealtimeFeeds = () => {
                 console.error('❌ MAX RETRIES: Giving up on real-time connection after', maxRetries, 'attempts');
                 setLastError('Real-time connection failed after multiple retries');
               }
+            } else if (status === 'CLOSED') {
+              console.log('📡 Live bet feed subscription closed (normal cleanup)');
+              setIsConnected(false);
+              // Don't set error or retry for normal closes during cleanup
             }
           });
 

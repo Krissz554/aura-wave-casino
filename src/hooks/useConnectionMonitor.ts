@@ -154,7 +154,20 @@ export const useConnectionMonitor = () => {
                             error.message.toLowerCase().includes('timeout') ||
                             error.message.toLowerCase().includes('connection');
     
-    if (isConnectionError) {
+    // Check if it's a subscription error (often normal during cleanup)
+    const isSubscriptionError = error.message.toLowerCase().includes('subscription') &&
+                               (error.message.toLowerCase().includes('closed') ||
+                                error.message.toLowerCase().includes('channel_error'));
+    
+    if (isSubscriptionError) {
+      // For subscription errors, just log and update status without showing user notification
+      console.log(`🔔 Subscription issue in ${context}: ${error.message}`);
+      setConnectionStatus(prev => ({
+        ...prev,
+        lastError: `${context}: ${error.message}`,
+        reconnectAttempts: prev.reconnectAttempts + 1
+      }));
+    } else if (isConnectionError) {
       toast({
         title: "🎮 Connection Error",
         description: `Failed to connect to game server. Please try again.`,

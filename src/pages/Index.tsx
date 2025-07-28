@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -53,6 +53,7 @@ export default function Index({ initialGame }: IndexProps) {
   const { userData, loading: profileLoading, updateUserProfile } = useUserProfile();
   const { toast } = useToast();
   const { connectionStatus, handleGameError, isHealthy } = useConnectionMonitor();
+  const isUnmountingRef = useRef(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -232,6 +233,9 @@ export default function Index({ initialGame }: IndexProps) {
 
   // Fetch notifications on mount and set up real-time subscription
   useEffect(() => {
+    // Reset unmounting flag when user changes
+    isUnmountingRef.current = false;
+    
     if (user) {
       fetchNotifications();
 
@@ -341,14 +345,21 @@ export default function Index({ initialGame }: IndexProps) {
           console.log('🔔 Notifications subscription status:', status);
           if (status === 'SUBSCRIBED') {
             console.log('✅ Enhanced notifications subscription active for user:', user.id);
-          } else if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-            console.error('❌ Notifications subscription failed:', status);
-            handleGameError(new Error(`Notification subscription failed: ${status}`), 'Notifications');
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('❌ Notifications subscription failed with error:', status);
+            // Only show error if not unmounting
+            if (!isUnmountingRef.current) {
+              handleGameError(new Error(`Notification subscription failed: ${status}`), 'Notifications');
+            }
+          } else if (status === 'CLOSED') {
+            console.log('🔔 Notifications subscription closed (normal cleanup)');
+            // Don't show error for normal closes during cleanup
           }
         });
 
       return () => {
         console.log('🔔 Cleaning up notifications subscription');
+        isUnmountingRef.current = true;
         supabase.removeChannel(channel);
       };
     }
