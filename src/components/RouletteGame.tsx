@@ -1358,7 +1358,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                   </div>
                                   
                                   <div className="relative flex-1">
-                                <Input
+                                <input
                                   type="text"
                                   value={betAmount}
                                   onChange={(e) => {
@@ -1388,7 +1388,13 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                       setBetAmount(Number(Number(betAmount).toFixed(2)));
                                     }
                                   }}
-                                  className="w-full text-center text-4xl font-bold bg-transparent border-none focus:ring-0 focus:border-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 placeholder:font-mono placeholder:text-xl [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 font-mono tracking-wider min-h-[40px] flex items-center justify-center"
+                                  style={{
+                                    fontSize: '36px',
+                                    fontFamily: 'monospace',
+                                    fontWeight: 'bold',
+                                    letterSpacing: '0.1em'
+                                  }}
+                                  className="w-full text-center bg-transparent border-none focus:ring-0 focus:outline-none p-0 pr-8 text-primary focus:text-white placeholder:text-primary/40 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none transition-colors duration-300 min-h-[50px]"
                                   disabled={currentRound.status !== 'betting'}
                                   placeholder="[ 0.00 ]"
                                 />
