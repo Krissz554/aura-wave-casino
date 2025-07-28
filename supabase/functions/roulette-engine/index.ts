@@ -6,6 +6,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Performance and timeout configuration
+const FUNCTION_TIMEOUT_MS = 50000; // 50 second timeout (less than 55s Edge Function limit)
+const MAX_LOOP_ITERATIONS = 1000; // Prevent infinite loops
+const BATCH_SIZE = 10; // Process bets in batches to prevent timeouts
+
 // Roulette wheel configuration: 15 slots total in specific order
 const WHEEL_SLOTS = [
   { slot: 0, color: 'green', multiplier: 14 },
@@ -32,243 +37,211 @@ const SPINNING_DURATION = 4000; // 4 seconds spinning animation
 const DAILY_SEED_LENGTH = 64; // 64 character hex string (256 bits)
 const LOTTO_LENGTH = 10; // 10 digit lotto number
 
+// Timeout wrapper for all operations
+async function withTimeout<T>(operation: Promise<T>, timeoutMs: number, operationName: string): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(`Operation '${operationName}' timed out after ${timeoutMs}ms`)), timeoutMs);
+  });
+  
+  return Promise.race([operation, timeoutPromise]);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const startTime = Date.now();
+  
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    return await withTimeout((async () => {
+      const supabase = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
 
-    const { action, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
-    console.log(`🎰 Roulette Engine: ${action}`);
+      const { action, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
+      console.log(`🎰 Roulette Engine: ${action} (started at ${new Date().toISOString()})`);
 
-    switch (action) {
-      case 'get_current_round': {
-        const round = await getCurrentRound(supabase);
-        return new Response(JSON.stringify(round), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'place_bet': {
-        if (!userId || !betColor || !betAmount || !roundId) {
-          throw new Error('Missing required bet parameters');
-        }
-
-        const bet = await placeBet(supabase, userId, roundId, betColor, betAmount, clientSeed);
-        return new Response(JSON.stringify(bet), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'get_round_bets': {
-        if (!roundId) {
-          return new Response(JSON.stringify({ error: 'Round ID required' }), {
-            status: 400,
+      switch (action) {
+        case 'get_current_round': {
+          const round = await getCurrentRound(supabase);
+          return new Response(JSON.stringify(round), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
 
-        try {
-          const { data: bets, error } = await supabase
-            .from('roulette_bets')
-            .select(`
-              *,
-              profiles(username, avatar_url)
-            `)
-            .eq('round_id', roundId)
-            .order('created_at', { ascending: false });
+        case 'place_bet': {
+          if (!userId || !betColor || !betAmount || !roundId) {
+            throw new Error('Missing required bet parameters');
+          }
 
-          if (error) {
-            console.error('❌ Error fetching round bets:', error);
-            // Try without profiles join as fallback
-            const { data: fallbackBets, error: fallbackError } = await supabase
-              .from('roulette_bets')
-              .select('*')
-              .eq('round_id', roundId)
-              .order('created_at', { ascending: false });
+          const bet = await placeBet(supabase, userId, roundId, betColor, betAmount, clientSeed);
+          return new Response(JSON.stringify(bet), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
 
-            if (fallbackError) {
-              console.error('❌ Fallback bet fetch also failed:', fallbackError);
-              return new Response(JSON.stringify([]), {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-              });
-            }
-
-            console.log(`📊 Retrieved ${fallbackBets?.length || 0} bets (fallback) for round ${roundId}`);
-            return new Response(JSON.stringify(fallbackBets || []), {
+        case 'get_round_bets': {
+          if (!roundId) {
+            return new Response(JSON.stringify({ error: 'Round ID required' }), {
+              status: 400,
               headers: { ...corsHeaders, 'Content-Type': 'application/json' }
             });
           }
 
-          console.log(`📊 Retrieved ${bets?.length || 0} bets for round ${roundId}`);
-          return new Response(JSON.stringify(bets || []), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
+          try {
+            const { data: bets, error } = await supabase
+              .from('roulette_bets')
+              .select(`
+                *,
+                profiles(username, avatar_url)
+              `)
+              .eq('round_id', roundId)
+              .order('created_at', { ascending: false });
 
-        } catch (error) {
-          console.error('❌ get_round_bets crashed:', error);
-          return new Response(JSON.stringify([]), {
+            if (error) {
+              console.error('❌ Error fetching round bets:', error);
+              // Try without profiles join as fallback
+              const { data: fallbackBets, error: fallbackError } = await supabase
+                .from('roulette_bets')
+                .select('*')
+                .eq('round_id', roundId)
+                .order('created_at', { ascending: false });
+
+              if (fallbackError) {
+                console.error('❌ Fallback bet fetch also failed:', fallbackError);
+                return new Response(JSON.stringify([]), {
+                  headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+                });
+              }
+
+              console.log(`📊 Retrieved ${fallbackBets?.length || 0} bets (fallback) for round ${roundId}`);
+              return new Response(JSON.stringify(fallbackBets || []), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+              });
+            }
+
+            console.log(`📊 Retrieved ${bets?.length || 0} bets for round ${roundId}`);
+            return new Response(JSON.stringify(bets || []), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+
+          } catch (error) {
+            console.error('❌ get_round_bets crashed:', error);
+            return new Response(JSON.stringify([]), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        }
+
+        case 'get_recent_results': {
+          // Pull from authoritative roulette_rounds table (same as Provably Fair)
+          const { data: results, error } = await supabase
+            .from('roulette_rounds')
+            .select('id, round_number, result_slot, result_color, result_multiplier, created_at')
+            .eq('status', 'completed')
+            .order('round_number', { ascending: false })
+            .limit(15);
+
+          if (error) throw error;
+
+          return new Response(JSON.stringify(results || []), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
-      }
 
-      case 'get_recent_results': {
-        // Pull from authoritative roulette_rounds table (same as Provably Fair)
-        const { data: results, error } = await supabase
-          .from('roulette_rounds')
-          .select('id, round_number, result_slot, result_color, result_multiplier, created_at')
-          .eq('status', 'completed')
-          .order('round_number', { ascending: false })
-          .limit(15);
+        case 'set_client_seed': {
+          if (!userId || !clientSeed) {
+            throw new Error('Missing required parameters');
+          }
 
-        if (error) throw error;
-
-        return new Response(JSON.stringify(results || []), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'set_client_seed': {
-        if (!userId || !clientSeed) {
-          throw new Error('Missing required parameters');
-        }
-
-        const result = await setClientSeed(supabase, userId, clientSeed);
-        return new Response(JSON.stringify(result), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'reveal_daily_seeds': {
-        console.log('🔓 Manual daily seed revelation requested');
-        
-        try {
-          const result = await revealExpiredDailySeeds(supabase);
+          const result = await setClientSeed(supabase, userId, clientSeed);
           return new Response(JSON.stringify(result), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
-        } catch (error) {
-          console.error('❌ Error revealing daily seeds:', error);
-          return new Response(JSON.stringify({ error: error.message }), {
-            status: 500,
+        }
+
+        case 'reveal_daily_seeds': {
+          console.log('🔓 Manual daily seed revelation requested');
+          
+          try {
+            const result = await revealExpiredDailySeeds(supabase);
+            return new Response(JSON.stringify(result), {
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          } catch (error) {
+            console.error('❌ Error revealing daily seeds:', error);
+            return new Response(JSON.stringify({ error: error.message }), {
+              status: 500,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        }
+
+        case 'verify_round': {
+          if (!roundId) {
+            throw new Error('Round ID required');
+          }
+
+          const verification = await verifyRound(supabase, roundId, clientSeed);
+          return new Response(JSON.stringify(verification), {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
-      }
 
-      case 'verify_round': {
-        if (!roundId) {
-          throw new Error('Round ID required');
-        }
-
-        const verification = await verifyRound(supabase, roundId, clientSeed);
-        return new Response(JSON.stringify(verification), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'test_bets': {
-        // Test endpoint to check if bets are being stored correctly
-        const { data: allBets } = await supabase
-          .from('roulette_bets')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        const { data: allRounds } = await supabase
-          .from('roulette_rounds')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        // Check live bet feed data
-        const { data: liveFeed } = await supabase
-          .from('live_bet_feed')
-          .select('*')
-          .eq('game_type', 'roulette')
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        return new Response(JSON.stringify({
-          recent_bets: allBets || [],
-          recent_rounds: allRounds || [],
-          live_feed: liveFeed || [],
-          test_passed: true
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-      }
-
-      case 'test_live_feed': {
-        // Test endpoint to check live_bet_feed table and recent entries
-        try {
-          // Check table structure
-          const { data: columns, error: schemaError } = await supabase
-            .from('information_schema.columns')
-            .select('column_name, data_type, is_nullable')
-            .eq('table_schema', 'public')
-            .eq('table_name', 'live_bet_feed')
-            .order('ordinal_position');
-
-          // Check recent roulette entries
-          const { data: recentEntries, error: entriesError } = await supabase
-            .from('live_bet_feed')
-            .select('*')
-            .eq('game_type', 'roulette')
-            .order('created_at', { ascending: false })
-            .limit(5);
-
-          // Check ALL recent entries
-          const { data: allEntries, error: allError } = await supabase
-            .from('live_bet_feed')
+        case 'test_bets': {
+          // Test endpoint to check if bets are being stored correctly
+          const { data: allBets } = await supabase
+            .from('roulette_bets')
             .select('*')
             .order('created_at', { ascending: false })
             .limit(10);
 
+          const { data: allRounds } = await supabase
+            .from('roulette_rounds')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+          // Check live bet feed data
+          const { data: liveFeed } = await supabase
+            .from('live_bet_feed')
+            .select('*')
+            .eq('game_type', 'roulette')
+            .order('created_at', { ascending: false })
+            .limit(10);
+
           return new Response(JSON.stringify({
-            table_schema: {
-              columns: columns || [],
-              schema_error: schemaError
-            },
-            roulette_entries: {
-              count: recentEntries?.length || 0,
-              entries: recentEntries || [],
-              entries_error: entriesError
-            },
-            all_entries: {
-              count: allEntries?.length || 0,
-              entries: allEntries || [],
-              all_error: allError
-            }
+            recent_bets: allBets || [],
+            recent_rounds: allRounds || [],
+            live_feed: liveFeed || []
           }), {
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        } catch (error) {
-          return new Response(JSON.stringify({ 
-            error: 'Test failed', 
-            details: error.message 
-          }), {
-            status: 500,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
-      }
 
-      default:
-        return new Response(JSON.stringify({ error: 'Invalid action' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        });
-    }
+        case 'create_round': {
+          const round = await createNewRound(supabase);
+          return new Response(JSON.stringify(round), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        default:
+          throw new Error(`Unknown action: ${action}`);
+      }
+    })(), FUNCTION_TIMEOUT_MS, `${req.url} ${action || 'unknown'}`);
+
   } catch (error) {
-    console.error('❌ Roulette Engine Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const executionTime = Date.now() - startTime;
+    console.error(`❌ Roulette Engine Error (after ${executionTime}ms):`, error);
+    
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      execution_time_ms: executionTime,
+      timestamp: new Date().toISOString()
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
@@ -350,31 +323,20 @@ async function getCurrentRound(supabase: any) {
       }
       
       // Calculate the final reel position that centers the winning slot precisely
-      // 
-      // Understanding the coordinate system:
-      // - Container center line is at CENTER_OFFSET (600px from left edge)
-      // - When reel position = 0: first tile (index 0) left edge is at x=0
-      // - Tile at index i: left edge at (position + i * TILE_WIDTH)
-      // - Tile at index i: center at (position + i * TILE_WIDTH + TILE_WIDTH/2)
-      // 
-      // Goal: Make winning slot center align with CENTER_OFFSET
-      // Equation: position + winningSlotIndex * TILE_WIDTH + TILE_WIDTH/2 = CENTER_OFFSET
-      // Solve for position: position = CENTER_OFFSET - winningSlotIndex * TILE_WIDTH - TILE_WIDTH/2
-      
       const winningSlotTargetPosition = CENTER_OFFSET - (winningSlotIndex * TILE_WIDTH + TILE_WIDTH / 2);
       
-              // Verification: at this position, where will the winning slot center be?
-        const verificationSlotCenter = winningSlotTargetPosition + (winningSlotIndex * TILE_WIDTH + TILE_WIDTH / 2);
-        
-        console.log('🧮 Position calculation details:', {
-          winningSlotIndex,
-          TILE_WIDTH,
-          CENTER_OFFSET,
-          calculation: `${CENTER_OFFSET} - (${winningSlotIndex} * ${TILE_WIDTH} + ${TILE_WIDTH/2})`,
-          winningSlotTargetPosition,
-          verification: `At position ${winningSlotTargetPosition}, slot ${result.slot} center will be at ${verificationSlotCenter} (should equal ${CENTER_OFFSET})`,
-          isAccurate: Math.abs(verificationSlotCenter - CENTER_OFFSET) < 1
-        });
+      // Verification: at this position, where will the winning slot center be?
+      const verificationSlotCenter = winningSlotTargetPosition + (winningSlotIndex * TILE_WIDTH + TILE_WIDTH / 2);
+      
+      console.log('🧮 Position calculation details:', {
+        winningSlotIndex,
+        TILE_WIDTH,
+        CENTER_OFFSET,
+        calculation: `${CENTER_OFFSET} - (${winningSlotIndex} * ${TILE_WIDTH} + ${TILE_WIDTH/2})`,
+        winningSlotTargetPosition,
+        verification: `At position ${winningSlotTargetPosition}, slot ${result.slot} center will be at ${verificationSlotCenter} (should equal ${CENTER_OFFSET})`,
+        isAccurate: Math.abs(verificationSlotCenter - CENTER_OFFSET) < 1
+      });
       
       // For the first round or if no previous position, start from 0
       // Otherwise, calculate from the previous round's final position
@@ -400,10 +362,24 @@ async function getCurrentRound(supabase: any) {
       // Start with the exact position needed for the winning slot
       let finalReelPosition = winningSlotTargetPosition;
       
+      // 🛡️ PERFORMANCE FIX: Add safety check to prevent infinite loops
+      if (totalRotationDistance <= 0) {
+        console.error('❌ Invalid rotation distance:', totalRotationDistance);
+        throw new Error('Invalid rotation calculation - this would cause an infinite loop');
+      }
+      
       // Add full rotations to move left from previous position and create dramatic effect
       // Keep adding rotations until we're sufficiently left of the previous position
-      while (finalReelPosition > previousReelPosition - totalRotationDistance) {
+      let loopIterations = 0;
+      while (finalReelPosition > previousReelPosition - totalRotationDistance && loopIterations < MAX_LOOP_ITERATIONS) {
         finalReelPosition -= fullRotationDistance;
+        loopIterations++;
+      }
+      
+      // Safety check for infinite loop prevention
+      if (loopIterations >= MAX_LOOP_ITERATIONS) {
+        console.error('❌ Rotation calculation hit max iterations, using fallback');
+        finalReelPosition = winningSlotTargetPosition - totalRotationDistance;
       }
       
       // Normalize position to prevent tiles from disappearing (keep within reasonable bounds)
@@ -422,17 +398,18 @@ async function getCurrentRound(supabase: any) {
         });
       }
       
-                      console.log('🎯 Calculated synchronized reel position:', {
-          resultSlot: result.slot,
-          winningSlotIndex,
-          centerOffset: CENTER_OFFSET,
-          winningSlotTargetPosition,
-          previousReelPosition,
-          finalReelPosition,
-          totalRotationDistance,
-          rotationsAdded: Math.abs(finalReelPosition - winningSlotTargetPosition) / fullRotationDistance,
-          calculation: `slot ${result.slot} at index ${winningSlotIndex}: target=${winningSlotTargetPosition}, final=${finalReelPosition}`
-        });
+      console.log('🎯 Calculated synchronized reel position:', {
+        resultSlot: result.slot,
+        winningSlotIndex,
+        centerOffset: CENTER_OFFSET,
+        winningSlotTargetPosition,
+        previousReelPosition,
+        finalReelPosition,
+        totalRotationDistance,
+        loopIterations,
+        rotationsAdded: Math.abs(finalReelPosition - winningSlotTargetPosition) / fullRotationDistance,
+        calculation: `slot ${result.slot} at index ${winningSlotIndex}: target=${winningSlotTargetPosition}, final=${finalReelPosition}`
+      });
 
       // Update round to spinning with result and synchronized reel position
       const { data: updatedRound } = await supabase
@@ -471,17 +448,18 @@ async function getCurrentRound(supabase: any) {
 async function createNewRound(supabase: any) {
   console.log('🆕 Creating new round...');
   
-  try {
-    // Try advanced system first
-    console.log('🔬 Attempting advanced provably fair round...');
-    
-    // 🛡️ SECURITY FIX: Auto-reveal expired seeds for transparency
+  return await withTimeout((async () => {
     try {
-      await revealExpiredDailySeeds(supabase);
-    } catch (error) {
-      console.error('⚠️ Failed to auto-reveal expired seeds, but continuing:', error);
-      // Don't fail round creation if revelation fails
-    }
+      // Try advanced system first
+      console.log('🔬 Attempting advanced provably fair round...');
+      
+      // 🛡️ SECURITY FIX: Auto-reveal expired seeds for transparency (with timeout)
+      try {
+        await withTimeout(revealExpiredDailySeeds(supabase), 10000, 'revealExpiredDailySeeds');
+      } catch (error) {
+        console.error('⚠️ Failed to auto-reveal expired seeds, but continuing:', error);
+        // Don't fail round creation if revelation fails
+      }
 
     // Get or create today's daily seed
     console.log('📅 Getting daily seed...');
@@ -580,7 +558,8 @@ async function createNewRound(supabase: any) {
 
     console.log('✅ Created legacy round as fallback:', legacyRound.id);
     return legacyRound;
-  }
+    }
+  })(), 30000, 'createNewRound'); // 30 second timeout for round creation
 }
 
 async function placeBet(supabase: any, userId: string, roundId: string, betColor: string, betAmount: number, clientSeed?: string) {
@@ -934,70 +913,109 @@ async function completeRound(supabase: any, round: any) {
     .select('*')
     .eq('round_id', round.id);
 
+  if (!bets || bets.length === 0) {
+    console.log('🎯 No bets to process for this round');
+    return;
+  }
+
+  console.log(`🎯 Processing ${bets.length} bets for round ${round.id}`);
+  
+  // 🛡️ PERFORMANCE FIX: Process bets in batches to prevent timeouts
+  const betBatches = [];
+  for (let i = 0; i < bets.length; i += BATCH_SIZE) {
+    betBatches.push(bets.slice(i, i + BATCH_SIZE));
+  }
+
   let totalBetsCount = 0;
   let totalBetsAmount = 0;
 
-  // Process each bet
-  for (const bet of bets || []) {
-    totalBetsCount++;
-    totalBetsAmount += bet.bet_amount;
+  // Process each batch in parallel
+  for (let batchIndex = 0; batchIndex < betBatches.length; batchIndex++) {
+    const batch = betBatches[batchIndex];
+    console.log(`🔄 Processing batch ${batchIndex + 1}/${betBatches.length} (${batch.length} bets)`);
     
-    const isWinner = bet.bet_color === round.result_color;
-    const actualPayout = isWinner ? bet.potential_payout : 0;
-    const profit = actualPayout - bet.bet_amount;
+    // Prepare all batch operations
+    const betUpdates = [];
+    const liveFeedUpdates = [];
+    const statsUpdates = [];
+    
+    for (const bet of batch) {
+      totalBetsCount++;
+      totalBetsAmount += bet.bet_amount;
+      
+      const isWinner = bet.bet_color === round.result_color;
+      const actualPayout = isWinner ? bet.potential_payout : 0;
+      const profit = actualPayout - bet.bet_amount;
 
-    console.log(`🎲 Processing bet: user=${bet.user_id}, color=${bet.bet_color}, amount=${bet.bet_amount}, potential=${bet.potential_payout}`);
-    console.log(`🎯 Round result: ${round.result_color}, isWinner: ${isWinner}, actualPayout: ${actualPayout}, profit: ${profit}`);
+      console.log(`🎲 Preparing bet: user=${bet.user_id}, color=${bet.bet_color}, winner=${isWinner}, profit=${profit}`);
 
-    // Update bet record
-    await supabase
-      .from('roulette_bets')
-      .update({
-        is_winner: isWinner,
-        actual_payout: actualPayout,
-        profit: profit
-      })
-      .eq('id', bet.id);
+      // Prepare bet update
+      betUpdates.push(
+        supabase
+          .from('roulette_bets')
+          .update({
+            is_winner: isWinner,
+            actual_payout: actualPayout,
+            profit: profit
+          })
+          .eq('id', bet.id)
+      );
 
-    // Update live bet feed with result
-    await supabase
-      .from('live_bet_feed')
-      .update({
-        result: isWinner ? 'win' : 'loss',
-        profit: profit
-      })
-      .eq('user_id', bet.user_id)
-      .eq('game_type', 'roulette')
-      .eq('round_id', round.id);
+      // Prepare live feed update
+      liveFeedUpdates.push(
+        supabase
+          .from('live_bet_feed')
+          .update({
+            result: isWinner ? 'win' : 'loss',
+            profit: profit
+          })
+          .eq('user_id', bet.user_id)
+          .eq('game_type', 'roulette')
+          .eq('round_id', round.id)
+      );
 
-    // Update user stats and level using the comprehensive function
-    console.log(`🎯 Calling update_user_stats_and_level for user ${bet.user_id}:`, {
-      game_type: 'roulette',
-      bet_amount: bet.bet_amount,
-      result: isWinner ? 'win' : 'loss',
-      profit: profit,
-      winning_color: round.result_color,
-      bet_color: bet.bet_color
-    });
+      // Prepare stats update
+      statsUpdates.push(
+        supabase.rpc('update_user_stats_and_level', {
+          p_user_id: bet.user_id,
+          p_game_type: 'roulette',
+          p_bet_amount: bet.bet_amount,
+          p_result: isWinner ? 'win' : 'loss',
+          p_profit: profit,
+          p_streak_length: 0,
+          p_winning_color: round.result_color,
+          p_bet_color: bet.bet_color
+        })
+      );
+    }
 
-    const { data: statsResult, error: statsError } = await supabase.rpc('update_user_stats_and_level', {
-      p_user_id: bet.user_id,
-      p_game_type: 'roulette',
-      p_bet_amount: bet.bet_amount,
-      p_result: isWinner ? 'win' : 'loss',
-      p_profit: profit,
-      p_streak_length: 0,
-      p_winning_color: round.result_color,
-      p_bet_color: bet.bet_color
-    });
-
-    if (statsError) {
-      console.error('❌ Error updating user stats:', statsError);
-      console.error('❌ Error details:', JSON.stringify(statsError, null, 2));
-    } else if (statsResult && statsResult.length > 0) {
-      const result = statsResult[0];
-      console.log(`📊 Stats updated successfully for ${bet.user_id}:`, {
-        leveledUp: result.leveled_up,
+    try {
+      // Execute all updates in parallel for this batch
+      console.log(`⚡ Executing ${betUpdates.length} bet updates in parallel...`);
+      await Promise.all(betUpdates);
+      
+      console.log(`⚡ Executing ${liveFeedUpdates.length} live feed updates in parallel...`);
+      await Promise.all(liveFeedUpdates);
+      
+      console.log(`⚡ Executing ${statsUpdates.length} stats updates in parallel...`);
+      const statsResults = await Promise.allSettled(statsUpdates);
+      
+      // Log any stats update failures
+      statsResults.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`❌ Stats update failed for bet ${batch[index].id}:`, result.reason);
+        } else if (result.value?.data?.[0]?.leveled_up) {
+          console.log(`🎉 User ${batch[index].user_id} leveled up!`);
+        }
+      });
+      
+      console.log(`✅ Batch ${batchIndex + 1} completed successfully`);
+      
+    } catch (error) {
+      console.error(`❌ Error processing batch ${batchIndex + 1}:`, error);
+      // Continue with next batch even if this one fails
+    }
+  }
         newLevel: result.new_level,
         oldLevel: result.old_level,
         casesEarned: result.cases_earned,
