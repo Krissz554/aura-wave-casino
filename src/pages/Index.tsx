@@ -25,7 +25,6 @@ import { useLevelSync } from '@/contexts/LevelSyncContext';
 import { useUserLevelStats } from '@/hooks/useUserLevelStats';
 import { useXPSync } from '@/contexts/XPSyncContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
 import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
