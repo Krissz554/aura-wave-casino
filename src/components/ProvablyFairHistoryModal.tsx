@@ -198,119 +198,173 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="glass border-0 max-w-5xl max-h-[85vh]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <Shield className="w-5 h-5 text-emerald-400" />
-              Provably Fair History
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-5xl max-h-[85vh] p-0 border-0 bg-transparent overflow-hidden">
+          {/* Main Cyberpunk Container */}
+          <div className="relative">
+            {/* Multi-layer Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl" />
+            
+            {/* Circuit Pattern Overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.08)_25%,rgba(99,102,241,0.08)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.08)_75%,rgba(99,102,241,0.08)_76%,transparent_77%,transparent)] bg-[length:12px_12px] opacity-50" />
+            
+            {/* Angular Clipping */}
+            <div className="relative clip-path-[polygon(0_0,calc(100%-16px)_0,100%_16px,100%_100%,16px_100%,0_calc(100%-16px))] border border-indigo-500/30 shadow-2xl shadow-indigo-500/20">
+              
+              {/* Scan Line Animation */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/20 to-transparent translate-x-[-100%] animate-[cyber-scan_3s_ease-in-out_infinite] clip-path-[polygon(0_0,calc(100%-16px)_0,100%_16px,100%_100%,16px_100%,0_calc(100%-16px))]" />
+              
+              {/* Tech Corners */}
+              <div className="absolute top-2 left-2 w-3 h-3 border-l-2 border-t-2 border-indigo-400/60" />
+              <div className="absolute top-2 right-2 w-3 h-3 border-r-2 border-t-2 border-cyan-400/60" />
+              <div className="absolute bottom-2 left-2 w-3 h-3 border-l-2 border-b-2 border-purple-400/60" />
+              <div className="absolute bottom-2 right-2 w-3 h-3 border-r-2 border-b-2 border-indigo-400/60" />
+              
+              {/* Content */}
+              <div className="relative z-10 p-8">
+                {/* Cyberpunk Header */}
+                <DialogHeader className="text-center mb-6">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="relative">
+                      <Shield className="w-12 h-12 text-indigo-400 drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]" />
+                      <div className="absolute inset-0 border border-indigo-400/30 rounded-full animate-pulse" />
+                    </div>
+                  </div>
+                  <DialogTitle className="text-2xl font-bold font-mono tracking-wider text-white drop-shadow-sm">
+                    <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                      PROVABLY_FAIR_HISTORY
+                    </span>
+                  </DialogTitle>
+                  <p className="text-slate-400 text-sm font-mono tracking-wider mt-2">
+                    // CRYPTOGRAPHIC_VERIFICATION_PROTOCOL
+                  </p>
+                </DialogHeader>
 
-          <div className="space-y-6">
-            {/* Date Selection */}
-            <div className="bg-gradient-to-r from-emerald-500/10 to-blue-500/10 p-4 rounded-lg border border-emerald-500/20">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-emerald-400" />
-                  <div>
-                    <Label className="text-sm font-medium text-foreground">Select Date</Label>
-                    <p className="text-xs text-muted-foreground">View games and verify results from any day</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => changeDate('prev')}
-                    className="h-8 w-8 p-0 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 hover:shadow-md hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </Button>
-                  
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      max={new Date().toISOString().split('T')[0]}
-                      className="h-8 text-sm bg-background/50 border-emerald-500/30"
-                    />
-                    <div className="text-sm font-medium text-foreground min-w-0">
-                      {formatDateDisplay(selectedDate)}
+                <div className="space-y-6">
+                  {/* Cyberpunk Date Selection */}
+                  <div className="relative">
+                    {/* Background Effects */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/15 to-cyan-500/20 rounded-lg" />
+                    <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[length:8px_8px] opacity-40" />
+                    
+                    <div className="relative border border-indigo-500/30 rounded-lg p-4 clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <Calendar className="w-5 h-5 text-indigo-400 drop-shadow-[0_0_6px_rgba(99,102,241,0.6)]" />
+                            <div className="absolute inset-0 border border-indigo-400/20 rounded animate-pulse" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-bold font-mono tracking-wider text-white">DATE_SELECTION</Label>
+                            <p className="text-xs text-slate-400 font-mono">Access historical verification data</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => changeDate('prev')}
+                            className="relative h-8 w-8 p-0 bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="date"
+                              value={selectedDate}
+                              onChange={(e) => setSelectedDate(e.target.value)}
+                              max={new Date().toISOString().split('T')[0]}
+                              className="h-8 text-sm bg-gradient-to-r from-slate-800/80 via-slate-700/60 to-slate-800/80 border border-slate-600/40 text-white font-mono focus:border-indigo-500/60 focus:ring-1 focus:ring-indigo-500/40 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                            />
+                            <div className="text-sm font-bold font-mono tracking-wider text-indigo-300 min-w-0">
+                              {formatDateDisplay(selectedDate)}
+                            </div>
+                          </div>
+                          
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => changeDate('next')}
+                            disabled={selectedDate >= new Date().toISOString().split('T')[0]}
+                            className="relative h-8 w-8 p-0 bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 disabled:opacity-50 disabled:cursor-not-allowed clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                  
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => changeDate('next')}
-                    disabled={selectedDate >= new Date().toISOString().split('T')[0]}
-                    className="h-8 w-8 p-0 hover:bg-emerald-500/20 text-emerald-400 hover:text-emerald-300 hover:shadow-md hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out disabled:opacity-50"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
 
-              {/* Daily Seed Info */}
-              {selectedDailySeed && (
-                <div className="mt-3 pt-3 border-t border-emerald-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-emerald-400" />
-                      <span className="text-sm font-medium text-foreground">Daily Seed Status</span>
-                      <Badge variant={selectedDailySeed.is_revealed ? "default" : "secondary"} className="text-xs">
-                        {selectedDailySeed.is_revealed ? 'Revealed' : 'Hidden'}
-                      </Badge>
+                  {/* Cyberpunk Daily Seed Info */}
+                  {user && selectedDailySeed && (
+                    <div className="relative mt-4">
+                      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-indigo-500/15 to-purple-500/20 rounded-lg" />
+                      <div className="relative border border-cyan-500/30 rounded-lg p-3 clip-path-[polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))]">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="relative">
+                              <Shield className="w-4 h-4 text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]" />
+                              <div className="absolute inset-0 border border-cyan-400/20 rounded animate-pulse" />
+                            </div>
+                            <span className="text-sm font-bold font-mono tracking-wider text-white">DAILY_SEED_STATUS</span>
+                            <Badge 
+                              variant={selectedDailySeed.is_revealed ? "default" : "secondary"} 
+                              className={`text-xs font-mono ${selectedDailySeed.is_revealed ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}
+                            >
+                              {selectedDailySeed.is_revealed ? 'REVEALED' : 'SEALED'}
+                            </Badge>
+                          </div>
+                          <div className="text-xs font-mono text-slate-400">
+                            HASH: {selectedDailySeed.server_seed_hash.slice(0, 16)}...
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div className="text-xs font-mono text-muted-foreground">
-                      Hash: {selectedDailySeed.server_seed_hash.slice(0, 16)}...
-                    </div>
-                  </div>
-                </div>
-              )}
+                  )}
             </div>
 
-            {/* Games List */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">
-                  Games for {formatDateDisplay(selectedDate)}
-                </h3>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline" className="text-xs">
-                    {totalRounds} total rounds
-                  </Badge>
-                  {totalPages > 1 && (
-                    <Badge variant="outline" className="text-xs">
-                      Page {currentPage} of {totalPages}
-                    </Badge>
-                  )}
-                </div>
-              </div>
+                  {/* Cyberpunk Games List */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-bold font-mono tracking-wider text-white">
+                        <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
+                          ROUNDS_{formatDateDisplay(selectedDate).replace(/[^0-9]/g, '_')}
+                        </span>
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Badge className="text-xs font-mono bg-indigo-500/20 text-indigo-300 border-indigo-500/40">
+                          {totalRounds} TOTAL
+                        </Badge>
+                        {totalPages > 1 && (
+                          <Badge className="text-xs font-mono bg-purple-500/20 text-purple-300 border-purple-500/40">
+                            {currentPage}/{totalPages}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
 
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                    className="h-8 px-2 text-xs"
-                  >
-                    First
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronLeft className="w-3 h-3" />
-                  </Button>
+                    {/* Cyberpunk Pagination Controls */}
+                    {user && totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-2 mb-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(1)}
+                          disabled={currentPage === 1}
+                          className="h-8 px-2 text-xs bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white font-mono disabled:opacity-50 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                        >
+                          FIRST
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                          disabled={currentPage === 1}
+                          className="h-8 w-8 p-0 bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white disabled:opacity-50 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                        >
+                          <ChevronLeft className="w-3 h-3" />
+                        </Button>
                   
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -325,46 +379,54 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
                         pageNum = currentPage - 2 + i;
                       }
                       
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={currentPage === pageNum ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setCurrentPage(pageNum)}
-                          className="h-8 w-8 p-0 text-xs"
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    })}
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={currentPage === pageNum ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`h-8 w-8 p-0 text-xs font-mono ${
+                              currentPage === pageNum 
+                                ? 'bg-gradient-to-r from-indigo-600/80 via-purple-600/80 to-indigo-600/80 border-indigo-400/50 text-white shadow-lg shadow-indigo-500/25' 
+                                : 'bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white'
+                            } clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]`}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      })}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                      className="h-8 w-8 p-0 bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white disabled:opacity-50 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                    >
+                      <ChevronRight className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className="h-8 px-2 text-xs bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white font-mono disabled:opacity-50 clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                    >
+                      LAST
+                    </Button>
                   </div>
-                  
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages}
-                    className="h-8 w-8 p-0"
-                  >
-                    <ChevronRight className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    className="h-8 px-2 text-xs"
-                  >
-                    Last
-                  </Button>
-                </div>
-              )}
+                )}
 
-              {loading ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-                </div>
-              ) : !user ? (
+                    {loading ? (
+                      <div className="flex flex-col items-center justify-center py-12">
+                        <div className="relative">
+                          <div className="animate-spin rounded-full h-8 w-8 border-2 border-transparent border-t-indigo-400 border-r-purple-400"></div>
+                          <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse"></div>
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono tracking-wider mt-3">LOADING_VERIFICATION_DATA</p>
+                      </div>
+                    ) : !user ? (
                 /* Cyberpunk Guest Authentication Notification */
                 <div className="relative overflow-hidden my-6">
                   {/* Multi-layer cyberpunk background */}
@@ -437,55 +499,64 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
                   <p className="text-sm">Try selecting a different date</p>
                 </div>
               ) : (
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-2">{rounds.map((round) => (
+                <ScrollArea className="h-[400px] cyberpunk-scrollbar">
+                  <div className="space-y-3">{rounds.map((round) => (
                     <div
                       key={round.id}
-                      className="glass border-0 p-4 rounded-lg hover:bg-white/5 transition-all duration-200"
+                      className="relative group"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                          {/* Round Number */}
-                          <div className="text-lg font-bold text-emerald-400">
-                            #{round.round_number}
-                          </div>
-
-                          {/* Result */}
-                          <div className="flex items-center gap-2">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${getColorClass(round.result_color)}`}>
-                              {round.result_slot}
+                      {/* Multi-layer Background */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-800/60 via-slate-700/40 to-slate-800/60 rounded-lg" />
+                      <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.06)_25%,rgba(99,102,241,0.06)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.06)_75%,rgba(99,102,241,0.06)_76%,transparent_77%,transparent)] bg-[length:10px_10px] opacity-30" />
+                      
+                      <div className="relative border border-slate-600/40 group-hover:border-indigo-500/50 rounded-lg p-4 transition-all duration-300 hover:bg-slate-700/20 clip-path-[polygon(0_0,calc(100%-8px)_0,100%_8px,100%_100%,8px_100%,0_calc(100%-8px))]">
+                        {/* Scan Line on Hover */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-indigo-400/10 to-transparent translate-x-[-100%] group-hover:animate-[cyber-scan_1s_ease-in-out] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            {/* Round Number */}
+                            <div className="text-lg font-bold font-mono tracking-wider text-indigo-400 drop-shadow-[0_0_6px_rgba(99,102,241,0.6)]">
+                              #{round.round_number}
                             </div>
-                            <span className="text-sm text-muted-foreground capitalize">
-                              {round.result_color}
-                            </span>
+
+                            {/* Result */}
+                            <div className="flex items-center gap-2">
+                              <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-bold text-sm border-2 ${getColorClass(round.result_color)} clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]`}>
+                                {round.result_slot}
+                              </div>
+                              <span className="text-sm text-slate-300 capitalize font-mono tracking-wider">
+                                {round.result_color.toUpperCase()}
+                              </span>
+                            </div>
+
+                            {/* System Type */}
+                            <Badge className={`text-xs font-mono ${getSystemType(round) === 'Advanced' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' : 'bg-orange-500/20 text-orange-300 border-orange-500/40'}`}>
+                              {getSystemType(round).toUpperCase()}
+                            </Badge>
+
+                            {/* Hash Preview */}
+                            <div className="text-xs font-mono text-slate-400">
+                              HASH: {round.server_seed_hash.slice(0, 12)}...
+                            </div>
+
+                            {/* Date */}
+                            <div className="text-xs text-slate-400 font-mono">
+                              {new Date(round.created_at).toLocaleString()}
+                            </div>
                           </div>
 
-                          {/* System Type */}
-                          <Badge variant={getSystemType(round) === 'Advanced' ? 'default' : 'secondary'} className="text-xs">
-                            {getSystemType(round)}
-                          </Badge>
-
-                          {/* Hash Preview */}
-                          <div className="text-xs font-mono text-muted-foreground">
-                            {round.server_seed_hash.slice(0, 12)}...
-                          </div>
-
-                          {/* Date */}
-                          <div className="text-xs text-muted-foreground">
-                            {new Date(round.created_at).toLocaleString()}
-                          </div>
+                          {/* Actions */}
+                          <Button
+                            onClick={() => openRoundDetails(round)}
+                            variant="outline"
+                            size="sm"
+                            className="relative bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-indigo-600/80 hover:via-purple-600/80 hover:to-indigo-600/80 border border-slate-400/30 hover:border-indigo-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-indigo-500/25 font-mono tracking-wider clip-path-[polygon(0_0,calc(100%-4px)_0,100%_4px,100%_100%,4px_100%,0_calc(100%-4px))]"
+                          >
+                            <Eye className="w-3 h-3 mr-2" />
+                            ANALYZE
+                          </Button>
                         </div>
-
-                        {/* Actions */}
-                        <Button
-                          onClick={() => openRoundDetails(round)}
-                          variant="outline"
-                          size="sm"
-                          className="glass border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 hover:border-emerald-400 text-emerald-400 hover:text-emerald-300 hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 ease-out"
-                        >
-                          <Eye className="w-3 h-3 mr-1" />
-                          Details
-                        </Button>
                       </div>
                     </div>
                   ))}
@@ -494,23 +565,33 @@ export function ProvablyFairHistoryModal({ isOpen, onClose }: ProvablyFairHistor
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-white/10">
-              <Link 
-                to="/provably-fair" 
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-emerald-400 transition-colors"
-                onClick={() => onClose()}
-              >
-                <HelpCircle className="w-4 h-4" />
-                How does Provably Fair work?
-              </Link>
-              
-              <Button onClick={onClose} variant="outline" className="glass">
-                <X className="w-4 h-4 mr-1" />
-                Close
-              </Button>
+                    {/* Cyberpunk Footer */}
+                    <div className="flex items-center justify-between pt-6 mt-6 border-t border-indigo-500/20">
+                      <Link 
+                        to="/provably-fair" 
+                        className="flex items-center gap-2 text-sm text-slate-400 hover:text-indigo-400 transition-colors font-mono tracking-wider"
+                        onClick={() => onClose()}
+                      >
+                        <div className="relative">
+                          <HelpCircle className="w-4 h-4" />
+                          <div className="absolute inset-0 border border-indigo-400/20 rounded-full animate-pulse" />
+                        </div>
+                        SYSTEM_DOCUMENTATION
+                      </Link>
+                      
+                      <Button 
+                        onClick={onClose} 
+                        className="relative bg-gradient-to-r from-slate-700/80 via-slate-600/80 to-slate-700/80 hover:from-red-600/80 hover:via-red-500/80 hover:to-red-600/80 border border-slate-400/30 hover:border-red-400/50 text-slate-200 hover:text-white transition-all duration-300 hover:shadow-lg hover:shadow-red-500/25 clip-path-[polygon(0_0,calc(100%-6px)_0,100%_6px,100%_100%,6px_100%,0_calc(100%-6px))] font-mono tracking-wider"
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        TERMINATE
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </DialogContent>
+          </DialogContent>
       </Dialog>
 
       {/* Round Details Modal */}
