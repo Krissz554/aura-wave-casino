@@ -1246,3 +1246,178 @@
     overflow: hidden;
   }
 }
+
+/* Header Cyberpunk Animations */
+.animate-cyber-scan {
+  animation: cyber-scan 3s linear infinite;
+}
+
+.animate-cyber-scan-horizontal {
+  animation: cyber-scan-horizontal 4s linear infinite;
+}
+
+.animate-grid-move-slow {
+  animation: grid-move-slow 8s linear infinite;
+}
+
+.animate-cyber-header-pulse {
+  animation: cyber-header-pulse 4s ease-in-out infinite;
+}
+
+.animate-cyber-logo-shine {
+  animation: cyber-logo-shine 3s ease-in-out infinite;
+}
+
+.animate-cyber-typing {
+  animation: cyber-typing 4s steps(26) infinite;
+}
+
+.animate-cyber-balance-glow {
+  animation: cyber-balance-glow 2s ease-in-out infinite alternate;
+}
+
+.animate-cyber-button-hover {
+  animation: cyber-button-hover 0.3s ease-out forwards;
+}
+
+.animate-cyber-avatar-scan {
+  animation: cyber-avatar-scan 3s linear infinite;
+}
+
+@keyframes cyber-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes cyber-scan-horizontal {
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes grid-move-slow {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(20px, 20px);
+  }
+}
+
+@keyframes cyber-header-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2), inset 0 0 20px rgba(99, 102, 241, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.4), inset 0 0 30px rgba(99, 102, 241, 0.2);
+  }
+}
+
+@keyframes cyber-logo-shine {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes cyber-typing {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes cyber-balance-glow {
+  0% {
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 25px rgba(34, 197, 94, 0.6), 0 0 40px rgba(34, 197, 94, 0.3);
+  }
+}
+
+@keyframes cyber-button-hover {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.5);
+  }
+}
+
+@keyframes cyber-avatar-scan {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+}
+
+/* Cyberpunk tech corner effects */
+.cyber-corner-tl::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-left: 2px solid rgba(99, 102, 241, 0.6);
+  border-top: 2px solid rgba(99, 102, 241, 0.6);
+}
+
+.cyber-corner-tr::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(99, 102, 241, 0.6);
+  border-top: 2px solid rgba(99, 102, 241, 0.6);
+}
+
+.cyber-corner-bl::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border-left: 2px solid rgba(99, 102, 241, 0.6);
+  border-bottom: 2px solid rgba(99, 102, 241, 0.6);
+}
+
+.cyber-corner-br::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid rgba(99, 102, 241, 0.6);
+  border-bottom: 2px solid rgba(99, 102, 241, 0.6);
+}
