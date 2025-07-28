@@ -497,7 +497,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                              style={{
                                clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                              }}>
-                          <div className="text-3xl font-bold text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)] animate-cyber-balance-glow">
+                          <div className="text-3xl font-bold text-primary drop-shadow-[0_0_8px_rgba(99,102,241,0.8)]">
                             {animatedStats.level}
                           </div>
                           <div className="text-sm text-primary/80 font-mono tracking-wider">LEVEL</div>
@@ -625,7 +625,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                        </div>
                        
                        {/* Balance Amount */}
-                       <div className="text-4xl font-bold text-green-400 drop-shadow-[0_0_12px_rgba(34,197,94,0.8)] font-mono animate-cyber-balance-glow">
+                       <div className="text-4xl font-bold text-green-400 drop-shadow-[0_0_12px_rgba(34,197,94,0.8)] font-mono">
                          {isBalanceVisible ? `$${animatedStats.balance.toFixed(2)}` : '$••••••'}
                        </div>
                        
@@ -707,8 +707,11 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
-                    {/* Scan line effect for active state */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
+                                         {/* Scan line effect for active state */}
+                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                          }} />
                     <BarChart3 className="w-4 h-4 mr-2 drop-shadow-sm" />
                     <span className="font-mono tracking-wide">OVERVIEW</span>
                   </TabsTrigger>
@@ -720,9 +723,12 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
-                    <Gamepad2 className="w-4 h-4 mr-2 drop-shadow-sm" />
-                    <span className="font-mono tracking-wide">GAMES</span>
+                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                          }} />
+                     <Gamepad2 className="w-4 h-4 mr-2 drop-shadow-sm" />
+                     <span className="font-mono tracking-wide">GAMES</span>
                   </TabsTrigger>
                   
                   <TabsTrigger 
@@ -732,21 +738,24 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
-                    <Award className="w-4 h-4 mr-2 drop-shadow-sm" />
-                    <span className="font-mono tracking-wide">ACHIEVEMENTS</span>
+                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                          }} />
+                     <Award className="w-4 h-4 mr-2 drop-shadow-sm" />
+                     <span className="font-mono tracking-wide">ACHIEVEMENTS</span>
                     
-                    {/* Enhanced Notification Badge */}
-                    {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
-                      <div className="absolute -top-2 -right-2 group/badge">
-                        <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
-                        <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                          <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
-                            {notificationClaimable.length}
-                          </span>
-                        </div>
-                      </div>
-                    )}
+                                         {/* Enhanced Notification Badge */}
+                     {(isOwnProfile || shouldShowOwnProfile) && notificationClaimable.length > 0 && (
+                       <div className="absolute -top-2 -right-2 group/badge z-50">
+                         <div className="absolute -inset-1 bg-green-500/60 rounded-full blur-sm animate-pulse" />
+                         <div className="relative w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 border-2 border-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                           <span className="text-xs font-bold text-white drop-shadow-[0_0_4px_rgba(0,0,0,0.8)]">
+                             {notificationClaimable.length}
+                           </span>
+                         </div>
+                       </div>
+                     )}
                   </TabsTrigger>
                   
                   <TabsTrigger 
@@ -756,9 +765,12 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out" />
-                    <TrendingUp className="w-4 h-4 mr-2 drop-shadow-sm" />
-                    <span className="font-mono tracking-wide">STATISTICS</span>
+                                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] data-[state=active]:translate-x-[100%] transition-transform duration-700 ease-out overflow-hidden"
+                          style={{
+                            clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                          }} />
+                     <TrendingUp className="w-4 h-4 mr-2 drop-shadow-sm" />
+                     <span className="font-mono tracking-wide">STATISTICS</span>
                   </TabsTrigger>
                 </TabsList>
               </div>
