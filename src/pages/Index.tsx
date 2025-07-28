@@ -371,11 +371,20 @@ export default function Index({ initialGame }: IndexProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      onClick={() => {
+                        // Add button press animation class temporarily
+                        const button = document.activeElement as HTMLElement;
+                        if (button) {
+                          button.classList.add('animate-cyber-button-press');
+                          setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
+                        }
+                      }}
                       className={cn(
                         "relative px-3 py-2 overflow-hidden group",
                         "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
                         "border border-primary/20 rounded-xl transition-all duration-500",
                         "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
+                        "active:scale-95 active:shadow-[0_0_40px_rgba(99,102,241,0.8)]",
                         unreadCount > 0 && "animate-cyber-pulse"
                       )}
                     >
@@ -410,20 +419,32 @@ export default function Index({ initialGame }: IndexProps) {
                     </Button>
                   </DialogTrigger>
                   
-                  <DialogContent className={cn(
-                    "max-w-4xl w-[95vw] h-[85vh] p-0 border-0 bg-transparent",
-                    "data-[state=open]:animate-cyber-modal-in",
-                    "data-[state=closed]:animate-cyber-modal-out"
-                  )}>
-                    {/* Main cyberpunk container */}
-                    <div className="relative w-full h-full overflow-hidden">
+                  <DialogContent className="max-w-4xl w-[95vw] h-[85vh] p-0 border-0 bg-transparent overflow-hidden">
+                    {/* Animated backdrop with cyberpunk effects */}
+                    <div className={cn(
+                      "fixed inset-0 bg-black/80 backdrop-blur-lg transition-all duration-800",
+                      notificationModalOpen ? "animate-cyber-backdrop-in" : "animate-cyber-backdrop-out"
+                    )} />
+                    
+                    {/* Main cyberpunk container with epic entrance */}
+                    <div className={cn(
+                      "relative w-full h-full overflow-hidden transition-all duration-1200 transform-gpu",
+                      notificationModalOpen ? "animate-cyber-modal-in" : "animate-cyber-modal-out"
+                    )}>
                       {/* Animated background with multiple layers */}
                       <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95 backdrop-blur-2xl" />
                       
-                      {/* Circuit board pattern */}
-                      <div className="absolute inset-0 opacity-[0.15]">
+                      {/* Enhanced circuit board pattern with activation animation */}
+                      <div className={cn(
+                        "absolute inset-0 opacity-[0.15] transition-all duration-2000",
+                        notificationModalOpen && "animate-cyber-circuit-in"
+                      )}>
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.3)_1px,transparent_0)] bg-[12px_12px] animate-grid-move" />
                         <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(99,102,241,0.1)_25%,rgba(99,102,241,0.1)_26%,transparent_27%,transparent_74%,rgba(99,102,241,0.1)_75%,rgba(99,102,241,0.1)_76%,transparent_77%,transparent)] bg-[24px_24px]" />
+                        
+                        {/* Power-up circuit lines */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent animate-cyber-energy-surge" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent/8 to-transparent animate-cyber-energy-surge delay-300" />
                       </div>
                       
                       {/* Animated corner elements */}
@@ -474,8 +495,13 @@ export default function Index({ initialGame }: IndexProps) {
                       
                       {/* Main content area */}
                       <div className="relative z-10 h-full flex flex-col">
-                        {/* Header section with enhanced design */}
-                        <div className="p-6 border-b border-primary/20 bg-gradient-to-r from-slate-900/40 to-slate-800/40 backdrop-blur-sm">
+                        {/* Header section with enhanced design and scan-line entrance */}
+                        <div className={cn(
+                          "p-6 border-b border-primary/20 bg-gradient-to-r from-slate-900/40 to-slate-800/40 backdrop-blur-sm relative overflow-hidden",
+                          notificationModalOpen && "animate-cyber-header-in"
+                        )}>
+                          {/* Scan-line effect */}
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -skew-x-12 animate-cyber-energy-surge opacity-30" />
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-6">
                               {/* Advanced status indicator */}
@@ -547,8 +573,11 @@ export default function Index({ initialGame }: IndexProps) {
                           </div>
                         </div>
                         
-                        {/* Content area */}
-                        <div className="flex-1 overflow-hidden">
+                        {/* Content area with reveal animation */}
+                        <div className={cn(
+                          "flex-1 overflow-hidden relative",
+                          notificationModalOpen ? "animate-cyber-content-in" : "animate-cyber-content-out"
+                        )}>
                           <ScrollArea className="h-full">
                             {notifications.length === 0 ? (
                               <div className="flex items-center justify-center h-full min-h-[400px]">
