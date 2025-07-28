@@ -1307,35 +1307,35 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
               {/* Full-Width Betting Interface */}
               {user && profile ? (
                 <div className="w-full">
-                  <div className="relative glass rounded-lg px-4 py-3 border border-primary/20 shadow-lg backdrop-blur-lg">
-                    <div className="relative flex items-center justify-between gap-4">
-                      {/* Left Side - Bet Amount Input with Floating Label */}
-                      <div className="flex items-center gap-3 flex-1">
-                        <div className="relative flex-1 max-w-xs">
-                          {/* Clean Floating Label with Perfect Border Break */}
-                          <div className="absolute -top-2.5 left-3 z-20">
-                            <label className="text-xs font-medium text-primary uppercase tracking-wider">
-                              Bet Amount
-                            </label>
-                          </div>
-                          
-                          {/* Container with Custom Border that Breaks for Label */}
-                          <div className="relative">
-                            {/* Custom Border Elements with Perfect Gap */}
-                            <div className="absolute inset-0 rounded-lg overflow-hidden">
-                              {/* Top border with precise gap for text */}
-                              <div className="absolute top-0 left-0 h-px bg-primary/40" style={{ width: '12px' }}></div>
-                              <div className="absolute top-0 h-px bg-primary/40" style={{ left: '80px', width: 'calc(100% - 80px)' }}></div>
-                              
-                              {/* Side borders */}
-                              <div className="absolute top-0 left-0 w-px h-full bg-primary/40"></div>
-                              <div className="absolute top-0 right-0 w-px h-full bg-primary/40"></div>
-                              
-                              {/* Bottom border */}
-                              <div className="absolute bottom-0 left-0 w-full h-px bg-primary/40"></div>
+                  <div className="relative overflow-hidden group">
+                    {/* Cyberpunk Background */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-slate-800/70 to-slate-900/80 backdrop-blur-sm rounded-xl" />
+                    
+                    {/* Subtle Border Glow */}
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 via-accent/15 to-primary/10 rounded-xl blur-sm transition-all duration-300" />
+                    
+                    {/* Tech Corner Accents */}
+                    <div className="absolute top-1 left-1 w-2 h-2 border-l border-t border-primary/50" />
+                    <div className="absolute bottom-1 right-1 w-2 h-2 border-r border-b border-accent/50" />
+                    
+                    <div className="relative z-10 px-4 py-3">
+                      <div className="relative flex items-center justify-between gap-4">
+                        {/* Left Side - Bet Amount Input with Floating Label */}
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="relative flex-1 max-w-xs">
+                            {/* Clean Floating Label */}
+                            <div className="absolute -top-2.5 left-3 z-20">
+                              <label className="text-xs font-medium text-primary uppercase tracking-wider bg-slate-800/90 px-2 rounded">
+                                Bet Amount
+                              </label>
                             </div>
                             
-                            <div className="flex items-center gap-2 bg-black/50 rounded-lg px-3 py-2 relative z-10">
+                            {/* Container with Cyberpunk Border */}
+                            <div className="relative">
+                              {/* Cyberpunk Border */}
+                              <div className="absolute inset-0 rounded-lg border border-primary/30 group-hover:border-primary/50 transition-colors duration-300"></div>
+                              
+                              <div className="flex items-center gap-2 bg-slate-900/60 rounded-lg px-3 py-2 relative z-10">
                               <span className="text-lg font-bold text-primary">$</span>
                               <div className="relative flex-1">
                                 <Input
@@ -1439,6 +1439,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                     </div>
                   </div>
                 </div>
+              </div>
               ) : (
                 <div className="text-center py-4">
                   <p className="text-muted-foreground">Sign in to place bets</p>
@@ -1507,18 +1508,18 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
                     {/* Live Bet Feed (Cyberpunk Design) */}
                     <div className="relative overflow-hidden group">
-                      {/* Cyberpunk Background */}
-                      <div className={`absolute inset-0 backdrop-blur-md rounded-xl ${
-                        color === 'red' ? 'bg-gradient-to-br from-red-950/80 via-red-900/70 to-red-950/80' :
-                        color === 'green' ? 'bg-gradient-to-br from-emerald-950/80 via-emerald-900/70 to-emerald-950/80' :
-                        'bg-gradient-to-br from-slate-950/80 via-slate-900/70 to-slate-950/80'
+                      {/* Clean Cyberpunk Background */}
+                      <div className={`absolute inset-0 backdrop-blur-sm rounded-xl ${
+                        color === 'red' ? 'bg-gradient-to-br from-slate-900/60 via-slate-800/50 to-slate-900/60' :
+                        color === 'green' ? 'bg-gradient-to-br from-slate-900/60 via-slate-800/50 to-slate-900/60' :
+                        'bg-gradient-to-br from-slate-900/60 via-slate-800/50 to-slate-900/60'
                       }`} />
                       
-                      {/* Animated Border Glow */}
-                      <div className={`absolute -inset-0.5 rounded-xl blur-sm group-hover:blur-md transition-all duration-300 ${
-                        color === 'red' ? 'bg-gradient-to-r from-red-500/20 via-red-400/30 to-red-500/20' :
-                        color === 'green' ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-400/30 to-emerald-500/20' :
-                        'bg-gradient-to-r from-slate-500/20 via-slate-400/30 to-slate-500/20'
+                      {/* Subtle Border Accent */}
+                      <div className={`absolute -inset-0.5 rounded-xl blur-sm transition-all duration-300 ${
+                        color === 'red' ? 'bg-gradient-to-r from-red-500/10 via-red-400/15 to-red-500/10' :
+                        color === 'green' ? 'bg-gradient-to-r from-emerald-500/10 via-emerald-400/15 to-emerald-500/10' :
+                        'bg-gradient-to-r from-slate-500/10 via-slate-400/15 to-slate-500/10'
                       }`} />
                       
                       {/* Tech Corner Accents */}
@@ -1567,15 +1568,27 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                               {(color === 'green' ? greenBets : color === 'red' ? redBets : blackBets).slice(0, 8).map((bet, index) => (
                                 <div
                                   key={index}
-                                  className="p-2 rounded-lg border bg-card/20 hover:bg-card/30 transition-colors animate-fade-in"
+                                  className={`p-2 rounded-lg border transition-colors animate-fade-in ${
+                                    color === 'red' ? 'bg-red-950/40 hover:bg-red-950/60 border-red-500/20' :
+                                    color === 'green' ? 'bg-emerald-950/40 hover:bg-emerald-950/60 border-emerald-500/20' :
+                                    'bg-slate-900/40 hover:bg-slate-900/60 border-slate-500/20'
+                                  }`}
                                 >
                                   <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
-                                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary/30 to-primary/50 flex items-center justify-center text-xs font-bold border border-primary/50">
+                                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border ${
+                                        color === 'red' ? 'bg-gradient-to-br from-red-500/30 to-red-600/50 border-red-400/50 text-red-200' :
+                                        color === 'green' ? 'bg-gradient-to-br from-emerald-500/30 to-emerald-600/50 border-emerald-400/50 text-emerald-200' :
+                                        'bg-gradient-to-br from-slate-500/30 to-slate-600/50 border-slate-400/50 text-slate-200'
+                                      }`}>
                                         {bet.username[0].toUpperCase()}
                                       </div>
                                       <div className="min-w-0 flex-1">
-                                        <div className="font-medium text-xs text-primary truncate">
+                                        <div className={`font-medium text-xs truncate ${
+                                          color === 'red' ? 'text-red-300' :
+                                          color === 'green' ? 'text-emerald-300' :
+                                          'text-slate-300'
+                                        }`}>
                                           {bet.username}
                                         </div>
                                         {bet.result !== 'pending' && (
@@ -1588,7 +1601,11 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
                                     <div className="text-right flex-shrink-0">
                                       {bet.result === 'pending' ? (
                                         // Show bet amount for pending bets
-                                        <div className="font-bold text-xs text-primary">
+                                        <div className={`font-bold text-xs ${
+                                          color === 'red' ? 'text-red-200' :
+                                          color === 'green' ? 'text-emerald-200' :
+                                          'text-slate-200'
+                                        }`}>
                                           ${bet.bet_amount.toFixed(0)}
                                         </div>
                                       ) : (
