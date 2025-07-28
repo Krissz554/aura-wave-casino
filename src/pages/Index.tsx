@@ -273,12 +273,65 @@ export default function Index({ initialGame }: IndexProps) {
                 });
               }, 3000);
 
-              // Enhanced toast notification
+              // Get notification theme for enhanced toast
+              const theme = getNotificationTheme(newNotification.type);
+              
+              // Enhanced toast notification with type-specific styling
               toast({
-                title: `🔔 ${newNotification.title}`,
+                title: `${theme.emoji} ${newNotification.title}`,
                 description: newNotification.message,
-                duration: 5000,
+                duration: 6000,
               });
+
+              // Add button pulse effect for new notifications
+              const notificationButton = document.querySelector('[data-notification-button]');
+              if (notificationButton) {
+                notificationButton.classList.add('animate-cyber-button-press');
+                setTimeout(() => notificationButton.classList.remove('animate-cyber-button-press'), 300);
+              }
+
+              // Optional: Play subtle notification sound (cyberpunk beep)
+              try {
+                const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Cyberpunk-style notification beep
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(1200, audioContext.currentTime + 0.1);
+                gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.2);
+              } catch (error) {
+                // Silent fail if audio context not supported
+                console.log('Audio notification not available');
+              }
+
+              // Scroll to top if modal is open
+              if (scrollAreaRef.current) {
+                scrollAreaRef.current.scrollTop = 0;
+              }
+            }
+            
+            if (payload.eventType === 'UPDATE') {
+              const updatedNotification = payload.new as Notification;
+              console.log('🔄 REAL-TIME NOTIFICATION UPDATED:', updatedNotification);
+              
+              setNotifications(prev => 
+                prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
+              );
+            }
+            
+            if (payload.eventType === 'DELETE') {
+              const deletedId = payload.old.id;
+              console.log('🗑️ REAL-TIME NOTIFICATION DELETED:', deletedId);
+              
+              setNotifications(prev => prev.filter(n => n.id !== deletedId));
             }
           }
         )
@@ -371,6 +424,7 @@ export default function Index({ initialGame }: IndexProps) {
                     <Button
                       variant="ghost"
                       size="sm"
+                      data-notification-button="true"
                       onClick={() => {
                         // Add button press animation class temporarily
                         const button = document.activeElement as HTMLElement;
@@ -380,12 +434,33 @@ export default function Index({ initialGame }: IndexProps) {
                         }
                       }}
                       className={cn(
-                        "relative px-3 py-2 overflow-hidden group",
+                        "relative px-3 py-2 overflow-hidden group transition-all duration-500",
                         "bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md",
-                        "border border-primary/20 rounded-xl transition-all duration-500",
-                        "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
-                        "active:scale-95 active:shadow-[0_0_40px_rgba(99,102,241,0.8)]",
-                        unreadCount > 0 && "animate-cyber-pulse"
+                        "border rounded-xl",
+                        "active:scale-95",
+                        // Dynamic styling based on unread count
+                        unreadCount === 0 && [
+                          "border-primary/20",
+                          "hover:border-primary/50 hover:shadow-[0_0_25px_rgba(99,102,241,0.4)]",
+                          "animate-cyber-notification-glow"
+                        ],
+                        unreadCount > 0 && unreadCount <= 5 && [
+                          "border-primary/40",
+                          "animate-cyber-notification-alert animate-cyber-notification-glow",
+                          "bg-gradient-to-r from-red-900/20 to-orange-900/20"
+                        ],
+                        unreadCount > 5 && unreadCount <= 10 && [
+                          "border-orange-400/60",
+                          "animate-cyber-notification-urgent animate-cyber-notification-pulse-ring",
+                          "bg-gradient-to-r from-orange-900/30 to-red-900/30"
+                        ],
+                        unreadCount > 10 && [
+                          "border-red-400/80",
+                          "animate-cyber-notification-urgent animate-cyber-notification-pulse-ring",
+                          "bg-gradient-to-r from-red-900/40 to-pink-900/40",
+                          "before:absolute before:inset-0 before:bg-gradient-to-r before:from-red-500/10 before:via-orange-500/10 before:to-red-500/10",
+                          "before:bg-[length:200%_100%] before:animate-cyber-notification-energy-wave before:rounded-xl"
+                        ]
                       )}
                     >
                       {/* Animated background grid */}
@@ -402,12 +477,43 @@ export default function Index({ initialGame }: IndexProps) {
                             <Bell className="w-5 h-5 text-slate-400 group-hover:text-primary transition-all duration-300" />
                           )}
                           
-                          {/* Notification counter with enhanced design */}
+                          {/* Dynamic notification counter with epic animations */}
                           {unreadCount > 0 && (
-                            <div className="absolute -top-2 -right-2 min-w-[18px] h-[18px] flex items-center justify-center">
-                              <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-pink-500 to-red-600 rounded-full animate-cyber-pulse" />
-                              <div className="absolute inset-0 bg-gradient-to-r from-red-400 to-pink-400 rounded-full animate-ping opacity-40" />
-                              <span className="relative text-[10px] font-bold text-white z-10">
+                            <div className={cn(
+                              "absolute -top-2 -right-2 flex items-center justify-center transition-all duration-300",
+                              // Dynamic size and style based on count
+                              unreadCount <= 5 && "min-w-[18px] h-[18px]",
+                              unreadCount > 5 && unreadCount <= 10 && "min-w-[22px] h-[22px]",
+                              unreadCount > 10 && "min-w-[26px] h-[26px]"
+                            )}>
+                              {/* Background layers with count-based intensity */}
+                              <div className={cn(
+                                "absolute inset-0 rounded-full transition-all duration-300",
+                                unreadCount <= 5 && "bg-gradient-to-r from-red-500 via-pink-500 to-red-600 animate-cyber-counter-pulse",
+                                unreadCount > 5 && unreadCount <= 10 && "bg-gradient-to-r from-orange-500 via-red-500 to-pink-600 animate-cyber-counter-bounce animate-cyber-counter-pulse",
+                                unreadCount > 10 && "bg-gradient-to-r from-red-600 via-pink-600 to-purple-600 animate-cyber-counter-bounce animate-cyber-counter-pulse shadow-[0_0_20px_rgba(239,68,68,0.8)]"
+                              )} />
+                              
+                              {/* Ping effect - more intense for higher counts */}
+                              <div className={cn(
+                                "absolute inset-0 rounded-full opacity-40 animate-ping",
+                                unreadCount <= 5 && "bg-gradient-to-r from-red-400 to-pink-400",
+                                unreadCount > 5 && unreadCount <= 10 && "bg-gradient-to-r from-orange-400 to-red-400 animate-pulse",
+                                unreadCount > 10 && "bg-gradient-to-r from-red-500 to-purple-500 opacity-60"
+                              )} />
+                              
+                              {/* Extra glow layer for urgent notifications */}
+                              {unreadCount > 10 && (
+                                <div className="absolute inset-0 bg-gradient-to-r from-red-500/60 to-pink-500/60 rounded-full animate-ping delay-150" />
+                              )}
+                              
+                              {/* Text with dynamic sizing */}
+                              <span className={cn(
+                                "relative font-bold text-white z-10 transition-all duration-300",
+                                unreadCount <= 5 && "text-[10px]",
+                                unreadCount > 5 && unreadCount <= 10 && "text-[11px]",
+                                unreadCount > 10 && "text-[12px] animate-pulse"
+                              )}>
                                 {unreadCount > 99 ? '99+' : unreadCount}
                               </span>
                             </div>
