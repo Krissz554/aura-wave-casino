@@ -1354,12 +1354,12 @@ export default function Index({ initialGame }: IndexProps) {
                     currentGame === 'coinflip' 
                       ? 'bg-gradient-to-r from-blue-900/80 to-purple-900/80' 
                       : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-lg`} />
+                  } backdrop-blur-md rounded-md`} />
                   <div className={`absolute -inset-0.5 bg-gradient-to-r ${
                     currentGame === 'coinflip' 
                       ? 'from-blue-500/40 via-purple-500/40 to-blue-500/40' 
                       : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-lg blur-sm group-hover/coinflip:blur-md transition-all duration-300`} />
+                  } rounded-md blur-sm group-hover/coinflip:blur-md transition-all duration-300`} />
                   
                   <Button
                     onClick={() => handleGameChange('coinflip')}
@@ -1370,7 +1370,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300 rounded-lg" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300 rounded-md" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1404,12 +1404,12 @@ export default function Index({ initialGame }: IndexProps) {
                     currentGame === 'roulette' 
                       ? 'bg-gradient-to-r from-red-900/80 to-orange-900/80' 
                       : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-lg`} />
+                  } backdrop-blur-md rounded-md`} />
                   <div className={`absolute -inset-0.5 bg-gradient-to-r ${
                     currentGame === 'roulette' 
                       ? 'from-red-500/40 via-orange-500/40 to-red-500/40' 
                       : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-lg blur-sm group-hover/roulette:blur-md transition-all duration-300`} />
+                  } rounded-md blur-sm group-hover/roulette:blur-md transition-all duration-300`} />
                   
                   <Button
                     onClick={() => handleGameChange('roulette')}
@@ -1420,7 +1420,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300 rounded-lg" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/roulette:opacity-100 transition-opacity duration-300 rounded-md" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1454,12 +1454,12 @@ export default function Index({ initialGame }: IndexProps) {
                     currentGame === 'tower' 
                       ? 'bg-gradient-to-r from-emerald-900/80 to-teal-900/80' 
                       : 'bg-gradient-to-r from-slate-900/80 to-slate-800/60'
-                  } backdrop-blur-md rounded-lg`} />
+                  } backdrop-blur-md rounded-md`} />
                   <div className={`absolute -inset-0.5 bg-gradient-to-r ${
                     currentGame === 'tower' 
                       ? 'from-emerald-500/40 via-teal-500/40 to-emerald-500/40' 
                       : 'from-primary/0 via-primary/20 to-primary/0'
-                  } rounded-lg blur-sm group-hover/tower:blur-md transition-all duration-300`} />
+                  } rounded-md blur-sm group-hover/tower:blur-md transition-all duration-300`} />
                   
                   <Button
                     onClick={() => handleGameChange('tower')}
@@ -1470,7 +1470,7 @@ export default function Index({ initialGame }: IndexProps) {
                         : 'border-slate-600/30 bg-transparent hover:border-primary/40 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]'
                     }`}
                   >
-                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300 rounded-lg" />
+                    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_30%,rgba(99,102,241,0.1)_50%,transparent_70%)] opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300 rounded-md" />
                     
                     <div className="flex items-center gap-3 relative z-10">
                       <div className={`p-2 rounded-md border ${
@@ -1500,8 +1500,8 @@ export default function Index({ initialGame }: IndexProps) {
               
                 {/* Crash Game Button - Coming Soon */}
                 <div className="relative group/crash overflow-hidden opacity-60">
-                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-slate-800/40 backdrop-blur-md rounded-lg" />
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 rounded-lg blur-sm" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-slate-900/60 to-slate-800/40 backdrop-blur-md rounded-md" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 rounded-md blur-sm" />
                   
                   <Button
                     disabled
