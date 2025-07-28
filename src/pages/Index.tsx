@@ -28,6 +28,7 @@ import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
 import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
 import { formatDistanceToNow } from 'date-fns';
+import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useConnectionMonitor } from '@/hooks/useConnectionMonitor';
@@ -472,7 +473,7 @@ export default function Index({ initialGame }: IndexProps) {
   const { levelStats } = useLevelSync();
 
   const getXpForNextLevel = (level: number) => level * 100;
-  const xpProgress = levelStats ? (levelStats.current_level_xp / (levelStats.current_level_xp + levelStats.xp_to_next_level)) * 100 : 0;
+  const xpProgress = levelStats ? calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level) : 0;
 
   if (authLoading) {
     return (
@@ -1303,7 +1304,7 @@ export default function Index({ initialGame }: IndexProps) {
                               {levelStats && (
                                 <>
                                   <span className="text-slate-500">•</span>
-                                  <span className="text-slate-400 font-mono">{levelStats.current_level_xp}XP</span>
+                                  <span className="text-slate-400 font-mono">{formatXP(levelStats.current_level_xp)} XP</span>
                                 </>
                               )}
                             </div>
@@ -1440,9 +1441,9 @@ export default function Index({ initialGame }: IndexProps) {
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-xs font-mono">
-                      <span className="text-accent">{levelStats.current_level_xp}</span>
+                      <span className="text-accent">{formatXP(levelStats.current_level_xp)}</span>
                       <span className="text-slate-500">/</span>
-                      <span className="text-primary">{levelStats.current_level_xp + levelStats.xp_to_next_level}</span>
+                      <span className="text-primary">{formatXP(levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
                       <span className="text-slate-400">XP</span>
                     </div>
                   </div>

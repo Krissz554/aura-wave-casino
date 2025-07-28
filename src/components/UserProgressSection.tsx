@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Trophy, Target, TrendingUp, TrendingDown, Gift, Crown } from 'lucide-react';
 import { useLevelSync } from '@/contexts/LevelSyncContext';
+import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useUserLevelStats } from '@/hooks/useUserLevelStats';
 import { ProfileBorder } from './ProfileBorder';
 import { EnhancedLevelBadge } from './EnhancedLevelBadge';
@@ -48,9 +49,7 @@ export function UserProgressSection() {
     );
   }
 
-  const progressPercentage = levelStats.xp_to_next_level > 0 
-    ? (levelStats.current_level_xp / (levelStats.current_level_xp + levelStats.xp_to_next_level)) * 100 
-    : 0;
+  const progressPercentage = calculateXPProgress(levelStats.current_level_xp, levelStats.xp_to_next_level);
 
   const overallWinRate = stats.total_games > 0 ? (stats.total_wins / stats.total_games) * 100 : 0;
 
@@ -87,7 +86,7 @@ export function UserProgressSection() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span>XP Progress</span>
-              <span>{levelStats.current_level_xp.toLocaleString()} / {(levelStats.current_level_xp + levelStats.xp_to_next_level).toLocaleString()}</span>
+              <span>{formatXPProgress(levelStats.current_level_xp, levelStats.current_level_xp + levelStats.xp_to_next_level)}</span>
             </div>
             <Progress value={progressPercentage} className="h-3" />
             <div className="flex justify-between text-xs text-muted-foreground">
@@ -99,7 +98,7 @@ export function UserProgressSection() {
           {/* Key Stats */}
           <div className="grid grid-cols-2 gap-4">
             <div className="text-center p-3 bg-card/30 rounded-lg">
-              <div className="text-2xl font-bold text-purple-400">{levelStats.lifetime_xp.toLocaleString()}</div>
+              <div className="text-2xl font-bold text-purple-400">{formatXP(levelStats.lifetime_xp)}</div>
               <div className="text-xs text-muted-foreground">Total XP</div>
             </div>
             <div className="text-center p-3 bg-card/30 rounded-lg">

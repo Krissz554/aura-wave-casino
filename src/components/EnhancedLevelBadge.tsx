@@ -1,5 +1,6 @@
 import { Badge } from '@/components/ui/badge';
 import { Star, Crown, Zap } from 'lucide-react';
+import { formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 
 interface EnhancedLevelBadgeProps {
   level: number;
@@ -54,7 +55,7 @@ export const EnhancedLevelBadge = ({
   };
 
   const IconComponent = getIcon(level);
-  const progressPercentage = xpToNext > 0 ? (currentXP / (currentXP + xpToNext)) * 100 : 0;
+  const progressPercentage = calculateXPProgress(currentXP, xpToNext);
 
   return (
     <div className="flex flex-col items-center gap-1">
@@ -92,7 +93,7 @@ export const EnhancedLevelBadge = ({
       
       {showProgress && (
         <div className="text-xs text-muted-foreground">
-          {currentXP.toLocaleString()}/{(currentXP + xpToNext).toLocaleString()} XP
+          {formatXPProgress(currentXP, currentXP + xpToNext)}
         </div>
       )}
     </div>

@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 
 
 interface Achievement {
@@ -309,20 +310,20 @@ export default function UserStatsModal({ isOpen, onClose, username }: UserStatsM
                     <div className="flex items-center justify-between">
                       <span className="text-lg font-bold">Level {userStats.current_level}</span>
                       <span className="text-sm text-muted-foreground">
-                        {userStats.current_xp} / {userStats.current_xp + userStats.xp_to_next_level} XP
+                        {formatXPProgress(userStats.current_xp, userStats.current_xp + userStats.xp_to_next_level)}
                       </span>
                     </div>
                     <div className="w-full bg-secondary rounded-full h-2">
                       <div 
                         className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
                         style={{ 
-                          width: `${userStats.xp_to_next_level > 0 ? (userStats.current_xp / (userStats.current_xp + userStats.xp_to_next_level)) * 100 : 100}%` 
+                          width: `${calculateXPProgress(userStats.current_xp, userStats.xp_to_next_level)}%` 
                         }}
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4 mt-4">
                       <div className="text-center">
-                        <div className="text-xl font-bold text-purple-400">{userStats.lifetime_xp.toLocaleString()}</div>
+                        <div className="text-xl font-bold text-purple-400">{formatXP(userStats.lifetime_xp)}</div>
                         <div className="text-sm text-muted-foreground">Total XP</div>
                       </div>
                       <div className="text-center">

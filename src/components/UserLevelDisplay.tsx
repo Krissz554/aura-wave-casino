@@ -2,6 +2,7 @@ import { useLevelSync } from '@/contexts/LevelSyncContext';
 import { ProfileBorder } from './ProfileBorder';
 import { Badge } from '@/components/ui/badge';
 import { Crown } from 'lucide-react';
+import { formatXPProgress } from '@/lib/xpUtils';
 
 interface UserLevelDisplayProps {
   username: string;
@@ -70,7 +71,7 @@ export function UserLevelDisplay({ username, showXP = false, size = 'sm', classN
         
         {showXP && (
           <div className="text-xs text-muted-foreground">
-            {levelStats.current_level_xp.toLocaleString()} / {(levelStats.current_level_xp + levelStats.xp_to_next_level).toLocaleString()} XP
+            {formatXPProgress(levelStats.current_level_xp, levelStats.current_level_xp + levelStats.xp_to_next_level)}
           </div>
         )}
       </div>

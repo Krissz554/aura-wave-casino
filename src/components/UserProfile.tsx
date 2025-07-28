@@ -18,6 +18,7 @@ import { useUserLevelStats } from '@/hooks/useUserLevelStats';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
+import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 
 interface UserProfileProps {
   isOpen: boolean;
@@ -268,7 +269,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   const currentXP = stats?.current_level_xp || userData.current_xp;
   const xpToNext = stats?.xp_to_next_level || userData.xp_to_next_level;
   const totalXP = currentXP + xpToNext;
-  const xpProgress = totalXP > 0 ? (currentXP / totalXP) * 100 : 0;
+  const xpProgress = calculateXPProgress(currentXP, xpToNext);
 
   const registrationDate = new Date(userData.registration_date).toLocaleDateString('en-US', {
     year: 'numeric',

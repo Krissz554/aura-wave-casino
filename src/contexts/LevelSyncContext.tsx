@@ -86,14 +86,14 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     console.log('📊 Setting up level stats subscription for user:', user.id);
     const subscription = supabase
       .channel(`level_stats_${user.id}_${Date.now()}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
-        },
+              .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'profiles',
+            filter: `id=eq.${user.id}`
+          },
         (payload) => {
           console.log('📊 LEVEL STATS UPDATE:', payload);
           if (payload.new) {
