@@ -50,20 +50,7 @@ CREATE INDEX IF NOT EXISTS idx_user_achievements_user_id ON public.user_achievem
 CREATE INDEX IF NOT EXISTS idx_user_achievements_achievement_id ON public.user_achievements(achievement_id);
 CREATE INDEX IF NOT EXISTS idx_unlocked_achievements_user_id ON public.unlocked_achievements(user_id);
 
--- 2. Optimize existing indexes (partial indexes for better performance)
-
--- Partial index for active games only
-CREATE INDEX IF NOT EXISTS idx_active_roulette_rounds ON public.roulette_rounds(status, created_at DESC) 
-WHERE status IN ('betting', 'spinning');
-
-CREATE INDEX IF NOT EXISTS idx_active_crash_rounds ON public.crash_rounds(status, created_at DESC) 
-WHERE status IN ('countdown', 'active');
-
--- Partial index for recent bets only (last 24 hours)
-CREATE INDEX IF NOT EXISTS idx_recent_live_bet_feed ON public.live_bet_feed(created_at DESC, game_type) 
-WHERE created_at > NOW() - INTERVAL '24 hours';
-
--- 3. Add composite indexes for common query patterns
+-- 2. Add composite indexes for common query patterns
 
 -- User stats with level and XP
 CREATE INDEX IF NOT EXISTS idx_user_level_stats_composite ON public.user_level_stats(user_id, current_level, current_level_xp);
@@ -74,7 +61,7 @@ CREATE INDEX IF NOT EXISTS idx_game_history_composite ON public.game_history(use
 -- Live bet feed with user and game type
 CREATE INDEX IF NOT EXISTS idx_live_bet_feed_composite ON public.live_bet_feed(user_id, game_type, created_at DESC);
 
--- 4. Optimize table statistics
+-- 3. Optimize table statistics
 ANALYZE public.live_bet_feed;
 ANALYZE public.roulette_rounds;
 ANALYZE public.roulette_bets;
@@ -88,7 +75,7 @@ ANALYZE public.case_rewards;
 ANALYZE public.user_achievements;
 ANALYZE public.unlocked_achievements;
 
--- 5. Create optimized functions for common queries
+-- 4. Create optimized functions for common queries
 
 -- Function to get recent live bet feed with pagination
 CREATE OR REPLACE FUNCTION public.get_recent_live_bet_feed(
@@ -183,7 +170,7 @@ BEGIN
 END;
 $$;
 
--- 6. Add performance monitoring views
+-- 5. Add performance monitoring views
 
 -- View for slow queries monitoring
 CREATE OR REPLACE VIEW public.performance_monitor AS
@@ -210,13 +197,13 @@ FROM pg_stat_user_indexes
 WHERE schemaname = 'public'
 ORDER BY idx_scan DESC;
 
--- 7. Grant permissions for optimized functions
+-- 6. Grant permissions for optimized functions
 GRANT EXECUTE ON FUNCTION public.get_recent_live_bet_feed TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_stats_optimized TO authenticated;
 GRANT SELECT ON public.performance_monitor TO service_role;
 GRANT SELECT ON public.index_usage_stats TO service_role;
 
--- 8. Verify optimizations
+-- 7. Verify optimizations
 SELECT 'Indexes created successfully' as status;
 
 -- Check for any missing critical indexes
