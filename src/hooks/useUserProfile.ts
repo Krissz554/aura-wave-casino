@@ -266,7 +266,6 @@ export function useUserProfile() {
         };
         setUserData(profileWithGameStats);
         setLoading(false);
-        console.log('[useUserProfile] User data set (profile only, stats error):', profileWithGameStats);
         return;
       }
 
@@ -298,7 +297,6 @@ export function useUserProfile() {
       };
       setUserData(combinedData);
       setLoading(false);
-      console.log('[useUserProfile] User data set (profile + levelStats):', { ...profile, ...levelStats });
     } catch (err) {
       console.error('[useUserProfile] Unexpected error:', err);
       setUserData(null);
@@ -337,7 +335,6 @@ export function useUserProfile() {
       
       // Additional force balance sync if balance was updated
       if (updates.balance !== undefined) {
-        console.log('💰 Force syncing balance after manual update');
         setTimeout(async () => {
           const { data: currentProfile } = await supabase
             .from('profiles')
@@ -349,7 +346,6 @@ export function useUserProfile() {
             setUserData(prev => {
               if (!prev) return null;
               if (prev.balance !== currentProfile.balance) {
-                console.log('🔄 POST-UPDATE BALANCE SYNC:', prev.balance, '→', currentProfile.balance);
                 return {
                   ...prev,
                   balance: currentProfile.balance,

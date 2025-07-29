@@ -280,11 +280,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       
       // Prevent over-fetching (unless forced) - max once per 2 seconds
       if (!forceRefresh && now - lastResultsFetchRef.current < 2000) {
-        console.log('⏭️ Skipping recent results fetch (too soon)');
         return;
       }
       
-      console.log('🔄 Fetching recent results...');
       lastResultsFetchRef.current = now;
       
       const { data, error } = await supabase.functions.invoke('roulette-engine', {
@@ -298,7 +296,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         index === self.findIndex(r => r.round_number === result.round_number)
       ) : [];
       
-      console.log('✅ Recent results fetched:', uniqueResults.length, 'unique results');
       setRecentResults(uniqueResults);
     } catch (error: any) {
       console.error('Failed to fetch recent results:', error);
@@ -309,7 +306,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
   // Open provably fair history modal
   const openProvablyFairModal = () => {
-    console.log('🛡️ Opening provably fair history modal');
     setProvablyFairHistoryOpen(true);
   };
 
@@ -350,7 +346,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         description: `Round ${data.round_number}: Server seed verified. Result: ${data.result_color} (slot ${data.result_slot})`,
       });
       
-      console.log('🔍 Fairness verification:', data);
     } catch (error: any) {
       toast({
         title: "Verification Failed",
@@ -375,7 +370,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       totals[color].users.push(bet);
     });
 
-    console.log('📊 Calculated bet totals:', totals);
     setBetTotals(totals);
   };
 
@@ -405,17 +399,14 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
   // Real-time subscriptions
   useEffect(() => {
-    console.log('🔔 Setting up real-time subscriptions');
-
     // Subscribe to round updates
     const roundSubscription = supabase
-      .channel('roulette_rounds')
+      .channel(`roulette_rounds_${Date.now()}`)
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'roulette_rounds'
       }, (payload) => {
-        console.log('🎰 Round update:', payload);
         if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
           const round = payload.new as RouletteRound;
           const oldRound = payload.old as RouletteRound;
@@ -425,7 +416,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
           
           // Save completed round for fairness checking and handle payouts
           if (oldRound?.status === 'spinning' && round.status === 'completed') {
-            console.log('✅ Round completed, saving for fairness check');
             setLastCompletedRound(round);
             
             // Set winning color for button highlighting
@@ -447,12 +437,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
           
           // Handle different scenarios
           if (isNewRound) {
-            console.log('🆕 New round detected, clearing user bets and fetching fresh data');
             setUserBets({});
             
             // Only clear isolated totals if it's actually a different round
             if (isolatedRoundId !== round.id) {
-              console.log('🧹 Clearing isolated totals for new round:', round.id);
               setIsolatedRoundTotals({});
               setIsolatedRoundId(round.id);
             }
@@ -463,28 +451,21 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             setExtendedWinAnimation(false); // Clear extended win animation for new round
             fetchRoundBets(round.id);
           } else if (round.status === 'betting' && oldRound?.status !== 'betting') {
-            console.log('🎲 Betting phase started');
             fetchRoundBets(round.id);
           } else if (round.status === 'spinning' && oldRound?.status === 'betting') {
-            console.log('🌀 Spinning started, fetching final bets');
             fetchRoundBets(round.id);
           } else if (round.status === 'completed') {
-            console.log('🏁 Round completed, fetching final results');
             fetchRoundBets(round.id);
             
             // IMPROVED: Always update recent results when ANY round becomes completed
             // This handles all possible completion scenarios
             if (round.status === 'completed') {
-              console.log('🎯 Completed round detected, updating recent results');
-              
               // Immediate update for responsiveness (forced)
               fetchRecentResults(true);
               
               // Also update after delay to ensure DB consistency
               setTimeout(() => fetchRecentResults(true), 500);
             }
-          } else {
-            console.log('⏭️ Round update but keeping current state');
           }
         }
       })
@@ -492,14 +473,13 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
     // Additional subscription for newly inserted completed rounds (edge case handling)
     const completedRoundsSubscription = supabase
-      .channel('completed_roulette_rounds')
+      .channel(`completed_roulette_rounds_${Date.now()}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'roulette_rounds',
         filter: 'status=eq.completed'
       }, (payload) => {
-        console.log('🎯 New completed round inserted:', payload.new);
         // Immediate update for new completed rounds (forced)
         fetchRecentResults(true);
       })
@@ -507,17 +487,14 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
     // Subscribe to bet updates for live feed
     const betSubscription = supabase
-      .channel('roulette_bets')
+      .channel(`roulette_bets_${Date.now()}`)
       .on('postgres_changes', {
         event: 'INSERT',
         schema: 'public',
         table: 'roulette_bets'
       }, (payload) => {
-        console.log('💰 New bet placed:', payload);
-        
         // Always refresh bets to show live updates for all users
         if (currentRound?.id) {
-          console.log('🔄 Refreshing bets for live updates');
           fetchRoundBets(currentRound.id);
         }
       })
@@ -542,7 +519,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       );
       
       if (uniqueResults.length !== recentResults.length) {
-        console.log('🧹 Removed duplicate results:', recentResults.length - uniqueResults.length, 'duplicates');
         setRecentResults(uniqueResults);
       }
     }
@@ -573,13 +549,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
     }
 
     try {
-      console.log('💰 Round completed, fetching updated user balance:', completedRound.id);
-      
       // Check if user had any bets in this round
       const userBetsInRound = Object.entries(userBets).filter(([_, amount]) => amount > 0);
       
       if (userBetsInRound.length === 0) {
-        console.log('ℹ️ No bets placed by user in this round');
         return;
       }
 
@@ -671,8 +644,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         const newBalance = updatedProfile.balance;
         const balanceDifference = newBalance - oldBalance;
 
-        console.log(`💰 Balance update: ${oldBalance} → ${newBalance} (difference: ${balanceDifference})`);
-
         // Update frontend with the actual backend values
         await onUpdateUser({
           balance: newBalance,
@@ -689,10 +660,6 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
             description: `+$${balanceDifference.toFixed(2)} • ${completedRound.result_color.toUpperCase()}`,
             variant: "success",
           });
-          
-          console.log(`🎯 User won $${balanceDifference} on ${completedRound.result_color}`);
-        } else {
-          console.log(`😢 User lost (no balance increase)`);
         }
       }
 
