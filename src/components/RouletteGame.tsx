@@ -138,43 +138,9 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
     (currentRound?.status === 'betting' || currentRound?.status === 'spinning')
   );
   
-  // 🔍 DETAILED DEBUG: Live bet feed analysis
-  useEffect(() => {
-    console.log('🔍 Live bet feed analysis:', {
-      totalLiveBets: liveBetFeed?.length || 0,
-      currentRoundId: currentRound?.id,
-      rouletteBetsCount: rouletteBets.length,
-      liveBetFeedSample: liveBetFeed?.slice(0, 3).map(bet => ({
-        id: bet.id,
-        game_type: bet.game_type,
-        round_id: bet.round_id,
-        username: bet.username,
-        bet_color: bet.bet_color,
-        bet_amount: bet.bet_amount,
-        is_roulette: bet.game_type === 'roulette',
-        matches_current_round: bet.round_id === currentRound?.id
-      })),
-      allRouletteBets: liveBetFeed?.filter(bet => bet.game_type === 'roulette').map(bet => ({
-        round_id: bet.round_id,
-        current_round_id: currentRound?.id,
-        matches: bet.round_id === currentRound?.id
-      }))
-    });
-  }, [liveBetFeed, currentRound?.id, rouletteBets.length]);
+
   
-  // Debug bet amounts
-  useEffect(() => {
-    if (rouletteBets.length > 0) {
-      console.log('🎯 Live bet feed data:', rouletteBets.map(bet => ({
-        username: bet.username,
-        bet_amount: bet.bet_amount,
-        bet_amount_type: typeof bet.bet_amount,
-        bet_color: bet.bet_color,
-        round_id: bet.round_id,
-        game_type: bet.game_type
-      })));
-    }
-  }, [rouletteBets]);
+
   
   const greenBets = rouletteBets.filter(bet => bet.bet_color === 'green');
   const redBets = rouletteBets.filter(bet => bet.bet_color === 'red');
@@ -183,12 +149,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
   // Clear user bets when round changes
   useEffect(() => {
     if (currentRound?.id && currentRoundRef.current && currentRound.id !== currentRoundRef.current) {
-      console.log('🔄 Round changed, clearing user bets');
       setUserBets({});
       
       // Only clear isolated totals if it's actually a different round
       if (isolatedRoundId !== currentRound.id) {
-        console.log('🧹 Clearing isolated totals for new round:', currentRound.id);
         setIsolatedRoundTotals({});
         setIsolatedRoundId(currentRound.id);
       }
@@ -276,7 +240,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
       if (error) throw error;
       
-      console.log('🔍 Fetched round bets:', data);
+
       setRoundBets(data || []);
       calculateBetTotals(data || []);
       
@@ -287,7 +251,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         userRoundBets.forEach((bet: RouletteBet) => {
           dbUserBets[bet.bet_color] = (dbUserBets[bet.bet_color] || 0) + bet.bet_amount;
         });
-        console.log('👤 Database user bets:', dbUserBets);
+
         
         // Only update user bets if there's actually a difference to prevent flickering
         const currentBets = userBetsRef.current;
@@ -298,13 +262,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         );
         
         if (hasChanges || Object.keys(currentBets).length === 0) {
-          console.log('🔄 Updating user bets (changes detected):', dbUserBets);
           setUserBets(dbUserBets);
           userBetsRef.current = dbUserBets;
           
           // DO NOT sync isolated totals with database - keep them completely isolated
-        } else {
-          console.log('✅ User bets unchanged, keeping current state');
         }
       }
     } catch (error: any) {

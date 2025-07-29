@@ -486,34 +486,7 @@ export default function Index({ initialGame }: IndexProps) {
   const { stats: userLevelStats, refetch: refetchUserLevelStats } = useUserLevelStats();
   const { forceFullRefresh } = useXPSync();
 
-  // Debug: Log when data sources update
-  useEffect(() => {
-    if (userLevelStats) {
-      console.log('🎯 HEADER: userLevelStats updated (integer source):', {
-        lifetime_xp: userLevelStats.lifetime_xp,
-        current_level_xp: userLevelStats.current_level_xp,
-        current_level: userLevelStats.current_level,
-        timestamp: new Date().toISOString()
-      });
-    }
-  }, [userLevelStats]);
 
-  useEffect(() => {
-    if (levelStats) {
-      console.log('🎯 HEADER: levelStats updated (DECIMAL source):', {
-        'DB_lifetime_xp': levelStats.lifetime_xp,
-        'DB_current_level_xp': levelStats.current_level_xp,
-        'current_level': levelStats.current_level,
-        'effective_lifetime_xp': effectiveStats.lifetime_xp,
-        'effective_current_level_xp': effectiveStats.current_level_xp,
-        'displayCurrentLevelXP_calculated': displayCurrentLevelXP,
-        'formatted_profile_xp': formatXP(effectiveStats.lifetime_xp),
-        'formatted_progress_xp': formatXP(displayCurrentLevelXP),
-        'RAW_formatXP_test': formatXP(23.123),
-        timestamp: new Date().toISOString()
-      });
-    }
-  }, [levelStats]);
 
 
 
@@ -589,11 +562,7 @@ export default function Index({ initialGame }: IndexProps) {
       // Check if XP increased (with decimal precision handling)
       const xpDifference = Math.round((currentXP - previousXP.current) * 1000) / 1000; // Round to 3 decimals
       if (xpDifference > 0) {
-        console.log('🎯 HEADER: XP INCREASED! Animating:', {
-          lifetimeXP: `${previousXP.current} → ${currentXP}`,
-          currentLevelXP: `${previousCurrentLevelXP.current} → ${currentLevelXP}`,
-          progress: `${previousProgress.current}% → ${currentProgress}%`
-        });
+
         
         // Trigger increase animation
         setXpIncreaseAnimation(true);
@@ -634,52 +603,7 @@ export default function Index({ initialGame }: IndexProps) {
     return () => clearInterval(interval);
   }, [user, refetchUserLevelStats]);
 
-  // Debug: Add test XP function
-  const testXPIncrease = async () => {
-    if (!user) return;
-    
-    console.log('🧪 TESTING: Manual XP increase of 0.5 XP');
-    
-    try {
-      // Call the XP function directly
-      const { data, error } = await supabase.rpc('add_xp_and_check_levelup', {
-        user_uuid: user.id,
-        xp_amount: 0.5
-      });
-      
-      if (error) {
-        console.error('❌ XP TEST ERROR:', error);
-        toast({
-          title: "XP Test Failed",
-          description: error.message,
-          variant: "destructive"
-        });
-      } else {
-        console.log('✅ XP TEST SUCCESS:', data);
-        toast({
-          title: "XP Test Success", 
-          description: "Added 0.5 XP manually",
-        });
-        
-        // Force refresh both data sources - IMMEDIATE + FOLLOW-UP
-        console.log('🔄 IMMEDIATE: Forcing refresh after manual XP test');
-        forceFullRefresh().catch(console.error);
-        
-        // Follow-up refreshes to ensure it catches
-        setTimeout(() => {
-          console.log('🔄 TEST: Follow-up XP refresh #1');
-          forceFullRefresh().catch(console.error);
-        }, 200);
-        
-        setTimeout(() => {
-          console.log('🔄 TEST: Follow-up XP refresh #2');
-          forceFullRefresh().catch(console.error);
-        }, 1000);
-      }
-    } catch (error) {
-      console.error('❌ XP TEST EXCEPTION:', error);
-    }
-  };
+
 
   if (authLoading) {
     return (

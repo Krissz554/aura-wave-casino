@@ -107,17 +107,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   // Check if this should be treated as the user's own profile (no username provided, opening from header)
   const shouldShowOwnProfile = user && !username;
   
-  // Debug logging
-  console.log('🔍 UserProfile Debug:', {
-    user: user?.id,
-    username,
-    propUserData: propUserData?.id,
-    fetchedUserData: fetchedUserData?.id,
-    userData: userData?.id,
-    isOwnProfile,
-    shouldShowOwnProfile,
-    isOpen
-  });
+
 
   // Fetch user data when only username is provided or when opening from header (no username)
   useEffect(() => {
@@ -130,7 +120,6 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
           if (username) {
             // Fetch by username (for other users)
-            console.log('🔍 Fetching profile data for username:', username);
             const result = await supabase
               .from('profiles')
               .select('*')
@@ -140,7 +129,6 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
             profileError = result.error;
           } else if (user) {
             // Fetch current user's profile
-            console.log('🔍 Fetching current user profile data for user ID:', user.id);
             const result = await supabase
               .from('profiles')
               .select('*')
@@ -190,7 +178,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
             badges: [] // You might want to fetch this from a badges table
           };
 
-          console.log('✅ Successfully fetched user data:', fetchedUser);
+
           setFetchedUserData(fetchedUser);
         } catch (error) {
           console.error('❌ Error in fetchUserData:', error);
@@ -1552,16 +1540,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
   const [newlyClaimed, setNewlyClaimed] = useState<string[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
 
-  // Debug: Log the stats being passed
-  useEffect(() => {
-    console.log('🔍 AchievementsSection Debug:', {
-      userId,
-      isOwnProfile,
-      stats: stats?.user_id,
-      userStats: userStats?.user_id,
-      loading
-    });
-  }, [stats, isOwnProfile, userId, userStats, loading]);
+
 
   // Fetch user stats for achievement progress calculation
   useEffect(() => {
@@ -1848,36 +1827,17 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
   };
 
   const claimAchievement = async (achievement: any) => {
-    console.log('🎯 Claim achievement called:', achievement);
-    console.log('🎯 isOwnProfile:', isOwnProfile);
-    console.log('🎯 userId:', userId);
-    console.log('🎯 Achievement details:', {
-      id: achievement.id,
-      name: achievement.name,
-      reward_type: achievement.reward_type,
-      reward_amount: achievement.reward_amount
-    });
-    
     if (!isOwnProfile) {
-      console.log('❌ Not own profile, returning');
       return;
     }
     
     if (!userId) {
-      console.log('❌ No userId, returning');
       return;
     }
     
     setClaiming(achievement.id);
-    console.log('🎯 Starting claim process for achievement:', achievement.name);
     
     try {
-      // Call the manual claim function
-      console.log('🎯 Calling manual claim function with params:', {
-        p_user_id: userId,
-        p_achievement_id: achievement.id
-      });
-      
       const { data: claimResult, error: claimError } = await supabase.rpc('claim_achievement_manual', {
         p_user_id: userId,
         p_achievement_id: achievement.id
@@ -1885,33 +1845,19 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
 
       if (claimError) {
         console.error('❌ Error claiming achievement:', claimError);
-        console.error('❌ Error details:', {
-          message: claimError.message,
-          details: claimError.details,
-          hint: claimError.hint
-        });
         throw claimError;
       }
-      console.log('✅ Achievement claimed successfully:', claimResult);
       
       // Check if the claim was successful
       if (claimResult && claimResult.success) {
-        console.log('✅ Claim was successful:', claimResult);
+        // Success - continue with UI updates
       } else if (claimResult && claimResult.error === 'Achievement already unlocked') {
-        console.log('ℹ️ Achievement already unlocked, refreshing data...');
         // Just refresh the data to update the UI
         await fetchData();
         return; // Don't throw error, just return
       } else {
-        console.error('❌ Claim was not successful:', claimResult);
         throw new Error('Claim was not successful: ' + JSON.stringify(claimResult));
       }
-
-      // Reward is automatically awarded by the database function
-      console.log('🎯 Reward automatically awarded by database function');
-
-      // Show success notification
-      console.log(`🎉 Achievement unlocked: ${achievement.name}! Reward: ${achievement.reward_type === 'money' ? '$' : ''}${achievement.reward_amount}${achievement.reward_type === 'cases' ? ' cases' : achievement.reward_type === 'xp' ? ' XP' : ''}`);
 
       // Show success notification to user
       const rewardText = achievement.reward_type === 'money' 
@@ -1919,19 +1865,14 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         : achievement.reward_type === 'cases' 
         ? `${achievement.reward_amount} cases` 
         : `${achievement.reward_amount} XP`;
-        
-      // Show success notification (you can replace this with a toast system)
-      console.log(`🎉 Achievement Claimed!\n\n${achievement.name}\nReward: ${rewardText}`);
 
       // Track newly claimed achievement for smooth transition
       setNewlyClaimed(prev => [...prev, achievement.id]);
 
       // Refresh achievements data to update the UI
-      console.log('🎯 Refreshing achievement data...');
       await fetchData();
       
       // Verify the achievement was removed from unlocked achievements
-      console.log('🎯 Verifying achievement was removed from unlocked achievements...');
       const { data: remainingUnlocked } = await supabase
         .from('unlocked_achievements')
         .select('achievement_id')
@@ -1940,12 +1881,9 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       
       if (remainingUnlocked && remainingUnlocked.length > 0) {
         console.error('❌ Achievement still in unlocked achievements after claiming!');
-      } else {
-        console.log('✅ Achievement successfully removed from unlocked achievements');
       }
       
       // Verify the achievement was added to unlocked
-      console.log('🎯 Verifying achievement was added to unlocked...');
       const { data: unlockedAchievement } = await supabase
         .from('user_achievements')
         .select('achievement_id, unlocked_at')
@@ -1953,7 +1891,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         .eq('achievement_id', achievement.id);
       
       if (unlockedAchievement && unlockedAchievement.length > 0) {
-        console.log('✅ Achievement successfully added to unlocked');
+        // Achievement successfully added
       } else {
         console.error('❌ Achievement not found in unlocked achievements!');
       }
@@ -1972,7 +1910,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
           if (propUserData) {
             // If we have propUserData, update it through the parent
             // This will trigger a re-render with updated balance
-            console.log('Updated balance:', updatedProfile.balance);
             onUserDataUpdate?.(); // Call the callback to update the parent's userData
           }
         }
@@ -1989,7 +1926,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       throw error;
     } finally {
       setClaiming(null);
-      console.log('🎯 Claim process completed');
     }
   };
 
@@ -2166,14 +2102,10 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                             
                             <button
                               onClick={async () => {
-                                console.log('🎯 Claim button clicked for:', achievement.name);
                                 try {
                                   await claimAchievement(achievement);
-                                  // Show success toast or notification
-                                  console.log('✅ Achievement claimed successfully!');
                                 } catch (error) {
                                   console.error('❌ Failed to claim achievement:', error);
-                                  // Show error toast or notification
                                   alert('Failed to claim achievement. Please try again.');
                                 }
                               }}
