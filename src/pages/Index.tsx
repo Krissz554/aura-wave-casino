@@ -1968,7 +1968,10 @@ export default function Index({ initialGame }: IndexProps) {
 
       {/* Cyberpunk Logout Confirmation Dialog */}
       <Dialog open={showLogoutConfirmation} onOpenChange={setShowLogoutConfirmation}>
-        <DialogContent className="max-w-md p-0 border-none bg-transparent overflow-hidden">
+        <DialogContent 
+          className="max-w-md p-0 border-none bg-transparent overflow-hidden"
+          aria-describedby="logout-description"
+        >
           {/* Multi-layered Background */}
           <div className="relative overflow-hidden">
             {/* Base gradient background */}
@@ -2009,7 +2012,7 @@ export default function Index({ initialGame }: IndexProps) {
               
               {/* Message */}
               <div className="space-y-3">
-                <p className="text-slate-200 leading-relaxed">
+                <p id="logout-description" className="text-slate-200 leading-relaxed">
                   Are you sure you want to sign out? You'll need to authenticate again to access your account.
                 </p>
                 <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">

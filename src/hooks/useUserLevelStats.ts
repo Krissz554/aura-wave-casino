@@ -108,7 +108,7 @@ export function useUserLevelStats() {
       });
 
     return () => {
-      supabase.removeChannel(channelName);
+      supabase.removeChannel(subscription);
     };
   }, [user]);
 

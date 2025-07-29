@@ -118,7 +118,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
       });
 
     return () => {
-      supabase.removeChannel(channelName);
+      supabase.removeChannel(subscription);
     };
   }, [user]);
 
