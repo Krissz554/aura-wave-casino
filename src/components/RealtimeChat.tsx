@@ -207,7 +207,7 @@ export const RealtimeChat = () => {
         </CardHeader>
       
       <CardContent className="p-0 h-full flex flex-col">
-        <ScrollArea className="flex-1 px-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 px-4 max-h-[calc(100%-140px)]" ref={scrollAreaRef}>
           <div className="space-y-3 pb-4">
             {messages.length === 0 ? (
               <div className="flex items-center justify-center h-32">
@@ -306,7 +306,7 @@ export const RealtimeChat = () => {
           </div>
         </ScrollArea>
         
-        <div className="p-4 border-t border-primary/20">
+        <div className="p-4 border-t border-primary/20 min-h-[140px]">
           {user ? (
             <div className="space-y-3">
               <div className="flex gap-3">
