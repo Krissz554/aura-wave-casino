@@ -1985,6 +1985,8 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       
     } catch (error) {
       console.error('❌ Error claiming achievement:', error);
+      // Re-throw the error so the button handler can catch it
+      throw error;
     } finally {
       setClaiming(null);
       console.log('🎯 Claim process completed');
@@ -2163,9 +2165,17 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent translate-x-[-100%] group-hover/claimBtn:translate-x-[100%] transition-transform duration-700 ease-out" />
                             
                             <button
-                              onClick={() => {
+                              onClick={async () => {
                                 console.log('🎯 Claim button clicked for:', achievement.name);
-                                claimAchievement(achievement);
+                                try {
+                                  await claimAchievement(achievement);
+                                  // Show success toast or notification
+                                  console.log('✅ Achievement claimed successfully!');
+                                } catch (error) {
+                                  console.error('❌ Failed to claim achievement:', error);
+                                  // Show error toast or notification
+                                  alert('Failed to claim achievement. Please try again.');
+                                }
                               }}
                               disabled={claiming === achievement.id}
                               className="w-full relative bg-gradient-to-br from-emerald-600/80 to-green-600/80 hover:from-emerald-500/90 hover:to-green-500/90 text-white border border-emerald-500/60 py-2 px-3 transition-all duration-300 font-mono font-bold tracking-wider text-xs hover:scale-105 active:scale-95 disabled:opacity-60"
