@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Gift, Package, Trophy, Clock, Zap, Crown, Target, Sparkles } from 'lucide-react';
+import { ArrowLeft, Gift, Package, Trophy, Clock, Zap, Crown, Target, Sparkles, Coins, Star, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCaseRewards } from '@/hooks/useCaseRewards';
 import { useFreeCases } from '@/hooks/useFreeCases';
@@ -61,7 +61,7 @@ export default function Rewards() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-        <div className="glass p-8 rounded-2xl text-center">
+        <div className="glass p-8 rounded-2xl text-center border border-primary/20">
           <div className="text-4xl mb-4 animate-pulse">📦</div>
           <p className="text-muted-foreground">Loading your rewards...</p>
         </div>
@@ -89,7 +89,10 @@ export default function Rewards() {
                 Back to Games
               </Button>
               <div className="flex items-center space-x-3">
-                <Crown className="w-6 h-6 text-primary" />
+                <div className="relative">
+                  <Crown className="w-6 h-6 text-primary" />
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                </div>
                 <h1 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">
                   REWARD VAULT
                 </h1>
@@ -109,33 +112,42 @@ export default function Rewards() {
         
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="glass border border-primary/20 hover:glow-primary transition-smooth">
-            <CardContent className="p-6 text-center">
-              <Package className="w-10 h-10 mx-auto mb-3 text-primary" />
-              <div className="text-2xl font-bold gradient-primary bg-clip-text text-transparent mb-1">
-                {availableCases.length}
+          <Card className="glass border border-primary/20 hover:glow-primary transition-smooth group">
+            <CardContent className="p-6 text-center relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+              <div className="relative">
+                <Package className="w-10 h-10 mx-auto mb-3 text-primary" />
+                <div className="text-2xl font-bold gradient-primary bg-clip-text text-transparent mb-1">
+                  {availableCases.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Available Cases</div>
               </div>
-              <div className="text-sm text-muted-foreground">Available Cases</div>
             </CardContent>
           </Card>
           
-          <Card className="glass border border-accent/20 hover:glow-success transition-smooth">
-            <CardContent className="p-6 text-center">
-              <Gift className="w-10 h-10 mx-auto mb-3 text-accent" />
-              <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
-                {openedCases.length}
+          <Card className="glass border border-accent/20 hover:glow-success transition-smooth group">
+            <CardContent className="p-6 text-center relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+              <div className="relative">
+                <Gift className="w-10 h-10 mx-auto mb-3 text-accent" />
+                <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
+                  {openedCases.length}
+                </div>
+                <div className="text-sm text-muted-foreground">Cases Opened</div>
               </div>
-              <div className="text-sm text-muted-foreground">Cases Opened</div>
             </CardContent>
           </Card>
           
-          <Card className="glass border border-success/20 hover:glow-success transition-smooth">
-            <CardContent className="p-6 text-center">
-              <Trophy className="w-10 h-10 mx-auto mb-3 text-success" />
-              <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
-                ${openedCases.reduce((sum, c) => sum + c.reward_amount, 0).toFixed(2)}
+          <Card className="glass border border-success/20 hover:glow-success transition-smooth group">
+            <CardContent className="p-6 text-center relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-success/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+              <div className="relative">
+                <Trophy className="w-10 h-10 mx-auto mb-3 text-success" />
+                <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
+                  ${openedCases.reduce((sum, c) => sum + c.reward_amount, 0).toFixed(2)}
+                </div>
+                <div className="text-sm text-muted-foreground">Total Earned</div>
               </div>
-              <div className="text-sm text-muted-foreground">Total Earned</div>
             </CardContent>
           </Card>
         </div>
@@ -144,7 +156,10 @@ export default function Rewards() {
         <Card className="glass border border-accent/20">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-lg">
-              <Gift className="w-5 h-5 text-accent" />
+              <div className="relative">
+                <Gift className="w-5 h-5 text-accent" />
+                <Sparkles className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
+              </div>
               <span>Free Cases</span>
               <span className="text-sm text-muted-foreground font-normal">• Always Available</span>
             </CardTitle>
@@ -152,10 +167,11 @@ export default function Rewards() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {caseStatuses.map((status) => (
-                <Card key={status.config.type} className="glass border border-primary/20 hover:glow-primary transition-smooth">
-                  <CardContent className="p-6 text-center space-y-4">
+                <Card key={status.config.type} className="glass border border-primary/20 hover:glow-primary transition-smooth group">
+                  <CardContent className="p-6 text-center space-y-4 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
                     <div className="relative">
-                      <div className={`w-16 h-16 mx-auto bg-gradient-to-br ${status.config.color} rounded-lg flex items-center justify-center`}>
+                      <div className={`w-16 h-16 mx-auto bg-gradient-to-br ${status.config.color} rounded-lg flex items-center justify-center shadow-lg`}>
                         <span className="text-2xl">{status.config.icon}</span>
                       </div>
                       <div className={`absolute -top-2 -right-2 text-xs px-2 py-1 rounded-full font-bold ${
@@ -165,9 +181,12 @@ export default function Rewards() {
                       }`}>
                         {status.config.type.toUpperCase()}
                       </div>
+                      {status.canClaim && (
+                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                      )}
                     </div>
                     
-                    <div>
+                    <div className="relative">
                       <h3 className="font-semibold">{status.config.name}</h3>
                       <p className="text-sm text-muted-foreground">
                         ${status.config.minAmount.toLocaleString()} - ${status.config.maxAmount.toLocaleString()}
@@ -180,7 +199,7 @@ export default function Rewards() {
                     <Button 
                       onClick={() => openFreeCaseModal(status.config.type)}
                       disabled={!status.canClaim}
-                      className={`w-full ${
+                      className={`w-full relative ${
                         status.canClaim 
                           ? 'gradient-primary hover:glow-primary' 
                           : 'bg-muted text-muted-foreground cursor-not-allowed'
@@ -219,14 +238,20 @@ export default function Rewards() {
         <Card className="glass border border-primary/20">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-lg">
-              <Package className="w-5 h-5 text-primary" />
+              <div className="relative">
+                <Package className="w-5 h-5 text-primary" />
+                <Target className="w-3 h-3 text-accent absolute -top-1 -right-1 animate-pulse" />
+              </div>
               <span>Available Cases</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {availableCases.length === 0 ? (
               <div className="text-center py-12">
-                <Package className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <div className="relative mb-6">
+                  <Package className="w-16 h-16 mx-auto text-muted-foreground opacity-50" />
+                  <div className="absolute inset-0 w-16 h-16 mx-auto border-2 border-primary/20 rounded-full animate-pulse"></div>
+                </div>
                 <h3 className="text-lg font-semibold mb-2">No Cases Available</h3>
                 <p className="text-muted-foreground">
                   Level up to earn reward cases! You get a case every 25 levels.
@@ -235,18 +260,20 @@ export default function Rewards() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {availableCases.map((caseReward) => (
-                  <Card key={caseReward.id} className="glass border border-primary/20 hover:glow-primary transition-smooth cursor-pointer">
-                    <CardContent className="p-6 text-center space-y-4">
+                  <Card key={caseReward.id} className="glass border border-primary/20 hover:glow-primary transition-smooth cursor-pointer group">
+                    <CardContent className="p-6 text-center space-y-4 relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
                       <div className="relative">
-                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
                           <Gift className="w-10 h-10 text-white" />
                         </div>
                         <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
                           LV {caseReward.level_unlocked}
                         </div>
+                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
                       </div>
                       
-                      <div>
+                      <div className="relative">
                         <h3 className="font-semibold">Level {caseReward.level_unlocked} Case</h3>
                         <p className="text-sm text-muted-foreground">
                           Earned on {formatDate(caseReward.created_at)}
@@ -255,7 +282,7 @@ export default function Rewards() {
                       
                       <Button 
                         onClick={() => handleOpenCase(caseReward.id, caseReward.level_unlocked)}
-                        className="w-full gradient-primary hover:glow-primary"
+                        className="w-full gradient-primary hover:glow-primary relative"
                       >
                         <Gift className="w-4 h-4 mr-2" />
                         Open Case
@@ -272,14 +299,20 @@ export default function Rewards() {
         <Card className="glass border border-accent/20">
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-lg">
-              <Clock className="w-5 h-5 text-accent" />
+              <div className="relative">
+                <Clock className="w-5 h-5 text-accent" />
+                <Zap className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
+              </div>
               <span>Case History</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             {openedCases.length === 0 ? (
               <div className="text-center py-12">
-                <Clock className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <div className="relative mb-6">
+                  <Clock className="w-16 h-16 mx-auto text-muted-foreground opacity-50" />
+                  <div className="absolute inset-0 w-16 h-16 mx-auto border-2 border-accent/20 rounded-full animate-pulse"></div>
+                </div>
                 <h3 className="text-lg font-semibold mb-2">No Cases Opened Yet</h3>
                 <p className="text-muted-foreground">
                   Your opened cases will appear here.
@@ -288,9 +321,13 @@ export default function Rewards() {
             ) : (
               <div className="space-y-3">
                 {openedCases.map((caseReward) => (
-                  <div key={caseReward.id} className="flex items-center justify-between p-4 glass rounded-lg">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${getRarityColor(caseReward.rarity)}`} />
+                  <div key={caseReward.id} className="flex items-center justify-between p-4 glass rounded-lg border border-accent/20 hover:glow-accent transition-smooth group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+                    <div className="flex items-center space-x-4 relative">
+                      <div className="relative">
+                        <div className={`w-4 h-4 rounded-full ${getRarityColor(caseReward.rarity)}`} />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                      </div>
                       <div>
                         <div className="font-semibold">
                           {caseReward.level_unlocked === 0 
@@ -305,7 +342,7 @@ export default function Rewards() {
                       </div>
                     </div>
                     
-                    <div className="text-right">
+                    <div className="text-right relative">
                       <div className="font-semibold text-success">
                         +${caseReward.reward_amount.toFixed(2)}
                       </div>
