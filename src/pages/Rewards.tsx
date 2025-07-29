@@ -253,70 +253,78 @@ export default function Rewards() {
             <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-accent/30 to-primary/20 rounded-2xl blur-lg group-hover:blur-xl transition-all duration-500" />
             
             <div className="relative z-10 p-6">
-              <div className="flex items-center space-x-3 mb-6">
+              <div className="flex items-center space-x-3 mb-8">
                 <div className="relative">
-                  <Crown className="w-6 h-6 text-primary" />
+                  <Crown className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-bold gradient-primary bg-clip-text text-transparent">Level Daily Cases</h2>
+                <h2 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">Level Daily Cases</h2>
                 <span className="text-sm text-muted-foreground font-mono">• Reset Daily</span>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {levelDailyCases.map((caseData) => (
                   <div key={caseData.id} className="relative overflow-hidden group/case">
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm rounded-lg" />
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-lg blur-md group-hover/case:blur-lg transition-all duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm rounded-xl" />
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-xl blur-md group-hover/case:blur-lg transition-all duration-300" />
                     
-                    <div className="relative z-10 p-3 text-center space-y-3">
+                    <div className="relative z-10 p-6 text-center space-y-4">
                       <div className="relative">
-                        <div className={`w-12 h-12 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg ${
-                          caseData.user_level < caseData.level_required ? 'opacity-50' : ''
+                        <div className={`w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 via-pink-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg border border-purple-400/20 ${
+                          caseData.user_level < caseData.level_required ? 'opacity-50' : 'group-hover/case:scale-105 transition-transform duration-200'
                         }`}>
                           {caseData.user_level < caseData.level_required ? (
-                            <Lock className="w-6 h-6 text-white" />
+                            <Lock className="w-10 h-10 text-white" />
                           ) : (
-                            <Gift className="w-6 h-6 text-white" />
+                            <Gift className="w-10 h-10 text-white" />
                           )}
                         </div>
-                        <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-1 py-0.5 rounded-full font-bold">
+                        <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground text-sm px-2 py-1 rounded-full font-bold shadow-lg">
                           {caseData.level_required}
                         </div>
+                        {caseData.user_level >= caseData.level_required && caseData.is_available && (
+                          <div className="absolute -top-2 -left-2 w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                        )}
                       </div>
                       
-                      <div>
-                        <div className="text-xs font-semibold">Level {caseData.level_required}</div>
-                        <div className={`text-xs ${getCaseStatusColor(caseData)}`}>
+                      <div className="space-y-2">
+                        <div className="text-lg font-bold text-white">Level {caseData.level_required}</div>
+                        <div className={`text-sm font-medium ${getCaseStatusColor(caseData)}`}>
                           {getCaseStatusText(caseData)}
                         </div>
+                        {caseData.user_level < caseData.level_required && (
+                          <div className="text-xs text-muted-foreground">
+                            Need level {caseData.level_required}
+                          </div>
+                        )}
                       </div>
                       
                       <Button 
                         onClick={() => handleLevelCaseOpened(caseData.id)}
                         disabled={!canOpenCase(caseData) || openingCase === caseData.id}
                         variant={getCaseButtonVariant(caseData)}
-                        size="sm"
-                        className="w-full text-xs relative overflow-hidden hover:bg-primary/10 transition-all duration-200"
+                        size="default"
+                        className="w-full relative overflow-hidden hover:bg-primary/10 transition-all duration-200 font-medium"
                       >
                         <div className="relative z-10">
                           {openingCase === caseData.id ? (
                             <>
-                              <div className="w-3 h-3 mr-1 border border-current border-t-transparent rounded-full animate-spin"></div>
+                              <div className="w-4 h-4 mr-2 border border-current border-t-transparent rounded-full animate-spin"></div>
                               Opening...
                             </>
                           ) : caseData.user_level < caseData.level_required ? (
                             <>
-                              <Lock className="w-3 h-3 mr-1" />
+                              <Lock className="w-4 h-4 mr-2" />
                               Locked
                             </>
                           ) : !caseData.is_available ? (
                             <>
-                              <Clock className="w-3 h-3 mr-1" />
+                              <Clock className="w-4 h-4 mr-2" />
                               Opened
                             </>
                           ) : (
                             <>
-                              <Gift className="w-3 h-3 mr-1" />
-                              Open
+                              <Gift className="w-4 h-4 mr-2" />
+                              Open Case
                             </>
                           )}
                         </div>
