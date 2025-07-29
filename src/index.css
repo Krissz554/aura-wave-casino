@@ -1717,3 +1717,64 @@
 .animate-cyber-toast-out {
   animation: cyber-toast-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
+
+/* ==================== REWARDS PAGE ENHANCEMENTS ==================== */
+
+/* Enhanced pulse glow for rewards page icons */
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    filter: brightness(1) drop-shadow(0 0 5px currentColor);
+  }
+  50% {
+    filter: brightness(1.2) drop-shadow(0 0 15px currentColor);
+  }
+}
+
+/* Enhanced cyber button press animation */
+.animate-cyber-button-press {
+  animation: cyber-button-press 0.2s ease-out;
+}
+
+@keyframes cyber-button-press {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Enhanced balance glow for rewards */
+.animate-cyber-balance-glow {
+  animation: cyber-balance-glow 2s ease-in-out infinite;
+}
+
+@keyframes cyber-balance-glow {
+  0%, 100% {
+    text-shadow: 0 0 10px hsl(var(--success)), 0 0 20px hsl(var(--success)), 0 0 30px hsl(var(--success));
+  }
+  50% {
+    text-shadow: 0 0 20px hsl(var(--success)), 0 0 40px hsl(var(--success)), 0 0 60px hsl(var(--success));
+  }
+}
+
+/* Enhanced logo shine animation */
+.animate-cyber-logo-shine {
+  animation: cyber-logo-shine 3s ease-in-out infinite;
+}
+
+@keyframes cyber-logo-shine {
+  0%, 100% {
+    background-position: -200% center;
+  }
+  50% {
+    background-position: 200% center;
+  }
+}
