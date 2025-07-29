@@ -221,8 +221,8 @@ export default function Rewards() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {[
               { icon: Package, value: stats.totalCasesOpened, label: "Total Cases", color: "primary" },
-              { icon: Coins, value: `$${stats.totalRewards.toFixed(2)}`, label: "Total Rewards", color: "accent" },
-              { icon: Trophy, value: levelDailyCases.filter(c => canOpenCase(c)).length, label: "Available Cases", color: "success" },
+              { icon: Coins, value: `$${stats.totalRewards.toFixed(2)}`, label: "Total Rewards", color: "success" },
+              { icon: Trophy, value: levelDailyCases.filter(c => canOpenCase(c)).length, label: "Available Cases", color: "accent" },
               { icon: Star, value: userData?.level || 0, label: "Your Level", color: "warning" }
             ].map((stat, index) => (
               <div key={index} className="relative overflow-hidden group">
@@ -233,7 +233,12 @@ export default function Rewards() {
                   <div className="relative mb-3">
                     <stat.icon className={`w-8 h-8 mx-auto text-${stat.color}`} />
                   </div>
-                  <div className={`text-2xl font-bold gradient-${stat.color} bg-clip-text text-transparent mb-1`}>
+                  <div className={`text-2xl font-bold ${
+                    stat.color === 'primary' ? 'text-primary' :
+                    stat.color === 'success' ? 'text-green-400' :
+                    stat.color === 'accent' ? 'text-accent' :
+                    'text-yellow-400'
+                  } mb-1`}>
                     {stat.value}
                   </div>
                   <div className="text-sm text-muted-foreground font-mono">{stat.label}</div>
@@ -290,7 +295,7 @@ export default function Rewards() {
                         disabled={!canOpenCase(caseData) || openingCase === caseData.id}
                         variant={getCaseButtonVariant(caseData)}
                         size="sm"
-                        className="w-full text-xs relative overflow-hidden hover:bg-primary/10"
+                        className="w-full text-xs relative overflow-hidden hover:bg-primary/10 transition-all duration-200"
                       >
                         <div className="relative z-10">
                           {openingCase === caseData.id ? (
@@ -372,7 +377,7 @@ export default function Rewards() {
                       <Button 
                         onClick={() => openFreeCaseModal(status.config.type)}
                         disabled={!status.canClaim}
-                        className={`w-full relative overflow-hidden hover:bg-primary/10 ${
+                        className={`w-full relative overflow-hidden hover:bg-primary/10 transition-all duration-200 ${
                           status.canClaim 
                             ? 'gradient-primary hover:glow-primary' 
                             : 'bg-muted text-muted-foreground cursor-not-allowed'
