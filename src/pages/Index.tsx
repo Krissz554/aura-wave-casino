@@ -89,9 +89,9 @@ export default function Index({ initialGame }: IndexProps) {
   const getCurrentGame = () => {
     const path = location.pathname;
     if (path === '/roulette') return 'roulette';
-    if (path === '/coinflip') return 'coinflip';
-    if (path === '/tower') return 'tower';
-    return initialGame || 'coinflip';
+    if (path === '/coinflip') return 'roulette'; // Redirect coinflip to roulette during maintenance
+    if (path === '/tower') return 'roulette'; // Redirect tower to roulette during maintenance
+    return initialGame || 'roulette'; // Default to roulette instead of coinflip
   };
 
   const [currentGame, setCurrentGame] = useState(getCurrentGame());
@@ -1803,53 +1803,35 @@ export default function Index({ initialGame }: IndexProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 p-4">
-                {/* Coinflip Game Button */}
-                <div className="relative group/coinflip">
+                {/* Coinflip Game Button - Under Maintenance */}
+                <div className="relative group/coinflip opacity-60">
                   <Button
-                    onClick={() => handleGameChange('coinflip')}
-                    disabled={gameSelectionLoading === 'coinflip'}
+                    disabled
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
-                      currentGame === 'coinflip' 
-                        ? 'border-2 border-blue-400/80 bg-gradient-to-r from-blue-950/50 to-purple-950/50 text-white shadow-[0_0_20px_rgba(59,130,246,0.6)] backdrop-blur-sm' 
-                        : 'border border-slate-600/40 bg-slate-900/30 hover:border-primary/60 hover:bg-slate-800/50 backdrop-blur-sm'
-                    } ${gameSelectionLoading === 'coinflip' ? 'opacity-60' : ''}
-                    }`}
+                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed overflow-hidden border border-slate-600/40 bg-slate-900/20 backdrop-blur-sm"
                   >
-                    {/* Cyberpunk scan line effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent translate-x-[-100%] group-hover/coinflip:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    {/* Subtle disabled glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 via-blue-500/10 to-blue-500/5 opacity-50" />
                     
-                    {/* Subtle inner glow on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 opacity-0 group-hover/coinflip:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Edge pulse effect */}
-                    <div className="absolute inset-0 border border-primary/0 group-hover/coinflip:border-primary/30 rounded-md transition-all duration-300" />
-                    
-                    <div className="flex items-center gap-3 relative z-10">
-                      <div className={`p-2 rounded-md border ${
-                        currentGame === 'coinflip' 
-                          ? 'bg-blue-900/50 border-blue-400/60 text-blue-300' 
-                          : 'bg-slate-800/50 border-primary/30 text-primary'
-                      } transition-all duration-300`}>
-                        {gameSelectionLoading === 'coinflip' ? (
-                          <div className="w-4 h-4 flex items-center justify-center">
-                            <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <Gamepad2 className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
-                        )}
+                    <div className="flex items-center gap-3 relative z-10 w-full">
+                      <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
+                        <Gamepad2 className="w-4 h-4" />
                       </div>
-                      <span className={`font-bold text-sm font-mono ${
-                        currentGame === 'coinflip' ? 'text-blue-200' : 'text-slate-200'
-                      }`}>
-                        COINFLIP
-                      </span>
-
+                      <div className="flex-1 min-w-0">
+                        <span className="font-bold text-sm font-mono text-slate-400 block">
+                          COINFLIP
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse" />
+                          <span className="text-[10px] text-slate-500 font-mono">UNDER MAINTENANCE</span>
+                          <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse delay-500" />
+                        </div>
+                      </div>
                     </div>
                     
-                    {/* Tech corner indicators */}
-                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 group-hover/coinflip:border-primary" />
-                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 group-hover/coinflip:border-accent" />
+                    {/* Tech corner indicators - dimmed */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-slate-600/30" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-slate-600/30" />
                   </Button>
                 </div>
               
@@ -1902,52 +1884,35 @@ export default function Index({ initialGame }: IndexProps) {
                   </Button>
                 </div>
               
-                {/* Tower Game Button */}
-                <div className="relative group/tower">
+                {/* Tower Game Button - Under Maintenance */}
+                <div className="relative group/tower opacity-60">
                   <Button
-                    onClick={() => handleGameChange('tower')}
-                    disabled={gameSelectionLoading === 'tower'}
+                    disabled
                     variant="ghost"
-                    className={`relative w-full justify-start px-4 py-3 h-12 transition-all duration-300 overflow-hidden ${
-                      currentGame === 'tower' 
-                        ? 'border-2 border-emerald-400/80 bg-gradient-to-r from-emerald-950/50 to-teal-950/50 text-white shadow-[0_0_20px_rgba(16,185,129,0.6)] backdrop-blur-sm' 
-                        : 'border border-slate-600/40 bg-slate-900/30 hover:border-emerald-400/60 hover:bg-slate-800/50 backdrop-blur-sm'
-                    } ${gameSelectionLoading === 'tower' ? 'opacity-60' : ''}`}
+                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed overflow-hidden border border-slate-600/40 bg-slate-900/20 backdrop-blur-sm"
                   >
-                    {/* Cyberpunk scan line effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] group-hover/tower:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    {/* Subtle disabled glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-emerald-500/10 to-emerald-500/5 opacity-50" />
                     
-                    {/* Subtle inner glow on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
-                    
-                    {/* Edge pulse effect */}
-                    <div className="absolute inset-0 border border-emerald-400/0 group-hover/tower:border-emerald-400/30 rounded-md transition-all duration-300" />
-                    
-                    <div className="flex items-center gap-3 relative z-10">
-                      <div className={`p-2 rounded-md border ${
-                        currentGame === 'tower' 
-                          ? 'bg-emerald-900/50 border-emerald-400/60 text-emerald-300' 
-                          : 'bg-slate-800/50 border-primary/30 text-primary'
-                      } transition-all duration-300`}>
-                        {gameSelectionLoading === 'tower' ? (
-                          <div className="w-4 h-4 flex items-center justify-center">
-                            <div className="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <Building className="w-4 h-4 drop-shadow-[0_0_6px_currentColor]" />
-                        )}
+                    <div className="flex items-center gap-3 relative z-10 w-full">
+                      <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
+                        <Building className="w-4 h-4" />
                       </div>
-                      <span className={`font-bold text-sm font-mono ${
-                        currentGame === 'tower' ? 'text-emerald-200' : 'text-slate-200'
-                      }`}>
-                        TOWER
-                      </span>
-
+                      <div className="flex-1 min-w-0">
+                        <span className="font-bold text-sm font-mono text-slate-400 block">
+                          TOWER
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
+                          <span className="text-[10px] text-slate-500 font-mono">UNDER MAINTENANCE</span>
+                          <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse delay-500" />
+                        </div>
+                      </div>
                     </div>
                     
-                    {/* Tech corner indicators */}
-                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-primary/40 group-hover/tower:border-primary" />
-                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-accent/40 group-hover/tower:border-accent" />
+                    {/* Tech corner indicators - dimmed */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-slate-600/30" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-slate-600/30" />
                   </Button>
                 </div>
               
@@ -1990,13 +1955,20 @@ export default function Index({ initialGame }: IndexProps) {
         <div className="lg:col-span-7">
           <div className="space-y-4">
             <div style={{ display: currentGame === 'coinflip' ? 'block' : 'none' }}>
-              <MaintenanceAwareGame gameName="Coinflip">
-                {user && userData ? (
-                  <CoinflipGame userData={userData} onUpdateUser={updateUserProfile} />
-                ) : (
-                  <CoinflipGame userData={null} onUpdateUser={() => Promise.resolve()} />
-                )}
-              </MaintenanceAwareGame>
+              <div className="flex items-center justify-center h-64 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/50 rounded-full flex items-center justify-center border border-slate-600/50">
+                    <Gamepad2 className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-200 mb-2">Coinflip Under Maintenance</h3>
+                  <p className="text-slate-400 text-sm">This game is currently being updated. Please try Roulette in the meantime!</p>
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                    <span className="text-xs text-slate-500 font-mono">MAINTENANCE IN PROGRESS</span>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-500" />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div style={{ display: currentGame === 'roulette' ? 'block' : 'none' }}>
@@ -2010,13 +1982,20 @@ export default function Index({ initialGame }: IndexProps) {
             </div>
 
             <div style={{ display: currentGame === 'tower' ? 'block' : 'none' }}>
-              <MaintenanceAwareGame gameName="Tower">
-                {user && userData ? (
-                  <TowerGame userData={userData} onUpdateUser={updateUserProfile} />
-                ) : (
-                  <TowerGame userData={null} onUpdateUser={() => Promise.resolve()} />
-                )}
-              </MaintenanceAwareGame>
+              <div className="flex items-center justify-center h-64 bg-slate-900/50 rounded-lg border border-slate-700/50">
+                <div className="text-center">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/50 rounded-full flex items-center justify-center border border-slate-600/50">
+                    <Building className="w-8 h-8 text-slate-400" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-200 mb-2">Tower Under Maintenance</h3>
+                  <p className="text-slate-400 text-sm">This game is currently being updated. Please try Roulette in the meantime!</p>
+                  <div className="flex items-center justify-center gap-2 mt-4">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                    <span className="text-xs text-slate-500 font-mono">MAINTENANCE IN PROGRESS</span>
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-500" />
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div style={{ display: currentGame === 'crash' ? 'block' : 'none' }}>
