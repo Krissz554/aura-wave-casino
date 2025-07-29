@@ -86,8 +86,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
 
     fetchStats();
     
-    // Set up real-time subscription for level stats with enhanced logging
-    console.log('📊 Setting up enhanced XP tracking subscription for user:', user.id);
+    // Set up real-time subscription for level stats
     const subscription = supabase
       .channel(`xp_tracking_${user.id}_${Date.now()}`)
       .on(
@@ -99,7 +98,6 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
           filter: `id=eq.${user.id}`
         },
         (payload) => {
-          console.log('📊 LIVE XP UPDATE RECEIVED:', payload);
           if (payload.new) {
             const newData = payload.new as any;
             const newStats = {
@@ -110,31 +108,21 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
               border_tier: newData.border_tier || 1
             };
             
-            console.log('📊 UPDATING XP DISPLAY:', {
-              old_lifetime_xp: levelStats?.lifetime_xp,
-              new_lifetime_xp: newStats.lifetime_xp,
-              old_current_level_xp: levelStats?.current_level_xp,
-              new_current_level_xp: newStats.current_level_xp
-            });
-            
             setLevelStats(newStats);
           }
         }
       )
       .subscribe((status, err) => {
-        console.log('📊 XP tracking subscription status:', status);
-        if (err) console.error('📊 Subscription error:', err);
+        if (err) console.error('📊 XP tracking subscription error:', err);
       });
 
     return () => {
-      console.log('📊 Cleaning up XP tracking subscription');
       supabase.removeChannel(subscription);
     };
   }, [user]);
 
   // Force refresh function for immediate updates
   const forceRefresh = async () => {
-    console.log('📊 FORCE REFRESH: Manually refreshing XP data');
     setLoading(true);
     await fetchStats();
   };

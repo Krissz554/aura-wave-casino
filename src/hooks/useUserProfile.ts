@@ -41,8 +41,6 @@ export function useUserProfile() {
     fetchUserProfile()
     
     // Set up real-time subscription for user_level_stats (primary data source)
-    console.log('🔗 Setting up comprehensive stats subscription for user:', user.id);
-    
     const statsChannel = supabase
       .channel(`user_stats_${user.id}_${Date.now()}`)
       .on(
@@ -54,8 +52,6 @@ export function useUserProfile() {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('📊 USER STATS UPDATE RECEIVED:', payload);
-          
           if (payload.new) {
             const newStats = payload.new as any;
             setUserData(prev => {
@@ -105,36 +101,23 @@ export function useUserProfile() {
           filter: `id=eq.${user.id}`
         },
         (payload) => {
-          console.log('👤 PROFILE UPDATE RECEIVED:', payload);
-          console.log('👤 Old balance:', payload.old?.balance, 'New balance:', payload.new?.balance);
-          
           if (payload.new && payload.old) {
             // Only update profile-specific data (balance, username, etc.)
             if (payload.new.balance !== payload.old.balance) {
-              console.log('✅ UPDATING BALANCE FROM', payload.old.balance, 'TO', payload.new.balance);
-              console.log('💰 Balance change detected - updating user data');
               setUserData(prev => {
                 if (!prev) return null;
-                const updated = {
+                return {
                   ...prev,
                   balance: payload.new.balance,
                   username: payload.new.username,
                   badges: payload.new.badges,
                 };
-                console.log('💰 Updated user data:', { oldBalance: prev.balance, newBalance: updated.balance });
-                return updated;
               });
-            } else {
-              console.log('ℹ️ Profile update received but balance unchanged');
             }
-          } else {
-            console.log('⚠️ Profile update missing old or new data');
           }
         }
       )
-      .subscribe((status) => {
-        console.log('📊 Comprehensive stats subscription status:', status);
-      });
+      .subscribe();
 
     // Additional dedicated balance subscription for maximum reliability
     const balanceChannel = supabase
@@ -148,10 +131,7 @@ export function useUserProfile() {
           filter: `id=eq.${user.id}`
         },
         (payload) => {
-          console.log('🏦 DEDICATED BALANCE UPDATE:', payload);
-          
           if (payload.new && payload.new.balance !== undefined) {
-            console.log('💰 BALANCE SYNC: Updating balance to', payload.new.balance);
             setUserData(prev => {
               if (!prev) return null;
               return {
@@ -194,7 +174,6 @@ export function useUserProfile() {
     }, 5000); // Every 5 seconds
 
     return () => {
-      console.log('🧹 Cleaning up comprehensive stats subscription');
       supabase.removeChannel(statsChannel);
       supabase.removeChannel(balanceChannel);
       clearInterval(balanceRefreshInterval);
@@ -203,11 +182,8 @@ export function useUserProfile() {
 
   const fetchUserProfile = async () => {
     if (!user) {
-      console.warn('[useUserProfile] No user found, skipping fetch');
       return;
     }
-
-    console.log('[useUserProfile] Fetching profile for user:', user.id);
 
     try {
       // Fetch profile
@@ -216,8 +192,6 @@ export function useUserProfile() {
         .select('*')
         .eq('id', user.id)
         .single();
-
-      console.log('[useUserProfile] Profile fetch result:', { profile, profileError });
 
       if (profileError) {
         console.error('[useUserProfile] Error fetching profile:', profileError);
@@ -233,8 +207,6 @@ export function useUserProfile() {
         .eq('user_id', user.id)
         .single();
 
-      console.log('[useUserProfile] Level stats fetch result:', { levelStats, levelStatsError });
-
       if (levelStatsError && levelStatsError.code === 'PGRST116') {
         console.log('[useUserProfile] No level stats found, creating initial stats for user:', user.id);
         const { data: newLevelStats, error: createError } = await supabase
@@ -242,8 +214,6 @@ export function useUserProfile() {
           .insert({ user_id: user.id })
           .select('*')
           .single();
-
-        console.log('[useUserProfile] Created new level stats:', { newLevelStats, createError });
 
         if (createError) {
           console.error('[useUserProfile] Error creating level stats:', createError);
@@ -280,7 +250,6 @@ export function useUserProfile() {
         };
         setUserData(combinedData);
         setLoading(false);
-        console.log('[useUserProfile] User data set (profile + newLevelStats):', combinedData);
         return;
       }
 

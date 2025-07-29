@@ -87,7 +87,7 @@ export function useUserLevelStats() {
 
     fetchStats();
     
-    // Set up real-time subscription with enhanced logging
+    // Set up real-time subscription
     const subscription = supabase
       .channel(`user_level_stats_changes_${user.id}_${Date.now()}`)
       .on(
@@ -99,12 +99,10 @@ export function useUserLevelStats() {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('📊 USER_LEVEL_STATS: Real-time update received:', payload);
           fetchStats();
         }
       )
       .subscribe((status, err) => {
-        console.log('📊 USER_LEVEL_STATS: Subscription status:', status);
         if (err) console.error('📊 USER_LEVEL_STATS: Subscription error:', err);
       });
 

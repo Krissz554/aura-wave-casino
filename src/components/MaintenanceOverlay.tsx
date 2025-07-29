@@ -23,7 +23,9 @@ export default function MaintenanceOverlay() {
 
       try {
         // Try the robust admin check function
-        const { data: adminCheck, error: adminError } = await supabase.rpc('check_admin_status_robust');
+        const { data: adminCheck, error: adminError } = await supabase.rpc('check_admin_status_simple', {
+      user_uuid: user.id
+    });
         if (!adminError && adminCheck !== null) {
           setIsAdmin(adminCheck);
         } else {
