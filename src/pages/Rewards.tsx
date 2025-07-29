@@ -257,7 +257,7 @@ export default function Rewards() {
                 <div className="relative">
                   <Crown className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">Level Daily Cases</h2>
+                <h2 className="text-2xl font-bold gradient-primary bg-clip-text text-transparent">Daily Cases</h2>
                 <span className="text-sm text-muted-foreground font-mono">• Reset Daily</span>
               </div>
               
