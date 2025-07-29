@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Gift, Package, Trophy, Clock, Zap, Crown, Target, Sparkles, Coins, Star, Shield } from 'lucide-react';
+import { ArrowLeft, Gift, Package, Trophy, Clock, Zap, Crown, Target, Sparkles, Coins, Star, Shield, Lock, Unlock } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCaseRewards } from '@/hooks/useCaseRewards';
 import { useFreeCases } from '@/hooks/useFreeCases';
+import { useLevelDailyCases } from '@/hooks/useLevelDailyCases';
+import { useCaseHistory } from '@/hooks/useCaseHistory';
 import { EnhancedCaseOpeningModal } from '@/components/EnhancedCaseOpeningModal';
 import { useToast } from '@/hooks/use-toast';
 import { useUserProfile } from '@/hooks/useUserProfile';
@@ -13,11 +14,19 @@ import { useUserProfile } from '@/hooks/useUserProfile';
 export default function Rewards() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { userData, updateUserProfile } = useUserProfile();
-  const { availableCases, openedCases, loading, openCase } = useCaseRewards();
+  const { userData } = useUserProfile();
   const { caseStatuses, selectedFreeCase, openFreeCaseModal, handleFreeCaseOpened, closeFreeCaseModal } = useFreeCases();
-  const [selectedCase, setSelectedCase] = useState<string | null>(null);
-  const [selectedLevel, setSelectedLevel] = useState<number>(1);
+  const { 
+    cases: levelDailyCases, 
+    loading: levelCasesLoading, 
+    openingCase, 
+    openCase: openLevelCase, 
+    canOpenCase, 
+    getCaseStatusText, 
+    getCaseStatusColor, 
+    getCaseButtonVariant 
+  } = useLevelDailyCases();
+  const { history, stats, loading: historyLoading, formatDate, getRarityColor, getCaseTypeDisplayName } = useCaseHistory();
   const [isPageVisible, setIsPageVisible] = useState(false);
   const { toast } = useToast();
 
@@ -26,39 +35,15 @@ export default function Rewards() {
     setIsPageVisible(true);
   }, []);
 
-  const handleOpenCase = (caseId: string, level: number) => {
-    setSelectedCase(caseId);
-    setSelectedLevel(level);
-  };
-
-  const handleCaseOpened = async (reward: any) => {
-    toast({
-      title: `${reward.rarity.toUpperCase()} Reward!`,
-      description: `You won $${reward.amount}!`,
-    });
-    setSelectedCase(null);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getRarityColor = (rarity: string) => {
-    switch (rarity) {
-      case 'common': return 'bg-gray-500';
-      case 'rare': return 'bg-blue-500';
-      case 'epic': return 'bg-purple-500';
-      case 'legendary': return 'bg-orange-500';
-      default: return 'bg-gray-400';
+  const handleLevelCaseOpened = async (caseId: string) => {
+    const result = await openLevelCase(caseId);
+    if (result) {
+      // Refresh user data to update balance
+      window.location.reload();
     }
   };
 
-  if (loading) {
+  if (levelCasesLoading || historyLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="glass p-8 rounded-2xl text-center border border-primary/20">
@@ -106,21 +91,21 @@ export default function Rewards() {
         </div>
       </header>
 
-      <div className={`max-w-6xl mx-auto px-4 space-y-8 transition-all duration-600 ease-out delay-200 ${
+      <div className={`max-w-7xl mx-auto px-4 space-y-8 transition-all duration-600 ease-out delay-200 ${
         isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
       }`}>
         
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <Card className="glass border border-primary/20 hover:glow-primary transition-smooth group">
             <CardContent className="p-6 text-center relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
               <div className="relative">
                 <Package className="w-10 h-10 mx-auto mb-3 text-primary" />
                 <div className="text-2xl font-bold gradient-primary bg-clip-text text-transparent mb-1">
-                  {availableCases.length}
+                  {stats.totalCasesOpened}
                 </div>
-                <div className="text-sm text-muted-foreground">Available Cases</div>
+                <div className="text-sm text-muted-foreground">Total Cases Opened</div>
               </div>
             </CardContent>
           </Card>
@@ -129,11 +114,11 @@ export default function Rewards() {
             <CardContent className="p-6 text-center relative">
               <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
               <div className="relative">
-                <Gift className="w-10 h-10 mx-auto mb-3 text-accent" />
+                <Coins className="w-10 h-10 mx-auto mb-3 text-accent" />
                 <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
-                  {openedCases.length}
+                  ${stats.totalRewards.toFixed(2)}
                 </div>
-                <div className="text-sm text-muted-foreground">Cases Opened</div>
+                <div className="text-sm text-muted-foreground">Total Rewards</div>
               </div>
             </CardContent>
           </Card>
@@ -144,13 +129,102 @@ export default function Rewards() {
               <div className="relative">
                 <Trophy className="w-10 h-10 mx-auto mb-3 text-success" />
                 <div className="text-2xl font-bold gradient-success bg-clip-text text-transparent mb-1">
-                  ${openedCases.reduce((sum, c) => sum + c.reward_amount, 0).toFixed(2)}
+                  {levelDailyCases.filter(c => canOpenCase(c)).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Total Earned</div>
+                <div className="text-sm text-muted-foreground">Available Cases</div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="glass border border-warning/20 hover:glow-warning transition-smooth group">
+            <CardContent className="p-6 text-center relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+              <div className="relative">
+                <Star className="w-10 h-10 mx-auto mb-3 text-warning" />
+                <div className="text-2xl font-bold gradient-warning bg-clip-text text-transparent mb-1">
+                  {userData?.level || 0}
+                </div>
+                <div className="text-sm text-muted-foreground">Your Level</div>
               </div>
             </CardContent>
           </Card>
         </div>
+
+        {/* Level Daily Cases */}
+        <Card className="glass border border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-lg">
+              <div className="relative">
+                <Crown className="w-5 h-5 text-primary" />
+                <Sparkles className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <span>Level Daily Cases</span>
+              <span className="text-sm text-muted-foreground font-normal">• Reset Daily</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-5 lg:grid-cols-10 gap-4">
+              {levelDailyCases.map((caseData) => (
+                <Card key={caseData.id} className="glass border border-primary/20 hover:glow-primary transition-smooth group">
+                  <CardContent className="p-4 text-center space-y-3 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
+                    <div className="relative">
+                      <div className={`w-12 h-12 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg ${
+                        caseData.user_level < caseData.level_required ? 'opacity-50' : ''
+                      }`}>
+                        {caseData.user_level < caseData.level_required ? (
+                          <Lock className="w-6 h-6 text-white" />
+                        ) : (
+                          <Gift className="w-6 h-6 text-white" />
+                        )}
+                      </div>
+                      <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-1 py-0.5 rounded-full font-bold">
+                        {caseData.level_required}
+                      </div>
+                    </div>
+                    
+                    <div className="relative">
+                      <div className="text-xs font-semibold">Level {caseData.level_required}</div>
+                      <div className={`text-xs ${getCaseStatusColor(caseData)}`}>
+                        {getCaseStatusText(caseData)}
+                      </div>
+                    </div>
+                    
+                    <Button 
+                      onClick={() => handleLevelCaseOpened(caseData.id)}
+                      disabled={!canOpenCase(caseData) || openingCase === caseData.id}
+                      variant={getCaseButtonVariant(caseData)}
+                      size="sm"
+                      className="w-full text-xs"
+                    >
+                      {openingCase === caseData.id ? (
+                        <>
+                          <div className="w-3 h-3 mr-1 border border-current border-t-transparent rounded-full animate-spin"></div>
+                          Opening...
+                        </>
+                      ) : caseData.user_level < caseData.level_required ? (
+                        <>
+                          <Lock className="w-3 h-3 mr-1" />
+                          Locked
+                        </>
+                      ) : !caseData.is_available ? (
+                        <>
+                          <Clock className="w-3 h-3 mr-1" />
+                          Opened
+                        </>
+                      ) : (
+                        <>
+                          <Gift className="w-3 h-3 mr-1" />
+                          Open
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Free Cases */}
         <Card className="glass border border-accent/20">
@@ -234,67 +308,6 @@ export default function Rewards() {
           </CardContent>
         </Card>
 
-        {/* Available Cases */}
-        <Card className="glass border border-primary/20">
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-lg">
-              <div className="relative">
-                <Package className="w-5 h-5 text-primary" />
-                <Target className="w-3 h-3 text-accent absolute -top-1 -right-1 animate-pulse" />
-              </div>
-              <span>Available Cases</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {availableCases.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="relative mb-6">
-                  <Package className="w-16 h-16 mx-auto text-muted-foreground opacity-50" />
-                  <div className="absolute inset-0 w-16 h-16 mx-auto border-2 border-primary/20 rounded-full animate-pulse"></div>
-                </div>
-                <h3 className="text-lg font-semibold mb-2">No Cases Available</h3>
-                <p className="text-muted-foreground">
-                  Level up to earn reward cases! You get a case every 25 levels.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {availableCases.map((caseReward) => (
-                  <Card key={caseReward.id} className="glass border border-primary/20 hover:glow-primary transition-smooth cursor-pointer group">
-                    <CardContent className="p-6 text-center space-y-4 relative">
-                      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
-                      <div className="relative">
-                        <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center shadow-lg">
-                          <Gift className="w-10 h-10 text-white" />
-                        </div>
-                        <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded-full">
-                          LV {caseReward.level_unlocked}
-                        </div>
-                        <div className="absolute -top-1 -left-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
-                      </div>
-                      
-                      <div className="relative">
-                        <h3 className="font-semibold">Level {caseReward.level_unlocked} Case</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Earned on {formatDate(caseReward.created_at)}
-                        </p>
-                      </div>
-                      
-                      <Button 
-                        onClick={() => handleOpenCase(caseReward.id, caseReward.level_unlocked)}
-                        className="w-full gradient-primary hover:glow-primary relative"
-                      >
-                        <Gift className="w-4 h-4 mr-2" />
-                        Open Case
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Case History */}
         <Card className="glass border border-accent/20">
           <CardHeader>
@@ -307,7 +320,7 @@ export default function Rewards() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {openedCases.length === 0 ? (
+            {history.length === 0 ? (
               <div className="text-center py-12">
                 <div className="relative mb-6">
                   <Clock className="w-16 h-16 mx-auto text-muted-foreground opacity-50" />
@@ -320,7 +333,7 @@ export default function Rewards() {
               </div>
             ) : (
               <div className="space-y-3">
-                {openedCases.map((caseReward) => (
+                {history.map((caseReward) => (
                   <div key={caseReward.id} className="flex items-center justify-between p-4 glass rounded-lg border border-accent/20 hover:glow-accent transition-smooth group">
                     <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"></div>
                     <div className="flex items-center space-x-4 relative">
@@ -330,10 +343,7 @@ export default function Rewards() {
                       </div>
                       <div>
                         <div className="font-semibold">
-                          {caseReward.level_unlocked === 0 
-                            ? `${caseReward.rarity.charAt(0).toUpperCase() + caseReward.rarity.slice(1)} Free Case`
-                            : `Level ${caseReward.level_unlocked} Case`
-                          }
+                          {getCaseTypeDisplayName(caseReward.case_type, caseReward.level_unlocked)}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {caseReward.rarity.charAt(0).toUpperCase() + caseReward.rarity.slice(1)} • 
@@ -354,17 +364,6 @@ export default function Rewards() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Enhanced Case Opening Modal for Level Rewards */}
-      {selectedCase && (
-        <EnhancedCaseOpeningModal
-          isOpen={!!selectedCase}
-          onClose={() => setSelectedCase(null)}
-          caseId={selectedCase}
-          level={selectedLevel}
-          onCaseOpened={handleCaseOpened}
-        />
-      )}
 
       {/* Enhanced Case Opening Modal for Free Cases */}
       {selectedFreeCase && (
