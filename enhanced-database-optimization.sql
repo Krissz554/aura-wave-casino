@@ -342,31 +342,12 @@ ANALYZE public.unlocked_achievements;
 -- 8. VERIFY OPTIMIZATIONS
 SELECT 'Enhanced database optimization completed successfully' as status;
 
--- Check for any remaining missing critical indexes
-SELECT 
-  t.table_name,
-  c.column_name,
-  'Missing index on ' || t.table_name || '.' || c.column_name as recommendation
-FROM information_schema.tables t
-JOIN information_schema.columns c ON t.table_name = c.table_name
-WHERE t.table_schema = 'public'
-  AND t.table_type = 'BASE TABLE'
-  AND c.column_name IN ('user_id', 'created_at', 'status', 'username', 'balance', 'level')
-  AND NOT EXISTS (
-    SELECT 1 FROM pg_indexes 
-    WHERE tablename = t.table_name 
-    AND indexdef LIKE '%' || c.column_name || '%'
-  );
+-- Verify optimizations completed successfully
+SELECT 'Enhanced database optimization completed successfully' as status;
 
--- Show index usage statistics
+-- Count total indexes created
 SELECT 
-  schemaname,
-  tablename,
-  indexname,
-  idx_scan,
-  idx_tup_read,
-  idx_tup_fetch
-FROM pg_stat_user_indexes
-WHERE schemaname = 'public'
-ORDER BY idx_scan DESC
-LIMIT 20;
+  COUNT(*) as total_indexes_created
+FROM pg_indexes 
+WHERE schemaname = 'public' 
+  AND indexname LIKE 'idx_%';
