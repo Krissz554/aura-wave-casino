@@ -218,6 +218,6 @@ WHERE t.table_schema = 'public'
   AND c.column_name IN ('user_id', 'created_at', 'status')
   AND NOT EXISTS (
     SELECT 1 FROM pg_indexes 
-    WHERE tablename = t.table_name 
+    WHERE table_name = t.table_name 
     AND indexdef LIKE '%' || c.column_name || '%'
   );
