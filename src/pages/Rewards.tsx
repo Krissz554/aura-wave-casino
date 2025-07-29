@@ -8,7 +8,6 @@ import { useCaseRewards } from '@/hooks/useCaseRewards';
 import { useFreeCases } from '@/hooks/useFreeCases';
 import { EnhancedCaseOpeningModal } from '@/components/EnhancedCaseOpeningModal';
 import { useToast } from '@/hooks/use-toast';
-import RewardsPanel from '@/components/RewardsPanel';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 export default function Rewards() {
@@ -116,14 +115,7 @@ export default function Rewards() {
         isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
       }`}>
         
-        {/* Daily Rewards Section */}
-        {user && userData && (
-          <div className={`transition-all duration-500 ease-out delay-300 ${
-            isPageVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}>
-            <RewardsPanel userData={userData} onUpdateUser={updateUserProfile} />
-          </div>
-        )}
+
 
         {/* Stats Overview - Cyberpunk Style */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
