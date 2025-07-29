@@ -11,9 +11,8 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react(),
-    // Disable componentTagger in development to avoid CSP eval warnings
-    // mode === 'development' &&
-    // componentTagger(),
+    mode === 'development' &&
+    componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
