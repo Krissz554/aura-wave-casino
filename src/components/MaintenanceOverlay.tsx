@@ -53,11 +53,24 @@ export default function MaintenanceOverlay() {
     checkAdminStatus();
   }, [user]);
 
+  // Disable scrolling when maintenance is active
+  React.useEffect(() => {
+    if (isMaintenanceMode) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMaintenanceMode]);
+
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 flex items-center justify-center">
+      <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 flex items-center justify-center pointer-events-none">
         {/* Stunning Loading Environment */}
-        <div className="relative">
+        <div className="relative pointer-events-auto">
           {/* Animated Circuit Board Background */}
           <div className="absolute inset-0 w-96 h-96">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(99,102,241,0.3)_1px,transparent_0)] bg-[20px_20px] animate-pulse"></div>
@@ -103,8 +116,8 @@ export default function MaintenanceOverlay() {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 flex items-center justify-center p-4">
-      <div className="max-w-2xl w-full">
+    <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 flex items-center justify-center p-4 pointer-events-none">
+      <div className="max-w-2xl w-full pointer-events-auto">
         {/* Stunning Main Container */}
         <div className="relative overflow-hidden group">
           {/* Advanced Background System */}
@@ -159,7 +172,7 @@ export default function MaintenanceOverlay() {
             {user && !adminLoading && isAdmin && (
               <button
                 onClick={() => setShowAdminPanel(true)}
-                className="absolute top-6 right-6 p-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 transform hover:scale-105 z-10 border border-primary/30"
+                className="absolute top-6 right-6 p-3 bg-gradient-to-r from-primary to-accent text-white rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 transform hover:scale-105 z-10 border border-primary/30 pointer-events-auto"
               >
                 <Shield className="h-5 w-5" />
               </button>
