@@ -105,8 +105,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
 
   // 🧮 Calculate winning position using PROVABLY FAIR system algorithm
   const calculateWinningPosition = (winningNumber: number, startPosition: number): number => {
-    console.log('🎯 Calculating provably fair winning position...');
-    
     // Find the index of the winning slot in our WHEEL_SLOTS array (PROVABLY FAIR STEP 1)
     const winningSlotIndex = WHEEL_SLOTS.findIndex(slot => slot.slot === winningNumber);
     if (winningSlotIndex === -1) {
@@ -114,14 +112,10 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       return startPosition;
     }
     
-    console.log(`📍 Winning slot ${winningNumber} found at index ${winningSlotIndex} in wheel`);
-    
     // PROVABLY FAIR CALCULATION (matches backend exactly):
     // Goal: Make winning slot center align with CENTER_MARKER_PX (750px)
     // Formula: position = CENTER_MARKER_PX - (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX/2)
     const idealPosition = CENTER_MARKER_PX - (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
-    
-    console.log(`🧮 Ideal position calculation: ${CENTER_MARKER_PX} - (${winningSlotIndex} * ${TILE_SIZE_PX} + ${TILE_SIZE_PX/2}) = ${idealPosition}`);
     
     // Ensure we spin left (negative direction) with sufficient distance
     const minSpinDistance = 50 * WHEEL_SLOTS.length * TILE_SIZE_PX; // 50 full wheel rotations minimum
@@ -139,21 +133,7 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
     const verificationSlotCenter = bestPosition + (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
     const alignmentAccuracy = Math.abs(verificationSlotCenter - CENTER_MARKER_PX);
     
-    console.log('✅ PROVABLY FAIR Position Calculated:', {
-      winningSlot: winningNumber,
-      winningSlotIndex,
-      startPosition: Math.round(startPosition),
-      idealPosition: Math.round(idealPosition),
-      finalPosition: Math.round(bestPosition),
-      spinDistance: Math.round(Math.abs(bestPosition - startPosition)),
-      fullWheelRotations: Math.round(Math.abs(bestPosition - startPosition) / (WHEEL_SLOTS.length * TILE_SIZE_PX)),
-      verification: {
-        winningSlotCenterWillBeAt: Math.round(verificationSlotCenter),
-        shouldBeAt: CENTER_MARKER_PX,
-        pixelAccuracy: Math.round(alignmentAccuracy),
-        isPerfect: alignmentAccuracy < 1
-      }
-    });
+
     
     return bestPosition;
   };
@@ -177,8 +157,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         winningSlot,
         serverReelPosition
       };
-      
-      console.log('🚀 Starting PROVABLY FAIR Roulette Animation');
       
       const startPosition = currentPosition;
       
@@ -268,9 +246,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (reelRef.current) {
-            const direction = targetPosition < startPosition ? 'RIGHT → LEFT' : 'LEFT → RIGHT';
-            const distance = Math.abs(targetPosition - startPosition);
-            console.log(`🎬 Animating ${direction} | Distance: ${Math.round(distance)}px | From: ${Math.round(startPosition)} → To: ${Math.round(targetPosition)}`);
             reelRef.current.style.transform = `translateX(${targetPosition}px)`;
           }
         });
@@ -309,14 +284,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         if (reelRef.current) {
           reelRef.current.style.transition = 'none';
         }
-        
-        console.log('✅ Animation Complete:', {
-          originalPosition: Math.round(targetPosition),
-          normalizedPosition: Math.round(normalizedPosition),
-          winningSlot,
-          duration: `${SPIN_DURATION_MS}ms`,
-          tileSafety: 'Position normalized to prevent disappearing tiles'
-        });
         
         // Hide win glow after 2 seconds
         setTimeout(() => setShowWinGlow(false), 2000);

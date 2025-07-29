@@ -87,9 +87,10 @@ export function useUserLevelStats() {
 
     fetchStats();
     
-    // Set up real-time subscription
+    // Set up real-time subscription with unique channel name
+    const channelName = `user_level_stats_${user.id}_${Math.random().toString(36).substr(2, 9)}`;
     const subscription = supabase
-      .channel(`user_level_stats_changes_${user.id}_${Date.now()}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -107,7 +108,7 @@ export function useUserLevelStats() {
       });
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channelName);
     };
   }, [user]);
 

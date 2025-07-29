@@ -81,7 +81,6 @@ export function useAchievementNotifications() {
       // Show notification if new achievements are ready
       if (claimable.length > previousCount) {
         setHasNewClaimable(true);
-        console.log(`🎉 ${claimable.length - previousCount} new achievement(s) ready to claim!`);
       }
     } catch (error) {
       console.error('Error checking claimable achievements:', error);

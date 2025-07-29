@@ -184,24 +184,14 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
       if (error) throw error;
       
-      console.log('🎰 Current round:', data);
-      
       // Check if this is a new round (different ID)
       const isNewRound = currentRound?.id !== data?.id;
-      console.log('🔍 Round comparison:', {
-        currentRoundId: currentRound?.id,
-        dataId: data?.id,
-        isNewRound: isNewRound,
-        currentRoundRefValue: currentRoundRef.current
-      });
       
       if (isNewRound) {
-        console.log('🆕 New round detected, clearing user bets');
         setUserBets({});
         
         // Only clear isolated totals if it's actually a different round
         if (isolatedRoundId !== data?.id) {
-          console.log('🧹 Clearing isolated totals for new round:', data?.id);
           setIsolatedRoundTotals({});
           setIsolatedRoundId(data?.id);
         }

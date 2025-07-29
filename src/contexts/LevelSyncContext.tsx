@@ -86,9 +86,10 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
 
     fetchStats();
     
-    // Set up real-time subscription for level stats
+    // Set up real-time subscription for level stats with unique channel name
+    const channelName = `xp_tracking_${user.id}_${Math.random().toString(36).substr(2, 9)}`;
     const subscription = supabase
-      .channel(`xp_tracking_${user.id}_${Date.now()}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         {
@@ -117,7 +118,7 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
       });
 
     return () => {
-      supabase.removeChannel(subscription);
+      supabase.removeChannel(channelName);
     };
   }, [user]);
 
