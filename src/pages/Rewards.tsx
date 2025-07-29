@@ -177,9 +177,8 @@ export default function Rewards() {
                   <Button
                     variant="ghost"
                     onClick={() => navigate('/')}
-                    className="relative overflow-hidden backdrop-blur-sm transition-all duration-300 p-2"
+                    className="relative overflow-hidden backdrop-blur-sm transition-all duration-300 p-2 hover:bg-primary/10"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity rounded-lg" />
                     <ArrowLeft className="w-4 h-4 mr-2 relative z-10" />
                     <span className="relative z-10">Return</span>
                   </Button>
@@ -233,7 +232,6 @@ export default function Rewards() {
                 <div className="relative z-10 p-4 text-center">
                   <div className="relative mb-3">
                     <stat.icon className={`w-8 h-8 mx-auto text-${stat.color}`} />
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-accent rounded-full animate-pulse"></div>
                   </div>
                   <div className={`text-2xl font-bold gradient-${stat.color} bg-clip-text text-transparent mb-1`}>
                     {stat.value}
@@ -253,7 +251,6 @@ export default function Rewards() {
               <div className="flex items-center space-x-3 mb-6">
                 <div className="relative">
                   <Crown className="w-6 h-6 text-primary" />
-                  <Sparkles className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
                 </div>
                 <h2 className="text-xl font-bold gradient-primary bg-clip-text text-transparent">Level Daily Cases</h2>
                 <span className="text-sm text-muted-foreground font-mono">• Reset Daily</span>
@@ -293,9 +290,8 @@ export default function Rewards() {
                         disabled={!canOpenCase(caseData) || openingCase === caseData.id}
                         variant={getCaseButtonVariant(caseData)}
                         size="sm"
-                        className="w-full text-xs relative overflow-hidden"
+                        className="w-full text-xs relative overflow-hidden hover:bg-primary/10"
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity rounded-md" />
                         <div className="relative z-10">
                           {openingCase === caseData.id ? (
                             <>
@@ -336,10 +332,8 @@ export default function Rewards() {
               <div className="flex items-center space-x-3 mb-6">
                 <div className="relative">
                   <Gift className="w-6 h-6 text-accent" />
-                  <Sparkles className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
                 </div>
                 <h2 className="text-xl font-bold gradient-accent bg-clip-text text-transparent">Free Cases</h2>
-                <span className="text-sm text-muted-foreground font-mono">• Always Available</span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -378,13 +372,12 @@ export default function Rewards() {
                       <Button 
                         onClick={() => openFreeCaseModal(status.config.type)}
                         disabled={!status.canClaim}
-                        className={`w-full relative overflow-hidden ${
+                        className={`w-full relative overflow-hidden hover:bg-primary/10 ${
                           status.canClaim 
                             ? 'gradient-primary hover:glow-primary' 
                             : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }`}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent opacity-0 hover:opacity-100 transition-opacity rounded-md" />
                         <div className="relative z-10">
                           {status.canClaim ? (
                             <>
@@ -425,7 +418,6 @@ export default function Rewards() {
               <div className="flex items-center space-x-3 mb-6">
                 <div className="relative">
                   <Clock className="w-6 h-6 text-accent" />
-                  <Zap className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
                 </div>
                 <h2 className="text-xl font-bold gradient-accent bg-clip-text text-transparent">Case History</h2>
               </div>
@@ -452,7 +444,6 @@ export default function Rewards() {
                         <div className="flex items-center space-x-4">
                           <div className="relative">
                             <div className={`w-4 h-4 rounded-full ${getRarityColor(caseReward.rarity)}`} />
-                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full animate-pulse"></div>
                           </div>
                           <div>
                             <div className="font-semibold">
