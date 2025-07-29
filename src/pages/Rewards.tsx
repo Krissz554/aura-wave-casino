@@ -355,7 +355,7 @@ export default function Rewards() {
                 <div className="relative">
                   <Clock className="w-6 h-6 text-accent" />
                 </div>
-                <h2 className="text-xl font-bold gradient-accent bg-clip-text text-transparent">Case History</h2>
+                <h2 className="text-xl font-bold text-accent">Case History</h2>
               </div>
               
               {history.length === 0 ? (
