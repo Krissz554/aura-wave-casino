@@ -177,21 +177,17 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         
         if (serverDistance >= minSpinDistance && serverDistance <= maxReasonableDistance && movesLeft) {
           targetPosition = serverReelPosition;
-          console.log('🌐 Using validated server position (moves left):', Math.round(targetPosition));
         } else {
           targetPosition = clientCalculatedPosition;
-          console.log('🖥️ Server position invalid or wrong direction, using client calculation:', Math.round(targetPosition));
         }
       } else {
         targetPosition = clientCalculatedPosition;
-        console.log('🖥️ No server position, using client calculation:', Math.round(targetPosition));
       }
       
       if (!reelRef.current) return;
       
       // 🛡️ FINAL SAFEGUARD: Absolutely ensure LEFT movement (right → left)
       if (targetPosition >= startPosition) {
-        console.log('🔧 Forcing left movement by adding rotations');
         targetPosition = startPosition - (5 * WHEEL_SLOTS.length * TILE_SIZE_PX); // Force 5 rotations left
         
         // Re-align to correct winning slot
@@ -213,16 +209,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       
       const animationDistance = Math.abs(targetPosition - startPosition);
       const rotations = animationDistance / (WHEEL_SLOTS.length * TILE_SIZE_PX);
-      
-      console.log('🎯 Animation Details:', {
-        startPosition: Math.round(startPosition),
-        targetPosition: Math.round(targetPosition),
-        distance: Math.round(animationDistance),
-        rotations: Math.round(rotations * 100) / 100,
-        duration: SPIN_DURATION_MS,
-        winningSlot,
-        direction: targetPosition < startPosition ? 'LEFT (Right → Left) ✅' : 'RIGHT (Left → Right) ❌'
-      });
       
       // Set animation state
       setIsAnimating(true);

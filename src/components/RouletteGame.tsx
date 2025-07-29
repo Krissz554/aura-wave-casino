@@ -811,22 +811,18 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       });
 
       // XP TRACKING - Now handled automatically by total_wagered trigger
-      console.log('🎯 BET CONFIRMED: XP will be awarded automatically via total_wagered trigger for $' + betAmount + ' bet');
       
       // Force refresh XP data after successful bet - IMMEDIATE + FOLLOW-UP
-      console.log('🔄 ROULETTE: Forcing IMMEDIATE XP refresh after $' + betAmount + ' bet');
       
       // Immediate refresh (no delay)
       forceFullRefresh().catch(console.error);
       
       // Follow-up refreshes to ensure it catches (backend processing can take time)
       setTimeout(() => {
-        console.log('🔄 ROULETTE: Follow-up XP refresh #1');
         forceFullRefresh().catch(console.error);
       }, 200);
       
       setTimeout(() => {
-        console.log('🔄 ROULETTE: Follow-up XP refresh #2');
         forceFullRefresh().catch(console.error);
       }, 1000);
 
