@@ -170,38 +170,12 @@ BEGIN
 END;
 $$;
 
--- 5. Add performance monitoring views
-
--- View for slow queries monitoring
-CREATE OR REPLACE VIEW public.performance_monitor AS
-SELECT 
-  schemaname,
-  tablename,
-  attname,
-  n_distinct,
-  correlation
-FROM pg_stats
-WHERE schemaname = 'public'
-ORDER BY tablename, attname;
-
--- View for index usage statistics
-CREATE OR REPLACE VIEW public.index_usage_stats AS
-SELECT 
-  schemaname,
-  tablename,
-  indexname,
-  idx_scan,
-  idx_tup_read,
-  idx_tup_fetch
-FROM pg_stat_user_indexes
-WHERE schemaname = 'public'
-ORDER BY idx_scan DESC;
+-- 5. Performance monitoring (optional - can be added later if needed)
+-- Note: Performance monitoring views removed to avoid compatibility issues
 
 -- 6. Grant permissions for optimized functions
 GRANT EXECUTE ON FUNCTION public.get_recent_live_bet_feed TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_stats_optimized TO authenticated;
-GRANT SELECT ON public.performance_monitor TO service_role;
-GRANT SELECT ON public.index_usage_stats TO service_role;
 
 -- 7. Verify optimizations
 SELECT 'Indexes created successfully' as status;
