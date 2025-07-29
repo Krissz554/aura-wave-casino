@@ -264,7 +264,7 @@ export default function Rewards() {
               <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
                 {levelDailyCases.map((caseData) => (
                   <div key={caseData.id} className="relative overflow-hidden group/case">
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm rounded-xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm rounded-xl" />
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-transparent rounded-xl blur-md group-hover/case:blur-lg transition-all duration-300" />
                     
                     <div className="relative z-10 p-6 text-center space-y-4">
@@ -278,21 +278,29 @@ export default function Rewards() {
                             <Gift className="w-10 h-10 text-white" />
                           )}
                         </div>
-                        <div className="absolute -top-3 -right-3 bg-primary text-primary-foreground text-sm px-2 py-1 rounded-full font-bold shadow-lg">
+                        <div className="absolute -top-3 -right-3 bg-gradient-to-r from-primary to-accent text-white text-sm px-3 py-1 rounded-full font-bold shadow-lg border border-primary/20">
                           {caseData.level_required}
                         </div>
                         {caseData.user_level >= caseData.level_required && caseData.is_available && (
-                          <div className="absolute -top-2 -left-2 w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                          <div className="absolute -top-2 -left-2 w-4 h-4 bg-green-400 rounded-full animate-pulse shadow-lg border-2 border-white"></div>
                         )}
                       </div>
                       
-                      <div className="space-y-2">
-                        <div className="text-lg font-bold text-white">Level {caseData.level_required}</div>
-                        <div className={`text-sm font-medium ${getCaseStatusColor(caseData)}`}>
+                      <div className="space-y-3">
+                        <div className="text-lg font-bold bg-gradient-to-r from-white to-slate-200 bg-clip-text text-transparent">
+                          Level {caseData.level_required}
+                        </div>
+                        <div className={`text-sm font-medium px-3 py-1 rounded-full ${
+                          caseData.user_level < caseData.level_required 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
+                            : !caseData.is_available 
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : 'bg-green-500/20 text-green-400 border border-green-500/30'
+                        }`}>
                           {getCaseStatusText(caseData)}
                         </div>
                         {caseData.user_level < caseData.level_required && (
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-xs text-muted-foreground bg-slate-800/50 px-2 py-1 rounded-md border border-slate-700/50">
                             Need level {caseData.level_required}
                           </div>
                         )}
@@ -303,7 +311,13 @@ export default function Rewards() {
                         disabled={!canOpenCase(caseData) || openingCase === caseData.id}
                         variant={getCaseButtonVariant(caseData)}
                         size="default"
-                        className="w-full relative overflow-hidden hover:bg-primary/10 transition-all duration-200 font-medium"
+                        className={`w-full relative overflow-hidden transition-all duration-200 font-medium ${
+                          caseData.user_level < caseData.level_required 
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30' 
+                            : !caseData.is_available 
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/30'
+                            : 'bg-gradient-to-r from-primary to-accent text-white border border-primary/30 hover:from-primary/80 hover:to-accent/80'
+                        }`}
                       >
                         <div className="relative z-10">
                           {openingCase === caseData.id ? (
