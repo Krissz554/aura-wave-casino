@@ -1818,12 +1818,12 @@ export default function Index({ initialGame }: IndexProps) {
                         <Gamepad2 className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-bold text-sm font-mono text-slate-400 block">
+                        <span className="font-bold text-sm font-mono text-slate-300 block">
                           COINFLIP
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse" />
-                          <span className="text-[10px] text-slate-500 font-mono">UNDER MAINTENANCE</span>
+                          <span className="text-[10px] text-slate-400 font-mono">UNDER MAINTENANCE</span>
                           <div className="w-1 h-1 bg-blue-400 rounded-full animate-pulse delay-500" />
                         </div>
                       </div>
@@ -1899,12 +1899,12 @@ export default function Index({ initialGame }: IndexProps) {
                         <Building className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-bold text-sm font-mono text-slate-400 block">
+                        <span className="font-bold text-sm font-mono text-slate-300 block">
                           TOWER
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
-                          <span className="text-[10px] text-slate-500 font-mono">UNDER MAINTENANCE</span>
+                          <span className="text-[10px] text-slate-400 font-mono">UNDER MAINTENANCE</span>
                           <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse delay-500" />
                         </div>
                       </div>
@@ -1930,12 +1930,12 @@ export default function Index({ initialGame }: IndexProps) {
                          <TrendingUp className="w-4 h-4" />
                        </div>
                        <div className="flex-1 min-w-0">
-                         <span className="font-bold text-sm font-mono text-slate-400 block">
+                         <span className="font-bold text-sm font-mono text-slate-300 block">
                            CRASH
                          </span>
                          <div className="flex items-center gap-1.5 mt-0.5">
                            <div className="w-1 h-1 bg-amber-400 rounded-full animate-pulse" />
-                           <span className="text-[10px] text-slate-500 font-mono">COMING SOON</span>
+                           <span className="text-[10px] text-slate-400 font-mono">COMING SOON</span>
                            <div className="w-1 h-1 bg-yellow-400 rounded-full animate-pulse delay-500" />
                          </div>
                        </div>
