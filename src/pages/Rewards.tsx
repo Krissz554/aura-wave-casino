@@ -314,7 +314,7 @@ export default function Rewards() {
                             : 'bg-gradient-to-r from-primary to-accent text-white border border-primary/30 hover:from-primary/80 hover:to-accent/80'
                         }`}
                       >
-                        <div className="relative z-10">
+                        <div className="relative z-10 flex items-center justify-center">
                           {openingCase === caseData.id ? (
                             <>
                               <div className="w-4 h-4 mr-2 border border-current border-t-transparent rounded-full animate-spin"></div>
