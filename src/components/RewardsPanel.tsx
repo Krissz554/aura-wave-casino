@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Gift, Clock, Coins } from 'lucide-react';
+import { Gift, Clock, Coins, Zap, Crown, Sparkles } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { UserProfile } from '@/hooks/useUserProfile';
 
@@ -87,51 +87,89 @@ export default function RewardsPanel({ userData, onUpdateUser }: RewardsPanelPro
   const progressPercentage = timeLeft > 0 ? ((CLAIM_COOLDOWN - timeLeft) / CLAIM_COOLDOWN) * 100 : 100;
 
   return (
-    <Card className="glass border-0">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center space-x-2 text-lg">
-          <Gift className="w-5 h-5 text-primary" />
-          <span>Daily Rewards</span>
+    <Card className="glass border border-accent/20 shadow-glow overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent"></div>
+      <CardHeader className="relative pb-4">
+        <CardTitle className="flex items-center space-x-3 text-xl">
+          <div className="relative">
+            <Gift className="w-6 h-6 text-accent animate-pulse-glow" />
+            <Sparkles className="w-3 h-3 text-warning absolute -top-1 -right-1 animate-pulse" />
+          </div>
+          <span className="gradient-accent bg-clip-text text-transparent">DAILY REWARDS</span>
+          <div className="flex items-center space-x-2 ml-auto">
+            <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+            <span className="text-xs text-muted-foreground font-normal">ACTIVE</span>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="text-center space-y-2">
-          <div className="text-3xl font-bold gradient-primary bg-clip-text text-transparent">
-            ${CLAIM_AMOUNT}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Free credits every 20 seconds
-          </p>
-        </div>
-
-        {!canClaim && (
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span className="flex items-center space-x-1">
-                <Clock className="w-3 h-3" />
-                <span>Next claim in:</span>
-              </span>
-              <span className="font-mono text-primary">{formatTime(timeLeft)}</span>
+      <CardContent className="space-y-6 relative">
+        <div className="text-center space-y-4">
+          <div className="relative">
+            <div className="text-4xl font-bold gradient-accent bg-clip-text text-transparent mb-2">
+              ${CLAIM_AMOUNT}
             </div>
-            <Progress value={progressPercentage} className="h-2" />
+            <div className="text-sm text-muted-foreground font-medium">DAILY BONUS</div>
+            <div className="absolute -top-2 -right-2 w-4 h-4 bg-success rounded-full animate-pulse"></div>
           </div>
-        )}
-
-        <Button
-          onClick={handleClaim}
-          disabled={!canClaim || isUpdating}
-          className={`w-full transition-smooth ${
-            canClaim && !isUpdating
-              ? 'gradient-primary hover:glow-primary animate-pulse-glow'
-              : 'opacity-50 cursor-not-allowed'
-          }`}
-        >
-          <Coins className="w-4 h-4 mr-2" />
-          {isUpdating ? 'Claiming...' : canClaim ? 'Claim Reward' : `Wait ${formatTime(timeLeft)}`}
-        </Button>
-
-        <div className="text-xs text-center text-muted-foreground">
-          Claiming rewards also gives you +10 XP!
+          
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-muted-foreground">Progress</span>
+              <span className="font-medium">
+                {canClaim ? 'READY!' : formatTime(timeLeft)}
+              </span>
+            </div>
+            
+            <div className="relative">
+              <Progress 
+                value={progressPercentage} 
+                className="h-3 bg-muted/20 border border-accent/20"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent rounded-full"></div>
+              {canClaim && (
+                <div className="absolute inset-0 bg-gradient-to-r from-success/20 to-accent/20 rounded-full animate-pulse"></div>
+              )}
+            </div>
+          </div>
+          
+          <Button 
+            onClick={handleClaim}
+            disabled={!canClaim || isUpdating}
+            className={`w-full group ${
+              canClaim 
+                ? 'gradient-accent hover:glow-accent border border-accent/20 animate-cyber-button-press' 
+                : 'bg-muted text-muted-foreground cursor-not-allowed border border-muted'
+            }`}
+          >
+            {isUpdating ? (
+              <>
+                <div className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                CLAIMING...
+              </>
+            ) : canClaim ? (
+              <>
+                <Coins className="w-4 h-4 mr-2 animate-pulse" />
+                CLAIM REWARD
+              </>
+            ) : (
+              <>
+                <Clock className="w-4 h-4 mr-2" />
+                WAITING...
+              </>
+            )}
+          </Button>
+        </div>
+        
+        {/* Additional Info */}
+        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-accent/20">
+          <div className="text-center">
+            <div className="text-lg font-bold text-primary">+10 XP</div>
+            <div className="text-xs text-muted-foreground">BONUS XP</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-bold text-success">20s</div>
+            <div className="text-xs text-muted-foreground">COOLDOWN</div>
+          </div>
         </div>
       </CardContent>
     </Card>
