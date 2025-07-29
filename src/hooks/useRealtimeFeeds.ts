@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -46,6 +46,18 @@ export interface CrashBet {
   created_at: string;
 }
 
+// Debounce utility
+const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
+};
+
 export const useRealtimeFeeds = () => {
   const [liveBetFeed, setLiveBetFeed] = useState<LiveBetFeed[]>([]);
   const [currentCrashRound, setCurrentCrashRound] = useState<CrashRound | null>(null);
@@ -61,201 +73,181 @@ export const useRealtimeFeeds = () => {
     crashBets?: RealtimeChannel;
   }>({});
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
-  const maxRetries = 5;
+  const maxRetries = 3; // Reduced from 5
+  const isInitializedRef = useRef(false);
 
-  useEffect(() => {
-    const setupRealtimeSubscriptions = async () => {
-      try {
-        // Clear any existing reconnection timeout
-        if (reconnectTimeoutRef.current) {
-          clearTimeout(reconnectTimeoutRef.current);
+  // Optimized data fetching with caching
+  const fetchInitialData = useCallback(async () => {
+    try {
+      const [liveFeedData, crashRoundData, crashBetsData] = await Promise.allSettled([
+        supabase
+          .from('live_bet_feed')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(30), // Reduced from 50
+        supabase
+          .from('crash_rounds')
+          .select('*')
+          .in('status', ['countdown', 'active', 'crashed'])
+          .order('created_at', { ascending: false })
+          .limit(1),
+        supabase
+          .from('crash_bets')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(50) // Reduced from 100
+      ]);
+
+      if (liveFeedData.status === 'fulfilled' && liveFeedData.value.data) {
+        setLiveBetFeed(liveFeedData.value.data as LiveBetFeed[]);
+      }
+      
+      if (crashRoundData.status === 'fulfilled' && crashRoundData.value.data?.[0]) {
+        setCurrentCrashRound(crashRoundData.value.data[0] as CrashRound);
+      }
+      
+      if (crashBetsData.status === 'fulfilled' && crashBetsData.value.data) {
+        setCrashBets(crashBetsData.value.data as CrashBet[]);
+      }
+
+    } catch (error) {
+      console.error('Initial data fetch error:', error);
+    }
+  }, []);
+
+  // Optimized subscription setup with better error handling
+  const setupRealtimeSubscriptions = useCallback(async () => {
+    if (isInitializedRef.current) return;
+    
+    try {
+      // Clear existing channels
+      Object.values(channelsRef.current).forEach(channel => {
+        if (channel) {
+          supabase.removeChannel(channel);
         }
-        
-        // Initial data fetch with timeout
-        const fetchPromise = Promise.all([
-          supabase
-            .from('live_bet_feed')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(50),
-          supabase
-            .from('crash_rounds')
-            .select('*')
-            .in('status', ['countdown', 'active', 'crashed'])
-            .order('created_at', { ascending: false })
-            .limit(1),
-          supabase
-            .from('crash_bets')
-            .select('*')
-            .order('created_at', { ascending: false })
-            .limit(100)
-        ]);
+      });
+      channelsRef.current = {};
 
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Database fetch timeout')), 10000);
-        });
+      // Debounced state updates to reduce re-renders
+      const debouncedSetLiveBetFeed = debounce((updater: (prev: LiveBetFeed[]) => LiveBetFeed[]) => {
+        setLiveBetFeed(updater);
+      }, 100);
 
-        const [liveFeedData, crashRoundData, crashBetsData] = await Promise.race([
-          fetchPromise,
-          timeoutPromise
-        ]) as any;
+      const debouncedSetCrashBets = debounce((updater: (prev: CrashBet[]) => CrashBet[]) => {
+        setCrashBets(updater);
+      }, 100);
 
-        if (liveFeedData.data) {
-          setLiveBetFeed(liveFeedData.data as LiveBetFeed[]);
-        } else if (liveFeedData.error) {
-          setLastError(`Database error: ${liveFeedData.error.message}`);
-        }
-        
-        if (crashRoundData.data?.[0]) setCurrentCrashRound(crashRoundData.data[0] as CrashRound);
-        if (crashBetsData.data) setCrashBets(crashBetsData.data as CrashBet[]);
-
-        // Cleanup existing channels before creating new ones
-        Object.values(channelsRef.current).forEach(channel => {
-          if (channel) {
-            supabase.removeChannel(channel);
+      // Live bet feed subscription
+      channelsRef.current.liveFeed = supabase
+        .channel(`live_bet_feed_${Date.now()}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'live_bet_feed'
+          },
+          (payload) => {
+            const newBet = payload.new as LiveBetFeed;
+            
+            debouncedSetLiveBetFeed(prev => {
+              const exists = prev.some(bet => bet.id === newBet.id);
+              if (exists) return prev;
+              return [newBet, ...prev].slice(0, 30); // Reduced limit
+            });
+          }
+        )
+        .subscribe((status) => {
+          if (status === 'SUBSCRIBED') {
+            setIsConnected(true);
+            setConnectionAttempts(0);
+            setLastError(null);
+          } else if (status === 'CHANNEL_ERROR' && connectionAttempts < maxRetries) {
+            setIsConnected(false);
+            setConnectionAttempts(prev => prev + 1);
+            
+            const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 10000);
+            reconnectTimeoutRef.current = setTimeout(setupRealtimeSubscriptions, retryDelay);
           }
         });
-        channelsRef.current = {};
 
-        // Set up live bet feed subscription with improved error handling
-        channelsRef.current.liveFeed = supabase
-          .channel(`live_bet_feed_${Date.now()}`) // Unique channel name
-          .on(
-            'postgres_changes',
-            {
-              event: 'INSERT',
-              schema: 'public',
-              table: 'live_bet_feed'
-            },
-            (payload) => {
-              const newBet = payload.new as LiveBetFeed;
-              
-              setLiveBetFeed(prev => {
-                // Check for duplicates
+      // Crash rounds subscription
+      channelsRef.current.crashRound = supabase
+        .channel(`crash_rounds_${Date.now()}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'crash_rounds'
+          },
+          (payload) => {
+            if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+              setCurrentCrashRound(payload.new as CrashRound);
+            }
+          }
+        )
+        .subscribe();
+
+      // Crash bets subscription
+      channelsRef.current.crashBets = supabase
+        .channel(`crash_bets_${Date.now()}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'crash_bets'
+          },
+          (payload) => {
+            if (payload.eventType === 'INSERT') {
+              const newBet = payload.new as CrashBet;
+              debouncedSetCrashBets(prev => {
                 const exists = prev.some(bet => bet.id === newBet.id);
-                if (exists) {
-                  return prev;
-                }
-                
-                // Add to beginning of array and limit to 50 items
+                if (exists) return prev;
                 return [newBet, ...prev].slice(0, 50);
               });
+            } else if (payload.eventType === 'UPDATE') {
+              debouncedSetCrashBets(prev => 
+                prev.map(bet => 
+                  bet.id === payload.new.id ? payload.new as CrashBet : bet
+                )
+              );
             }
-          )
-          .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              setIsConnected(true);
-              setConnectionAttempts(0);
-              setLastError(null);
-            } else if (status === 'CHANNEL_ERROR') {
-              setIsConnected(false);
-              setLastError(`Connection error: ${status}`);
-              
-              // Only retry if we haven't exceeded max attempts
-              if (connectionAttempts < maxRetries) {
-                const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000); // Exponential backoff, max 30s
-                
-                setConnectionAttempts(prev => prev + 1);
-                
-                reconnectTimeoutRef.current = setTimeout(() => {
-                  setupRealtimeSubscriptions();
-                }, retryDelay);
-              } else {
-                setLastError('Real-time connection failed after multiple retries');
-              }
-            } else if (status === 'CLOSED') {
-              setIsConnected(false);
-              // Don't set error or retry for normal closes during cleanup
-            }
-          });
+          }
+        )
+        .subscribe();
 
-        // Set up crash rounds subscription with same improvements
-        channelsRef.current.crashRound = supabase
-          .channel(`crash_rounds_${Date.now()}`)
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'crash_rounds'
-            },
-            (payload) => {
-              if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-                setCurrentCrashRound(payload.new as CrashRound);
-              }
-            }
-          )
-          .subscribe(() => {});
+      isInitializedRef.current = true;
+      setLoading(false);
 
-        // Set up crash bets subscription with same improvements
-        channelsRef.current.crashBets = supabase
-          .channel(`crash_bets_${Date.now()}`)
-          .on(
-            'postgres_changes',
-            {
-              event: '*',
-              schema: 'public',
-              table: 'crash_bets'
-            },
-            (payload) => {
-              if (payload.eventType === 'INSERT') {
-                const newBet = payload.new as CrashBet;
-                setCrashBets(prev => {
-                  const exists = prev.some(bet => bet.id === newBet.id);
-                  if (exists) {
-                    return prev;
-                  }
-                  return [newBet, ...prev].slice(0, 100);
-                });
-              } else if (payload.eventType === 'UPDATE') {
-                setCrashBets(prev => 
-                  prev.map(bet => 
-                    bet.id === payload.new.id ? payload.new as CrashBet : bet
-                  )
-                );
-              }
-            }
-          )
-          .subscribe(() => {});
+    } catch (error) {
+      setLastError(`Setup error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLoading(false);
+      setIsConnected(false);
+    }
+  }, [connectionAttempts, maxRetries]);
 
-        setLoading(false);
+  useEffect(() => {
+    fetchInitialData().then(() => {
+      setupRealtimeSubscriptions();
+    });
 
-      } catch (error) {
-        setLastError(`Setup error: ${error instanceof Error ? error.message : 'Unknown error'}`);
-        setLoading(false);
-        setIsConnected(false);
-        
-        // Retry with backoff if we haven't hit max retries
-        if (connectionAttempts < maxRetries) {
-          const retryDelay = Math.min(1000 * Math.pow(2, connectionAttempts), 30000);
-          
-          setConnectionAttempts(prev => prev + 1);
-          
-          reconnectTimeoutRef.current = setTimeout(() => {
-            setupRealtimeSubscriptions();
-          }, retryDelay);
-        }
-      }
-    };
-
-    setupRealtimeSubscriptions();
-
-    // Cleanup subscriptions and timeouts
     return () => {
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
       
-      Object.entries(channelsRef.current).forEach(([name, channel]) => {
+      Object.values(channelsRef.current).forEach(channel => {
         if (channel) {
           supabase.removeChannel(channel);
         }
       });
       
       channelsRef.current = {};
+      isInitializedRef.current = false;
     };
-  }, []);
+  }, [fetchInitialData, setupRealtimeSubscriptions]);
 
   // Reset connection attempts when component unmounts or retries succeed
   useEffect(() => {
@@ -279,22 +271,21 @@ export const useCrashRoundUpdates = () => {
   const [currentRound, setCurrentRound] = useState<CrashRound | null>(null);
   
   useEffect(() => {
-    // Fetch current round data every second when active
+    if (!currentRound?.status || currentRound.status !== 'active') return;
+    
     const interval = setInterval(async () => {
-      if (currentRound?.status === 'active') {
-        try {
-          const { data } = await supabase
-            .from('crash_rounds')
-            .select('*')
-            .eq('id', currentRound.id)
-            .single();
-          
-          if (data) {
-            setCurrentRound(data as CrashRound);
-          }
-        } catch (error) {
-          // Silently handle error
+      try {
+        const { data } = await supabase
+          .from('crash_rounds')
+          .select('*')
+          .eq('id', currentRound.id)
+          .single();
+        
+        if (data) {
+          setCurrentRound(data as CrashRound);
         }
+      } catch (error) {
+        // Silently handle error
       }
     }, 1000);
 
