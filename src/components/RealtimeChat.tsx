@@ -188,7 +188,7 @@ export const RealtimeChat = () => {
                 </div>
               </div>
               <span className="text-white font-bold drop-shadow-[0_0_8px_rgba(99,102,241,0.6)]">
-                Live Chat
+                Chat
               </span>
               <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 isConnected 
