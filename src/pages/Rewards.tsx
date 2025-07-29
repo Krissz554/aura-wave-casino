@@ -299,11 +299,6 @@ export default function Rewards() {
                         }`}>
                           {getCaseStatusText(caseData)}
                         </div>
-                        {caseData.user_level < caseData.level_required && (
-                          <div className="text-xs text-muted-foreground bg-slate-800/50 px-2 py-1 rounded-md border border-slate-700/50">
-                            Need level {caseData.level_required}
-                          </div>
-                        )}
                       </div>
                       
                       <Button 
