@@ -304,54 +304,15 @@ BEGIN
 END;
 $$;
 
--- 5. PERFORMANCE MONITORING VIEWS (Safe version)
-
--- View for table statistics
-CREATE OR REPLACE VIEW public.performance_monitor AS
-SELECT 
-  schemaname,
-  tablename,
-  attname,
-  n_distinct,
-  correlation
-FROM pg_stats
-WHERE schemaname = 'public'
-ORDER BY tablename, attname;
-
--- View for index usage statistics
-CREATE OR REPLACE VIEW public.index_usage_stats AS
-SELECT 
-  schemaname,
-  tablename,
-  indexname,
-  idx_scan,
-  idx_tup_read,
-  idx_tup_fetch
-FROM pg_stat_user_indexes
-WHERE schemaname = 'public'
-ORDER BY idx_scan DESC;
-
--- View for slow queries (if available)
-CREATE OR REPLACE VIEW public.slow_queries AS
-SELECT 
-  query,
-  calls,
-  total_time,
-  mean_time,
-  rows
-FROM pg_stat_statements
-WHERE query LIKE '%public.%'
-ORDER BY mean_time DESC
-LIMIT 50;
+-- 5. PERFORMANCE MONITORING (Optional - can be added later if needed)
+-- Note: Performance monitoring views removed to avoid compatibility issues
+-- These can be added later if pg_stat_statements extension is enabled
 
 -- 6. GRANT PERMISSIONS FOR OPTIMIZED FUNCTIONS
 GRANT EXECUTE ON FUNCTION public.get_user_stats_optimized_v2 TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_live_bet_feed_optimized TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_notifications_optimized TO authenticated;
 GRANT EXECUTE ON FUNCTION public.get_user_game_history_optimized TO authenticated;
-GRANT SELECT ON public.performance_monitor TO service_role;
-GRANT SELECT ON public.index_usage_stats TO service_role;
-GRANT SELECT ON public.slow_queries TO service_role;
 
 -- 7. OPTIMIZE TABLE STATISTICS
 ANALYZE public.profiles;
