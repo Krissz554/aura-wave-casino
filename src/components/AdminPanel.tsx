@@ -237,11 +237,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
-  // Reset user statistics
-  const resetUserStats = async (userId: string) => {
+  // Reset user statistics - NEW VERSION
+  const resetUserStatsNew = async (userId: string) => {
     setResettingUser(true);
     try {
-      console.log('=== RESET USER STATS FUNCTION v2.0 ===');
+      console.log('=== RESET USER STATS FUNCTION v3.0 - CACHE BUSTED ===');
+      console.log('Random cache buster:', Math.random());
       console.log('Timestamp:', new Date().toISOString());
       console.log('Attempting to reset stats for user:', userId);
       
@@ -1557,7 +1558,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 Cancel
               </Button>
               <Button
-                onClick={() => selectedUser && resetUserStats(selectedUser.id)}
+                onClick={() => selectedUser && resetUserStatsNew(selectedUser.id)}
                 disabled={resettingUser || verificationText !== selectedUser?.username}
                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
               >
