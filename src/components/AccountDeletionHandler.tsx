@@ -88,6 +88,25 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       // Delete from all tables
       for (const { table, field } of tablesToDelete) {
         console.log(`Deleting from ${table}...`);
+        
+        // Special handling for user_level_stats to ensure it's deleted
+        if (table === 'user_level_stats') {
+          console.log('Special handling for user_level_stats...');
+          
+          // First, try to verify the record exists
+          const { data: existingData, error: checkError } = await supabase
+            .from('user_level_stats')
+            .select('id')
+            .eq('user_id', userId)
+            .single();
+          
+          if (checkError && checkError.code !== 'PGRST116') {
+            console.error('Error checking user_level_stats:', checkError);
+          } else if (existingData) {
+            console.log('Found user_level_stats record, proceeding with deletion...');
+          }
+        }
+        
         const { error } = await supabase
           .from(table)
           .delete()
@@ -99,6 +118,23 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
           deletionSuccess = false;
         } else {
           console.log(`${table} deleted successfully`);
+          
+          // Verify deletion for user_level_stats
+          if (table === 'user_level_stats') {
+            const { data: verifyData, error: verifyError } = await supabase
+              .from('user_level_stats')
+              .select('id')
+              .eq('user_id', userId)
+              .single();
+            
+            if (verifyError && verifyError.code === 'PGRST116') {
+              console.log('✅ user_level_stats deletion verified - record not found');
+            } else if (verifyData) {
+              console.error('❌ user_level_stats deletion failed - record still exists');
+              deletionErrors.push('user_level_stats: Record still exists after deletion');
+              deletionSuccess = false;
+            }
+          }
         }
       }
 
@@ -120,8 +156,37 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       if (deletionSuccess) {
         console.log('All database tables deleted successfully');
         
-        // Note: Supabase Auth deletion requires admin privileges that client doesn't have
-        // The database deletion is sufficient to prevent the user from accessing their data
+        // Final verification - check if user_level_stats still exists
+        console.log('Performing final verification...');
+        const { data: finalCheck, error: finalCheckError } = await supabase
+          .from('user_level_stats')
+          .select('id')
+          .eq('user_id', userId)
+          .single();
+        
+        if (finalCheckError && finalCheckError.code === 'PGRST116') {
+          console.log('✅ Final verification: user_level_stats successfully deleted');
+        } else if (finalCheck) {
+          console.error('❌ Final verification: user_level_stats still exists');
+          deletionErrors.push('user_level_stats: Final verification failed');
+          deletionSuccess = false;
+        }
+        
+        // Attempt to delete from Supabase Auth (may fail due to permissions)
+        console.log('Attempting to delete from Supabase Auth...');
+        try {
+          const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+          if (authError) {
+            console.log('Auth deletion failed (expected for client-side):', authError.message);
+            // This is expected to fail on client-side, but we'll still proceed
+          } else {
+            console.log('✅ User successfully deleted from Supabase Auth');
+          }
+        } catch (authError) {
+          console.log('Auth deletion error (expected):', authError);
+          // This is expected to fail on client-side
+        }
+        
         console.log('Database deletion completed successfully');
         toast({
           title: "Account Deleted",
