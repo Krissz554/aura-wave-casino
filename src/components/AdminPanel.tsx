@@ -237,16 +237,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
-  // Reset user statistics - ULTRA MINIMAL VERSION
-  const resetUserStatsUltraMinimal = async (userId: string) => {
+  // Reset user statistics - FINAL VERSION
+  const resetUserStatsFinal = async (userId: string) => {
     setResettingUser(true);
     try {
-      console.log('=== RESET USER STATS FUNCTION v5.0 - ULTRA MINIMAL ===');
+      console.log('=== RESET USER STATS FUNCTION v6.0 - FINAL ===');
       console.log('Cache buster:', Date.now());
       console.log('User ID:', userId);
       
       // Only update the most basic columns that we know exist
-      console.log('Updating profiles table with ultra minimal columns...');
+      console.log('Updating profiles table with final minimal columns...');
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -1266,7 +1266,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 Cancel
               </Button>
               <Button
-                onClick={() => selectedUser && resetUserStatsUltraMinimal(selectedUser.id)}
+                onClick={() => selectedUser && resetUserStatsFinal(selectedUser.id)}
                 disabled={resettingUser || verificationText !== selectedUser?.username}
                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
               >
