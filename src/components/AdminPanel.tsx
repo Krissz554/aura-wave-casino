@@ -243,7 +243,27 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     try {
       console.log('Attempting to reset stats for user:', userId);
       
+      // Test database connectivity first
+      console.log('Testing database connectivity...');
+      const { data: testData, error: testError } = await supabase
+        .from('profiles')
+        .select('count')
+        .limit(1);
+      
+      if (testError) {
+        console.error('Database connectivity test failed:', testError);
+        toast({
+          title: "Error",
+          description: `Database connection failed: ${testError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Database connectivity test passed');
+      
       // First, test if we can access the user's profile
+      console.log('Testing profile access...');
       const { data: profileData, error: profileTestError } = await supabase
         .from('profiles')
         .select('id, username')
@@ -252,6 +272,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       if (profileTestError) {
         console.error('Error accessing user profile:', profileTestError);
+        console.error('Profile test error details:', {
+          code: profileTestError.code,
+          message: profileTestError.message,
+          details: profileTestError.details,
+          hint: profileTestError.hint
+        });
         toast({
           title: "Error",
           description: `Cannot access user profile: ${profileTestError.message}`,
@@ -263,6 +289,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('User profile found:', profileData);
       
       // Reset profile statistics
+      console.log('Resetting profile statistics...');
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -284,6 +311,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (profileError) {
         console.error('Error resetting profile stats:', profileError);
+        console.error('Profile update error details:', {
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint
+        });
         toast({
           title: "Error",
           description: `Failed to reset profile statistics: ${profileError.message}`,
@@ -291,11 +324,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
         return;
       }
+      
+      console.log('Profile statistics reset successfully');
 
       // Reset user_level_stats
       console.log('Attempting to reset user_level_stats for user:', userId);
       
       // First check if user_level_stats exists for this user
+      console.log('Checking if user_level_stats exists...');
       const { data: existingStats, error: checkError } = await supabase
         .from('user_level_stats')
         .select('id')
@@ -304,6 +340,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (checkError && checkError.code !== 'PGRST116') {
         console.error('Error checking user_level_stats:', checkError);
+        console.error('User level stats check error details:', {
+          code: checkError.code,
+          message: checkError.message,
+          details: checkError.details,
+          hint: checkError.hint
+        });
         toast({
           title: "Error",
           description: `Failed to check user level stats: ${checkError.message}`,
@@ -311,11 +353,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
         return;
       }
+      
+      console.log('User level stats check result:', { existingStats, checkError });
 
       let levelStatsError = null;
       
       if (existingStats) {
         // Update existing record
+        console.log('Updating existing user_level_stats record...');
         const { error } = await supabase
           .from('user_level_stats')
           .update({
@@ -350,8 +395,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .eq('user_id', userId);
         
         levelStatsError = error;
+        console.log('User level stats update result:', { error });
       } else {
         // Create new record if it doesn't exist
+        console.log('Creating new user_level_stats record...');
         const { error } = await supabase
           .from('user_level_stats')
           .insert({
@@ -386,10 +433,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           });
         
         levelStatsError = error;
+        console.log('User level stats insert result:', { error });
       }
 
       if (levelStatsError) {
         console.error('Error resetting level stats:', levelStatsError);
+        console.error('Level stats error details:', {
+          code: levelStatsError.code,
+          message: levelStatsError.message,
+          details: levelStatsError.details,
+          hint: levelStatsError.hint
+        });
         toast({
           title: "Error",
           description: `Failed to reset level statistics: ${levelStatsError.message}`,
@@ -397,6 +451,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
         return;
       }
+      
+      console.log('User level stats reset successfully');
 
       // Reset game_stats
       console.log('Resetting game_stats for user:', userId);
