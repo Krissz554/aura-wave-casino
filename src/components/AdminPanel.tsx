@@ -75,6 +75,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resettingUser, setResettingUser] = useState(false);
   const [verificationText, setVerificationText] = useState('');
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingUser, setDeletingUser] = useState(false);
+  const [deleteVerificationText, setDeleteVerificationText] = useState('');
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationForm, setNotificationForm] = useState<NotificationForm>({
     title: '',
@@ -461,6 +465,314 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       });
     } finally {
       setResettingUser(false);
+    }
+  };
+
+  // Delete user account completely
+  const deleteUserAccount = async (userId: string) => {
+    setDeletingUser(true);
+    try {
+      console.log('=== DELETE USER ACCOUNT FUNCTION ===');
+      console.log('User ID:', userId);
+      
+      // 1. Delete from all related tables first
+      console.log('Deleting user data from all tables...');
+      
+      // Delete from user_level_stats
+      const { error: levelStatsError } = await supabase
+        .from('user_level_stats')
+        .delete()
+        .eq('user_id', userId);
+
+      if (levelStatsError) {
+        console.error('Error deleting level stats:', levelStatsError);
+      } else {
+        console.log('Level stats deleted successfully');
+      }
+
+      // Delete from game_history
+      const { error: gameHistoryError } = await supabase
+        .from('game_history')
+        .delete()
+        .eq('user_id', userId);
+
+      if (gameHistoryError) {
+        console.error('Error deleting game history:', gameHistoryError);
+      } else {
+        console.log('Game history deleted successfully');
+      }
+
+      // Delete from game_stats
+      const { error: gameStatsError } = await supabase
+        .from('game_stats')
+        .delete()
+        .eq('user_id', userId);
+
+      if (gameStatsError) {
+        console.error('Error deleting game stats:', gameStatsError);
+      } else {
+        console.log('Game stats deleted successfully');
+      }
+
+      // Delete from user_achievements
+      const { error: achievementsError } = await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      if (achievementsError) {
+        console.error('Error deleting user achievements:', achievementsError);
+      } else {
+        console.log('User achievements deleted successfully');
+      }
+
+      // Delete from case_rewards
+      const { error: caseRewardsError } = await supabase
+        .from('case_rewards')
+        .delete()
+        .eq('user_id', userId);
+
+      if (caseRewardsError) {
+        console.error('Error deleting case rewards:', caseRewardsError);
+      } else {
+        console.log('Case rewards deleted successfully');
+      }
+
+      // Delete from free_case_claims
+      const { error: freeCaseClaimsError } = await supabase
+        .from('free_case_claims')
+        .delete()
+        .eq('user_id', userId);
+
+      if (freeCaseClaimsError) {
+        console.error('Error deleting free case claims:', freeCaseClaimsError);
+      } else {
+        console.log('Free case claims deleted successfully');
+      }
+
+      // Delete from notifications
+      const { error: notificationsError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId);
+
+      if (notificationsError) {
+        console.error('Error deleting notifications:', notificationsError);
+      } else {
+        console.log('Notifications deleted successfully');
+      }
+
+      // Delete from level_daily_cases
+      const { error: levelDailyCasesError } = await supabase
+        .from('level_daily_cases')
+        .delete()
+        .eq('user_id', userId);
+
+      if (levelDailyCasesError) {
+        console.error('Error deleting level daily cases:', levelDailyCasesError);
+      } else {
+        console.log('Level daily cases deleted successfully');
+      }
+
+      // Delete from user_rate_limits
+      const { error: rateLimitsError } = await supabase
+        .from('user_rate_limits')
+        .delete()
+        .eq('user_id', userId);
+
+      if (rateLimitsError) {
+        console.error('Error deleting user rate limits:', rateLimitsError);
+      } else {
+        console.log('User rate limits deleted successfully');
+      }
+
+      // Delete from admin_users (if they were an admin)
+      const { error: adminUsersError } = await supabase
+        .from('admin_users')
+        .delete()
+        .eq('user_id', userId);
+
+      if (adminUsersError) {
+        console.error('Error deleting admin user record:', adminUsersError);
+      } else {
+        console.log('Admin user record deleted successfully');
+      }
+
+      // Delete from chat_messages
+      const { error: chatMessagesError } = await supabase
+        .from('chat_messages')
+        .delete()
+        .eq('user_id', userId);
+
+      if (chatMessagesError) {
+        console.error('Error deleting chat messages:', chatMessagesError);
+      } else {
+        console.log('Chat messages deleted successfully');
+      }
+
+      // Delete from user_daily_logins
+      const { error: dailyLoginsError } = await supabase
+        .from('user_daily_logins')
+        .delete()
+        .eq('user_id', userId);
+
+      if (dailyLoginsError) {
+        console.error('Error deleting daily logins:', dailyLoginsError);
+      } else {
+        console.log('Daily logins deleted successfully');
+      }
+
+      // Delete from unlocked_achievements
+      const { error: unlockedAchievementsError } = await supabase
+        .from('unlocked_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      if (unlockedAchievementsError) {
+        console.error('Error deleting unlocked achievements:', unlockedAchievementsError);
+      } else {
+        console.log('Unlocked achievements deleted successfully');
+      }
+
+      // Delete from tips (both sent and received)
+      const { error: tipsSentError } = await supabase
+        .from('tips')
+        .delete()
+        .eq('from_user_id', userId);
+
+      if (tipsSentError) {
+        console.error('Error deleting sent tips:', tipsSentError);
+      } else {
+        console.log('Sent tips deleted successfully');
+      }
+
+      const { error: tipsReceivedError } = await supabase
+        .from('tips')
+        .delete()
+        .eq('to_user_id', userId);
+
+      if (tipsReceivedError) {
+        console.error('Error deleting received tips:', tipsReceivedError);
+      } else {
+        console.log('Received tips deleted successfully');
+      }
+
+      // Delete from live_bet_feed
+      const { error: liveBetFeedError } = await supabase
+        .from('live_bet_feed')
+        .delete()
+        .eq('user_id', userId);
+
+      if (liveBetFeedError) {
+        console.error('Error deleting live bet feed:', liveBetFeedError);
+      } else {
+        console.log('Live bet feed deleted successfully');
+      }
+
+      // Delete from crash_bets
+      const { error: crashBetsError } = await supabase
+        .from('crash_bets')
+        .delete()
+        .eq('user_id', userId);
+
+      if (crashBetsError) {
+        console.error('Error deleting crash bets:', crashBetsError);
+      } else {
+        console.log('Crash bets deleted successfully');
+      }
+
+      // Delete from roulette_bets
+      const { error: rouletteBetsError } = await supabase
+        .from('roulette_bets')
+        .delete()
+        .eq('user_id', userId);
+
+      if (rouletteBetsError) {
+        console.error('Error deleting roulette bets:', rouletteBetsError);
+      } else {
+        console.log('Roulette bets deleted successfully');
+      }
+
+      // Delete from tower_games
+      const { error: towerGamesError } = await supabase
+        .from('tower_games')
+        .delete()
+        .eq('user_id', userId);
+
+      if (towerGamesError) {
+        console.error('Error deleting tower games:', towerGamesError);
+      } else {
+        console.log('Tower games deleted successfully');
+      }
+
+      // Delete from roulette_client_seeds
+      const { error: rouletteSeedsError } = await supabase
+        .from('roulette_client_seeds')
+        .delete()
+        .eq('user_id', userId);
+
+      if (rouletteSeedsError) {
+        console.error('Error deleting roulette client seeds:', rouletteSeedsError);
+      } else {
+        console.log('Roulette client seeds deleted successfully');
+      }
+
+      // 2. Finally delete from profiles table
+      console.log('Deleting from profiles table...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (profileError) {
+        console.error('Error deleting profile:', profileError);
+        toast({
+          title: "Error",
+          description: `Failed to delete user profile: ${profileError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Profile deleted successfully');
+      
+      // 3. Delete from auth.users (Supabase Auth)
+      console.log('Deleting from auth.users...');
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+
+      if (authError) {
+        console.error('Error deleting from auth:', authError);
+        toast({
+          title: "Warning",
+          description: `User data deleted but auth deletion failed: ${authError.message}`,
+          variant: "destructive",
+        });
+      } else {
+        console.log('User deleted from auth successfully');
+      }
+      
+      // Success message
+      toast({
+        title: "Success",
+        description: "User account has been completely deleted",
+      });
+      
+      setShowDeleteConfirm(false);
+      setSelectedUser(null);
+      setDeleteVerificationText('');
+      setDeleteConfirmText('');
+      loadUsers(); // Refresh the user list
+
+      console.log('User deletion completed successfully');
+    } catch (error) {
+      console.error('Error deleting user account:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete user account: ${error}`,
+        variant: "destructive",
+      });
+    } finally {
+      setDeletingUser(false);
     }
   };
 
@@ -1229,6 +1541,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <Trash2 className="h-4 w-4 mr-2" />
                         Reset Stats
                       </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowDeleteConfirm(true);
+                        }}
+                        variant="outline"
+                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Account
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -1451,6 +1774,102 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Reset Statistics
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              <span className="font-mono">CONFIRM DELETION</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-white font-mono mb-2">
+                Delete account for user:
+              </div>
+              <div className="text-lg font-bold text-red-400 font-mono mb-4">
+                {selectedUser?.username}
+              </div>
+              <div className="text-sm text-slate-400 font-mono">
+                This will PERMANENTLY DELETE:
+              </div>
+              <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
+                • Complete user account
+                • All game history and statistics
+                • All achievements and progress
+                • All notifications and data
+                • Authentication credentials
+                • Email can be reused for new registration
+              </div>
+              <div className="text-sm text-red-400 font-mono mt-2">
+                ⚠️ This action is IRREVERSIBLE
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-sm text-slate-400 font-mono mb-2">
+                  Type the username to confirm:
+                </div>
+                <input
+                  type="text"
+                  value={deleteVerificationText}
+                  onChange={(e) => setDeleteVerificationText(e.target.value)}
+                  placeholder="Enter username"
+                  className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+                />
+              </div>
+              
+              <div className="text-center">
+                <div className="text-sm text-slate-400 font-mono mb-2">
+                  Type "DELETE" to confirm:
+                </div>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="Type DELETE"
+                  className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => {
+                  setShowDeleteConfirm(false);
+                  setDeleteVerificationText('');
+                  setDeleteConfirmText('');
+                }}
+                variant="outline"
+                className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => selectedUser && deleteUserAccount(selectedUser.id)}
+                disabled={deletingUser || deleteVerificationText !== selectedUser?.username || deleteConfirmText !== 'DELETE'}
+                className="flex-1 bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {deletingUser ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Account
                   </>
                 )}
               </Button>
