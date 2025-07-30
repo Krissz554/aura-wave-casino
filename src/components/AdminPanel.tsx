@@ -241,6 +241,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const resetUserStats = async (userId: string) => {
     setResettingUser(true);
     try {
+      console.log('=== RESET USER STATS FUNCTION v2.0 ===');
+      console.log('Timestamp:', new Date().toISOString());
       console.log('Attempting to reset stats for user:', userId);
       
       // Test database connectivity first
@@ -290,6 +292,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       // Reset profile statistics
       console.log('Resetting profile statistics...');
+      console.log('Updating only existing columns in profiles table...');
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
