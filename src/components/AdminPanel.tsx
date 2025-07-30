@@ -245,15 +245,20 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('Cache buster:', Date.now());
       console.log('User ID:', userId);
       
+      // Test: Let's see what the actual update object looks like
+      const updateData = {
+        level: 1,
+        xp: 0,
+        balance: 0
+      };
+      
+      console.log('Update data being sent:', JSON.stringify(updateData, null, 2));
+      
       // Only update the most basic columns that we know exist
       console.log('Updating profiles table with final minimal columns...');
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          level: 1,
-          xp: 0,
-          balance: 0
-        })
+        .update(updateData)
         .eq('id', userId);
 
       if (profileError) {
