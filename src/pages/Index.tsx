@@ -53,6 +53,16 @@ interface IndexProps {
 export default function Index({ initialGame }: IndexProps) {
   const { user, signOut, loading: authLoading } = useAuth();
   const { userData, loading: profileLoading, updateUserProfile } = useUserProfile();
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('[Index] Auth state:', { 
+      user: user?.id, 
+      userData: userData?.id, 
+      authLoading, 
+      profileLoading 
+    });
+  }, [user, userData, authLoading, profileLoading]);
   const { toast } = useToast();
   const { handleGameError } = useConnectionMonitor();
   const isUnmountingRef = useRef(false);
