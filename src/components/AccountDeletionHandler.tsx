@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertTriangle, Clock, LogOut, Trash2 } from 'lucide-react';
+import { AlertTriangle, Clock, LogOut, Trash2, Shield, Lock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ interface AccountDeletionHandlerProps {
 export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }: AccountDeletionHandlerProps) {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deletionCompleted, setDeletionCompleted] = useState(false);
   const { signOut } = useAuth();
   const { toast } = useToast();
 
@@ -34,85 +35,62 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       
       if (remaining <= 0) {
         clearInterval(timer);
-        performAccountDeletion();
+        setIsDeleting(true);
+        // Server will handle the deletion automatically
+        // We just wait for the completion notification
+        setTimeout(() => {
+          checkDeletionStatus();
+        }, 5000); // Check status after 5 seconds
       }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [isOpen, deletionTime]);
 
-  const performAccountDeletion = async () => {
-    setIsDeleting(true);
-    
+  const checkDeletionStatus = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        signOut();
+        // User has been deleted successfully
+        setDeletionCompleted(true);
+        setTimeout(() => {
+          signOut();
+        }, 3000);
         return;
       }
 
-      const userId = user.id;
-      console.log('=== PERFORMING SERVER-SIDE ACCOUNT DELETION ===');
-      console.log('User ID:', userId);
-      console.log('Deletion time:', deletionTime);
+      // Check for completion notification
+      const { data: notifications } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('type', 'admin_message')
+        .like('title', '%Account Deletion%')
+        .order('created_at', { ascending: false })
+        .limit(5);
 
-      // Call the server-side Edge Function for secure deletion
-      console.log('Calling server-side deletion function...');
-      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user-account`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${supabase.supabaseKey}`,
-        },
-        body: JSON.stringify({
-          user_id: userId,
-          deletion_time: deletionTime
-        })
-      });
+      const completionNotification = notifications?.find(n => 
+        n.title.includes('Completed') || n.data?.deletion_completed
+      );
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const deletionResult = await response.json();
-      console.log('Server deletion result:', deletionResult);
-
-      if (deletionResult.success) {
-        console.log('✅ Server-side account deletion completed successfully');
-        console.log('Deleted tables:', deletionResult.deleted_tables);
-        console.log('Auth deleted:', deletionResult.auth_deleted);
-        
-        if (deletionResult.errors && deletionResult.errors.length > 0) {
-          console.log('⚠️ Some errors occurred:', deletionResult.errors);
-        }
-
-        toast({
-          title: "Account Deleted",
-          description: "Your account has been completely removed from the system.",
-        });
+      if (completionNotification) {
+        setDeletionCompleted(true);
+        setTimeout(() => {
+          signOut();
+        }, 3000);
       } else {
-        console.error('❌ Server-side account deletion failed');
-        console.error('Errors:', deletionResult.errors || 'Unknown error');
-        
-        toast({
-          title: "Deletion Error",
-          description: "Failed to delete account completely. You will be logged out.",
-          variant: "destructive",
-        });
+        // Keep checking
+        setTimeout(() => {
+          checkDeletionStatus();
+        }, 2000);
       }
-
-      // Logout the user regardless of deletion success/failure
-      signOut();
-      
     } catch (error) {
-      console.error('Error during server-side account deletion:', error);
-      toast({
-        title: "Deletion Error",
-        description: "An error occurred during account deletion. You will be logged out.",
-        variant: "destructive",
-      });
-      // Still logout even if deletion fails
-      signOut();
+      console.error('Error checking deletion status:', error);
+      // If we can't check, assume deletion completed
+      setDeletionCompleted(true);
+      setTimeout(() => {
+        signOut();
+      }, 3000);
     }
   };
 
@@ -120,59 +98,145 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
     signOut();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
-      <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-red-500/50">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2 text-white">
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-            <span className="font-mono">ACCOUNT DELETION</span>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="space-y-4 text-center">
-          <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-red-500/20 to-red-600/20 border border-red-500/30 flex items-center justify-center">
-            <Trash2 className="w-8 h-8 text-red-400" />
-          </div>
-          
-          <div className="space-y-2">
-            <h3 className="text-lg font-bold text-white font-mono">Account Deletion Initiated</h3>
-            <p className="text-slate-400 text-sm font-mono">
-              Your account has been marked for deletion by an administrator.
-            </p>
-            <p className="text-slate-500 text-xs font-mono">
-              All your data will be permanently deleted in {timeLeft} seconds.
-            </p>
-          </div>
-          
-          <div className="space-y-3">
-            <div className="flex items-center justify-center space-x-2">
-              <Clock className="h-4 w-4 text-orange-400" />
-              <span className="text-orange-400 font-mono font-semibold">
-                {timeLeft} seconds remaining
-              </span>
+    <>
+      {/* Full Screen Overlay */}
+      <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-lg">
+        {/* Animated Background Effects */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-1/2 right-1/3 w-72 h-72 bg-red-600/10 rounded-full blur-3xl animate-pulse delay-2000" />
+        </div>
+
+        {/* Animated Circuit Pattern */}
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent),linear-gradient(transparent_24%,rgba(239,68,68,0.3)_25%,rgba(239,68,68,0.3)_26%,transparent_27%,transparent_74%,rgba(239,68,68,0.3)_75%,rgba(239,68,68,0.3)_76%,transparent_77%,transparent)] bg-[20px_20px] animate-pulse" />
+        </div>
+
+        {/* Main Content */}
+        <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+          <div className="max-w-lg w-full">
+            {/* Lock Icon and Alert */}
+            <div className="text-center mb-8">
+              <div className="relative mx-auto w-24 h-24 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full border border-red-500/30 animate-pulse" />
+                <div className="absolute inset-2 bg-gradient-to-br from-red-600/30 to-red-700/30 rounded-full flex items-center justify-center">
+                  <Lock className="w-8 h-8 text-red-400" />
+                </div>
+                <div className="absolute -inset-1 border border-red-500/20 rounded-full animate-ping" />
+              </div>
+              
+              <h1 className="text-3xl font-bold text-white font-mono mb-2">SITE LOCKED</h1>
+              <p className="text-red-400 font-mono text-lg mb-1">ACCOUNT DELETION IN PROGRESS</p>
+              <p className="text-slate-400 font-mono text-sm">Administrator has initiated account deletion</p>
             </div>
-            
-            <div className="w-full bg-slate-700/30 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-red-500 to-red-600 h-2 rounded-full transition-all duration-1000"
-                style={{ width: `${((30 - timeLeft) / 30) * 100}%` }}
-              />
+
+            {/* Countdown Display */}
+            <div className="bg-slate-900/80 border border-red-500/30 rounded-2xl p-8 backdrop-blur-xl">
+              <div className="text-center space-y-6">
+                {!isDeleting ? (
+                  <>
+                    <div className="flex items-center justify-center space-x-3">
+                      <Clock className="h-6 w-6 text-orange-400 animate-pulse" />
+                      <span className="text-2xl font-bold text-orange-400 font-mono">
+                        {timeLeft}
+                      </span>
+                      <span className="text-orange-400 font-mono">
+                        {timeLeft === 1 ? 'SECOND' : 'SECONDS'}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-white font-mono">Deletion will commence in:</p>
+                      <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                        <div 
+                          className="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full transition-all duration-1000 animate-pulse"
+                          style={{ width: `${((30 - timeLeft) / 30) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </>
+                ) : !deletionCompleted ? (
+                  <>
+                    <div className="flex items-center justify-center space-x-3">
+                      <Trash2 className="h-6 w-6 text-red-400 animate-pulse" />
+                      <span className="text-xl font-bold text-red-400 font-mono">
+                        DELETING ACCOUNT...
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-slate-400 font-mono text-sm">
+                        Server is processing account deletion
+                      </p>
+                      <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full animate-pulse w-full" />
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-center space-x-3">
+                      <Shield className="h-6 w-6 text-green-400" />
+                      <span className="text-xl font-bold text-green-400 font-mono">
+                        DELETION COMPLETED
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-slate-400 font-mono text-sm">
+                        Account has been permanently deleted
+                      </p>
+                      <p className="text-slate-500 font-mono text-xs">
+                        You will be logged out automatically
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {/* Warning Message */}
+                <div className="bg-gradient-to-r from-red-500/10 to-orange-500/10 border border-red-500/30 rounded-lg p-4">
+                  <div className="flex items-start space-x-2">
+                    <AlertTriangle className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div className="text-left">
+                      <p className="text-red-400 font-mono text-sm font-semibold mb-1">
+                        WARNING: This action is irreversible
+                      </p>
+                      <p className="text-slate-400 font-mono text-xs">
+                        All your data, progress, and account information will be permanently deleted.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Logout Button */}
+                {!deletionCompleted && (
+                  <div className="pt-4">
+                    <button
+                      onClick={handleLogoutNow}
+                      disabled={isDeleting}
+                      className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <LogOut className="h-4 w-4 mr-2 inline" />
+                      {isDeleting ? 'Processing...' : 'Logout Immediately'}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          
-          <div className="pt-2">
-            <button
-              onClick={handleLogoutNow}
-              disabled={isDeleting}
-              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <LogOut className="h-4 w-4 mr-2 inline" />
-              {isDeleting ? 'Deleting...' : 'Logout Now'}
-            </button>
+
+            {/* Additional Info */}
+            <div className="mt-6 text-center">
+              <p className="text-slate-500 font-mono text-xs">
+                This deletion process will continue even if you close your browser
+              </p>
+            </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </>
   );
 }

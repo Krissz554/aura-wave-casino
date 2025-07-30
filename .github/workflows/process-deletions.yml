@@ -1,0 +1,50 @@
+name: Process Pending Account Deletions
+
+on:
+  schedule:
+    # Run every minute
+    - cron: '* * * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  process-deletions:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Process Pending Deletions
+        run: |
+          echo "🔍 Processing pending account deletions..."
+          
+          # Call the Supabase Edge Function
+          response=$(curl -s -w "\n%{http_code}" -X POST '${{ secrets.SUPABASE_URL }}/functions/v1/process-pending-deletions' \
+            -H 'Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}' \
+            -H 'Content-Type: application/json')
+          
+          # Extract response body and status code
+          http_code=$(echo "$response" | tail -n1)
+          response_body=$(echo "$response" | head -n -1)
+          
+          echo "HTTP Status: $http_code"
+          echo "Response: $response_body"
+          
+          # Check if request was successful
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Successfully processed pending deletions"
+            
+            # Parse the response to get processed count
+            processed_count=$(echo "$response_body" | grep -o '"processed_count":[0-9]*' | grep -o '[0-9]*')
+            
+            if [ "$processed_count" -gt 0 ]; then
+              echo "📊 Processed $processed_count pending deletions"
+            else
+              echo "📊 No pending deletions found"
+            fi
+          else
+            echo "❌ Failed to process pending deletions"
+            echo "Response: $response_body"
+            exit 1
+          fi
+
+      - name: Log Completion
+        run: |
+          echo "🎯 Deletion processing job completed at $(date -u)"

@@ -476,9 +476,34 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== INITIATE USER ACCOUNT DELETION ===');
       console.log('User ID:', userId);
       
+      const deletionTime = new Date(Date.now() + 30000); // 30 seconds from now
+      
+      // Create pending deletion record
+      console.log('Creating pending deletion record...');
+      const { data: pendingDeletion, error: pendingError } = await supabase
+        .from('pending_account_deletions')
+        .insert({
+          user_id: userId,
+          initiated_by: user?.id,
+          scheduled_deletion_time: deletionTime.toISOString(),
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (pendingError) {
+        console.error('Error creating pending deletion record:', pendingError);
+        toast({
+          title: "Error",
+          description: "Failed to initiate account deletion",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       // Send pending deletion notification to the user
       console.log('Sending pending deletion notification to user...');
-      const { error: pendingNotificationError } = await supabase
+      const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
           user_id: userId,
@@ -487,27 +512,23 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           message: 'Your account has been marked for deletion by an administrator. Your account will be permanently deleted in 30 seconds.',
           data: { 
             deletion_pending: true,
-            deletion_time: new Date(Date.now() + 30000).toISOString(), // 30 seconds from now
+            deletion_time: deletionTime.toISOString(),
+            deletion_id: pendingDeletion.id,
             initiated_at: new Date().toISOString()
           }
         });
 
-      if (pendingNotificationError) {
-        console.error('Error sending pending deletion notification:', pendingNotificationError);
-        toast({
-          title: "Error",
-          description: "Failed to initiate account deletion",
-          variant: "destructive",
-        });
-        return;
+      if (notificationError) {
+        console.error('Error sending pending deletion notification:', notificationError);
+        // Don't return here, deletion record is already created
       } else {
         console.log('Pending deletion notification sent successfully');
       }
       
       // Success message
       toast({
-        title: "Deletion Initiated",
-        description: "User account deletion has been initiated. The user will be notified and their account will be deleted in 30 seconds.",
+        title: "Deletion Scheduled",
+        description: `User account deletion has been scheduled. The account will be automatically deleted in 30 seconds (${deletionTime.toLocaleTimeString()}).`,
       });
       
       setShowDeleteConfirm(false);
@@ -516,7 +537,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setDeleteConfirmText('');
       loadUsers(); // Refresh the user list
 
-      console.log('User deletion initiated successfully');
+      console.log('User deletion scheduled successfully');
     } catch (error) {
       console.error('Error initiating user deletion:', error);
       toast({
