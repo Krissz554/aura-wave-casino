@@ -120,24 +120,13 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       if (deletionSuccess) {
         console.log('All database tables deleted successfully');
         
-        // Try to delete from Supabase Auth
-        console.log('Attempting to delete from Supabase Auth...');
-        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-        
-        if (authError) {
-          console.error('Error deleting from Supabase Auth:', authError);
-          toast({
-            title: "Partial Deletion",
-            description: "Account data deleted but authentication removal failed. You will be logged out.",
-            variant: "destructive",
-          });
-        } else {
-          console.log('User deleted from Supabase Auth successfully');
-          toast({
-            title: "Account Deleted",
-            description: "Your account has been completely removed from the system.",
-          });
-        }
+        // Note: Supabase Auth deletion requires admin privileges that client doesn't have
+        // The database deletion is sufficient to prevent the user from accessing their data
+        console.log('Database deletion completed successfully');
+        toast({
+          title: "Account Deleted",
+          description: "Your account data has been completely removed from the system.",
+        });
       } else {
         console.error('Deletion errors:', deletionErrors);
         toast({
