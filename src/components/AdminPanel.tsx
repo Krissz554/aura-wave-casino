@@ -66,6 +66,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resettingUser, setResettingUser] = useState(false);
+  const [verificationText, setVerificationText] = useState('');
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     database: { status: 'checking' },
     authentication: { status: 'checking' },
@@ -177,13 +178,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         // Refresh users list
         await loadUsers();
 
-        toast({
-          title: "Success",
-          description: "User statistics have been reset successfully",
-        });
+                 toast({
+           title: "Success",
+           description: "User statistics have been reset successfully",
+         });
 
-        setSelectedUser(null);
-        setShowResetConfirm(false);
+         setSelectedUser(null);
+         setShowResetConfirm(false);
+         setVerificationText('');
       }
     } catch (err) {
       console.error('Error resetting user stats:', err);
@@ -768,69 +770,87 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Reset Confirmation Modal */}
-      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
-        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
-          <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2 text-white">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              <span className="font-mono">CONFIRM RESET</span>
-            </DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-white font-mono mb-2">
-                Reset statistics for user:
-              </div>
-              <div className="text-lg font-bold text-blue-400 font-mono mb-4">
-                {selectedUser?.username}
-              </div>
-              <div className="text-sm text-slate-400 font-mono">
-                This will reset ALL statistics including:
-              </div>
-              <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
-                • Level and XP
-                • Game statistics
-                • Achievement progress
-                • Case history
-                • Daily cases
-                • All achievements
-              </div>
-              <div className="text-sm text-green-400 font-mono mt-2">
-                Balance will remain unchanged
-              </div>
-            </div>
-            
-            <div className="flex space-x-3">
-              <Button
-                onClick={() => setShowResetConfirm(false)}
-                variant="outline"
-                className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => selectedUser && resetUserStats(selectedUser.id)}
-                disabled={resettingUser}
-                className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
-              >
-                {resettingUser ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Resetting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Reset Statistics
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+             {/* Reset Confirmation Modal */}
+       <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+         <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+           <DialogHeader>
+             <DialogTitle className="flex items-center space-x-2 text-white">
+               <AlertTriangle className="h-5 w-5 text-red-500" />
+               <span className="font-mono">CONFIRM RESET</span>
+             </DialogTitle>
+           </DialogHeader>
+           
+           <div className="space-y-4">
+             <div className="text-center">
+               <div className="text-white font-mono mb-2">
+                 Reset statistics for user:
+               </div>
+               <div className="text-lg font-bold text-blue-400 font-mono mb-4">
+                 {selectedUser?.username}
+               </div>
+               <div className="text-sm text-slate-400 font-mono">
+                 This will reset ALL statistics including:
+               </div>
+               <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
+                 • Level and XP
+                 • Game statistics
+                 • Achievement progress
+                 • Case history
+                 • Daily cases
+                 • All achievements
+               </div>
+               <div className="text-sm text-green-400 font-mono mt-2">
+                 Balance will remain unchanged
+               </div>
+             </div>
+             
+             <div className="space-y-3">
+               <div className="text-center">
+                 <div className="text-sm text-slate-400 font-mono mb-2">
+                   Type the username to confirm:
+                 </div>
+                 <input
+                   type="text"
+                   value={verificationText}
+                   onChange={(e) => setVerificationText(e.target.value)}
+                   placeholder="Enter username"
+                   className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+                 />
+               </div>
+             </div>
+             
+             <div className="flex space-x-3">
+               <Button
+                 onClick={() => {
+                   setShowResetConfirm(false);
+                   setVerificationText('');
+                 }}
+                 variant="outline"
+                 className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+               >
+                 Cancel
+               </Button>
+               <Button
+                 onClick={() => selectedUser && resetUserStats(selectedUser.id)}
+                 disabled={resettingUser || verificationText !== selectedUser?.username}
+                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+               >
+                 {resettingUser ? (
+                   <>
+                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                     Resetting...
+                   </>
+                 ) : (
+                   <>
+                     <Trash2 className="h-4 w-4 mr-2" />
+                     Reset Statistics
+                   </>
+                 )}
+               </Button>
+             </div>
+           </div>
+         </DialogContent>
+       </Dialog>
     </>
   );
 }
