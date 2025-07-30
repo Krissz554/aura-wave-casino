@@ -476,249 +476,67 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== DELETE USER ACCOUNT FUNCTION ===');
       console.log('User ID:', userId);
       
-      // 1. Delete from all related tables first
+      // 1. Send final notification BEFORE deleting anything
+      console.log('Sending final deletion notification to user...');
+      const { error: finalNotificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          type: 'admin_message',
+          title: 'Account Deleted',
+          message: 'Your account has been permanently deleted by an administrator. You will be logged out in 15 seconds.',
+          data: { deletion_time: new Date().toISOString() }
+        });
+
+      if (finalNotificationError) {
+        console.error('Error sending final notification:', finalNotificationError);
+      } else {
+        console.log('Final deletion notification sent successfully');
+      }
+      
+      // 2. Delete from all related tables (in correct order to avoid foreign key constraints)
       console.log('Deleting user data from all tables...');
       
-      // Delete from user_level_stats
-      const { error: levelStatsError } = await supabase
-        .from('user_level_stats')
-        .delete()
-        .eq('user_id', userId);
+      // Delete from tables that reference profiles first
+      const tablesToDelete = [
+        { table: 'notifications', field: 'user_id' },
+        { table: 'tips', field: 'from_user_id' },
+        { table: 'tips', field: 'to_user_id' },
+        { table: 'user_achievements', field: 'user_id' },
+        { table: 'user_daily_logins', field: 'user_id' },
+        { table: 'user_level_stats', field: 'user_id' },
+        { table: 'game_history', field: 'user_id' },
+        { table: 'game_stats', field: 'user_id' },
+        { table: 'case_rewards', field: 'user_id' },
+        { table: 'free_case_claims', field: 'user_id' },
+        { table: 'level_daily_cases', field: 'user_id' },
+        { table: 'user_rate_limits', field: 'user_id' },
+        { table: 'admin_users', field: 'user_id' },
+        { table: 'chat_messages', field: 'user_id' },
+        { table: 'unlocked_achievements', field: 'user_id' },
+        { table: 'live_bet_feed', field: 'user_id' },
+        { table: 'crash_bets', field: 'user_id' },
+        { table: 'roulette_bets', field: 'user_id' },
+        { table: 'tower_games', field: 'user_id' },
+        { table: 'roulette_client_seeds', field: 'user_id' },
+        { table: 'audit_logs', field: 'user_id' }
+      ];
 
-      if (levelStatsError) {
-        console.error('Error deleting level stats:', levelStatsError);
-      } else {
-        console.log('Level stats deleted successfully');
+      for (const { table, field } of tablesToDelete) {
+        console.log(`Deleting from ${table}...`);
+        const { error } = await supabase
+          .from(table)
+          .delete()
+          .eq(field, userId);
+
+        if (error) {
+          console.error(`Error deleting from ${table}:`, error);
+        } else {
+          console.log(`${table} deleted successfully`);
+        }
       }
 
-      // Delete from game_history
-      const { error: gameHistoryError } = await supabase
-        .from('game_history')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameHistoryError) {
-        console.error('Error deleting game history:', gameHistoryError);
-      } else {
-        console.log('Game history deleted successfully');
-      }
-
-      // Delete from game_stats
-      const { error: gameStatsError } = await supabase
-        .from('game_stats')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameStatsError) {
-        console.error('Error deleting game stats:', gameStatsError);
-      } else {
-        console.log('Game stats deleted successfully');
-      }
-
-      // Delete from user_achievements
-      const { error: achievementsError } = await supabase
-        .from('user_achievements')
-        .delete()
-        .eq('user_id', userId);
-
-      if (achievementsError) {
-        console.error('Error deleting user achievements:', achievementsError);
-      } else {
-        console.log('User achievements deleted successfully');
-      }
-
-      // Delete from case_rewards
-      const { error: caseRewardsError } = await supabase
-        .from('case_rewards')
-        .delete()
-        .eq('user_id', userId);
-
-      if (caseRewardsError) {
-        console.error('Error deleting case rewards:', caseRewardsError);
-      } else {
-        console.log('Case rewards deleted successfully');
-      }
-
-      // Delete from free_case_claims
-      const { error: freeCaseClaimsError } = await supabase
-        .from('free_case_claims')
-        .delete()
-        .eq('user_id', userId);
-
-      if (freeCaseClaimsError) {
-        console.error('Error deleting free case claims:', freeCaseClaimsError);
-      } else {
-        console.log('Free case claims deleted successfully');
-      }
-
-      // Delete from notifications
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', userId);
-
-      if (notificationsError) {
-        console.error('Error deleting notifications:', notificationsError);
-      } else {
-        console.log('Notifications deleted successfully');
-      }
-
-      // Delete from level_daily_cases
-      const { error: levelDailyCasesError } = await supabase
-        .from('level_daily_cases')
-        .delete()
-        .eq('user_id', userId);
-
-      if (levelDailyCasesError) {
-        console.error('Error deleting level daily cases:', levelDailyCasesError);
-      } else {
-        console.log('Level daily cases deleted successfully');
-      }
-
-      // Delete from user_rate_limits
-      const { error: rateLimitsError } = await supabase
-        .from('user_rate_limits')
-        .delete()
-        .eq('user_id', userId);
-
-      if (rateLimitsError) {
-        console.error('Error deleting user rate limits:', rateLimitsError);
-      } else {
-        console.log('User rate limits deleted successfully');
-      }
-
-      // Delete from admin_users (if they were an admin)
-      const { error: adminUsersError } = await supabase
-        .from('admin_users')
-        .delete()
-        .eq('user_id', userId);
-
-      if (adminUsersError) {
-        console.error('Error deleting admin user record:', adminUsersError);
-      } else {
-        console.log('Admin user record deleted successfully');
-      }
-
-      // Delete from chat_messages
-      const { error: chatMessagesError } = await supabase
-        .from('chat_messages')
-        .delete()
-        .eq('user_id', userId);
-
-      if (chatMessagesError) {
-        console.error('Error deleting chat messages:', chatMessagesError);
-      } else {
-        console.log('Chat messages deleted successfully');
-      }
-
-      // Delete from user_daily_logins
-      const { error: dailyLoginsError } = await supabase
-        .from('user_daily_logins')
-        .delete()
-        .eq('user_id', userId);
-
-      if (dailyLoginsError) {
-        console.error('Error deleting daily logins:', dailyLoginsError);
-      } else {
-        console.log('Daily logins deleted successfully');
-      }
-
-      // Delete from unlocked_achievements
-      const { error: unlockedAchievementsError } = await supabase
-        .from('unlocked_achievements')
-        .delete()
-        .eq('user_id', userId);
-
-      if (unlockedAchievementsError) {
-        console.error('Error deleting unlocked achievements:', unlockedAchievementsError);
-      } else {
-        console.log('Unlocked achievements deleted successfully');
-      }
-
-      // Delete from tips (both sent and received)
-      const { error: tipsSentError } = await supabase
-        .from('tips')
-        .delete()
-        .eq('from_user_id', userId);
-
-      if (tipsSentError) {
-        console.error('Error deleting sent tips:', tipsSentError);
-      } else {
-        console.log('Sent tips deleted successfully');
-      }
-
-      const { error: tipsReceivedError } = await supabase
-        .from('tips')
-        .delete()
-        .eq('to_user_id', userId);
-
-      if (tipsReceivedError) {
-        console.error('Error deleting received tips:', tipsReceivedError);
-      } else {
-        console.log('Received tips deleted successfully');
-      }
-
-      // Delete from live_bet_feed
-      const { error: liveBetFeedError } = await supabase
-        .from('live_bet_feed')
-        .delete()
-        .eq('user_id', userId);
-
-      if (liveBetFeedError) {
-        console.error('Error deleting live bet feed:', liveBetFeedError);
-      } else {
-        console.log('Live bet feed deleted successfully');
-      }
-
-      // Delete from crash_bets
-      const { error: crashBetsError } = await supabase
-        .from('crash_bets')
-        .delete()
-        .eq('user_id', userId);
-
-      if (crashBetsError) {
-        console.error('Error deleting crash bets:', crashBetsError);
-      } else {
-        console.log('Crash bets deleted successfully');
-      }
-
-      // Delete from roulette_bets
-      const { error: rouletteBetsError } = await supabase
-        .from('roulette_bets')
-        .delete()
-        .eq('user_id', userId);
-
-      if (rouletteBetsError) {
-        console.error('Error deleting roulette bets:', rouletteBetsError);
-      } else {
-        console.log('Roulette bets deleted successfully');
-      }
-
-      // Delete from tower_games
-      const { error: towerGamesError } = await supabase
-        .from('tower_games')
-        .delete()
-        .eq('user_id', userId);
-
-      if (towerGamesError) {
-        console.error('Error deleting tower games:', towerGamesError);
-      } else {
-        console.log('Tower games deleted successfully');
-      }
-
-      // Delete from roulette_client_seeds
-      const { error: rouletteSeedsError } = await supabase
-        .from('roulette_client_seeds')
-        .delete()
-        .eq('user_id', userId);
-
-      if (rouletteSeedsError) {
-        console.error('Error deleting roulette client seeds:', rouletteSeedsError);
-      } else {
-        console.log('Roulette client seeds deleted successfully');
-      }
-
-      // 2. Finally delete from profiles table
+      // 3. Delete from profiles table
       console.log('Deleting from profiles table...');
       const { error: profileError } = await supabase
         .from('profiles')
@@ -737,7 +555,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       console.log('Profile deleted successfully');
       
-      // 3. Delete from auth.users (Supabase Auth)
+      // 4. Delete from auth.users (Supabase Auth)
       console.log('Deleting from auth.users...');
       const { error: authError } = await supabase.auth.admin.deleteUser(userId);
 
@@ -750,24 +568,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
       } else {
         console.log('User deleted from auth successfully');
-      }
-      
-      // Send final notification to the deleted user
-      console.log('Sending final deletion notification to user...');
-      const { error: finalNotificationError } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: userId,
-          type: 'admin_message',
-          title: 'Account Deleted',
-          message: 'Your account has been permanently deleted by an administrator. You will be logged out in 15 seconds.',
-          data: { deletion_time: new Date().toISOString() }
-        });
-
-      if (finalNotificationError) {
-        console.error('Error sending final notification:', finalNotificationError);
-      } else {
-        console.log('Final deletion notification sent successfully');
       }
       
       // Success message
