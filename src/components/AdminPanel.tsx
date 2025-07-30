@@ -6,8 +6,9 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
+import { toast } from '@/hooks/use-toast';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -42,11 +43,29 @@ interface SystemStatus {
   };
 }
 
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  level: number;
+  xp: number;
+  balance: number;
+  total_wagered: number;
+  created_at: string;
+  last_seen: string;
+}
+
 export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPushNotification, setShowPushNotification] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [resettingUser, setResettingUser] = useState(false);
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     database: { status: 'checking' },
     authentication: { status: 'checking' },
@@ -71,6 +90,112 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   });
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Load all users
+  const loadUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading users:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load users",
+          variant: "destructive",
+        });
+      } else {
+        setUsers(data || []);
+      }
+    } catch (err) {
+      console.error('Error loading users:', err);
+      toast({
+        title: "Error",
+        description: "Failed to load users",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  // Reset user statistics
+  const resetUserStats = async (userId: string) => {
+    setResettingUser(true);
+    try {
+      // Reset all user statistics
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          level: 1,
+          xp: 0,
+          total_wagered: 0,
+          games_played: 0,
+          games_won: 0,
+          total_bets: 0,
+          total_wins: 0,
+          total_losses: 0,
+          biggest_win: 0,
+          biggest_loss: 0,
+          current_streak: 0,
+          longest_streak: 0,
+          achievements_unlocked: 0,
+          cases_opened: 0,
+          total_rewards_claimed: 0
+        })
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error resetting user stats:', error);
+        toast({
+          title: "Error",
+          description: "Failed to reset user statistics",
+          variant: "destructive",
+        });
+      } else {
+        // Reset achievements
+        await supabase
+          .from('user_achievements')
+          .delete()
+          .eq('user_id', userId);
+
+        // Reset case history
+        await supabase
+          .from('case_rewards')
+          .delete()
+          .eq('user_id', userId);
+
+        // Reset level daily cases
+        await supabase
+          .from('level_daily_cases')
+          .delete()
+          .eq('user_id', userId);
+
+        // Refresh users list
+        await loadUsers();
+
+        toast({
+          title: "Success",
+          description: "User statistics have been reset successfully",
+        });
+
+        setSelectedUser(null);
+        setShowResetConfirm(false);
+      }
+    } catch (err) {
+      console.error('Error resetting user stats:', err);
+      toast({
+        title: "Error",
+        description: "Failed to reset user statistics",
+        variant: "destructive",
+      });
+    } finally {
+      setResettingUser(false);
+    }
+  };
 
   // Check system status
   const checkSystemStatus = async () => {
@@ -327,233 +452,385 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
-        <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2 text-white">
-            <Shield className="h-5 w-5 text-primary" />
-            <span className="font-mono">ADMIN CONTROL CENTER</span>
-            <Badge className="ml-2 bg-gradient-to-r from-primary to-accent text-white border-0">ADMIN</Badge>
-          </DialogTitle>
-        </DialogHeader>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Maintenance Control */}
-          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Settings className="h-5 w-5 text-primary" />
-                <span className="font-mono">SITE CONTROL</span>
-              </CardTitle>
-              <CardDescription className="text-slate-400 font-mono">
-                Control website maintenance mode and site-wide settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <MaintenanceToggle />
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats */}
-          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Activity className="h-5 w-5 text-accent" />
-                <span className="font-mono">SYSTEM STATS</span>
-              </CardTitle>
-              <CardDescription className="text-slate-400 font-mono">
-                Overview of site activity and user statistics
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg border border-primary/30">
-                  <div className="text-2xl font-bold text-primary font-mono">
-                    {/* Add user count here */}
-                    -
-                  </div>
-                  <div className="text-sm text-slate-400 font-mono">TOTAL USERS</div>
-                </div>
-                <div className="text-center p-4 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg border border-accent/30">
-                  <div className="text-2xl font-bold text-accent font-mono">
-                    {/* Add active users here */}
-                    -
-                  </div>
-                  <div className="text-sm text-slate-400 font-mono">ACTIVE TODAY</div>
-                </div>
-              </div>
-              
-              <div className="text-sm text-slate-500 font-mono">
-                <p>More detailed analytics coming soon...</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Push Notifications */}
-          {showPushNotification ? (
-            <div className="lg:col-span-2">
-              <PushNotificationForm onClose={() => setShowPushNotification(false)} />
-            </div>
-          ) : (
-            <Card className="lg:col-span-2 bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="font-mono">ADMIN CONTROL CENTER</span>
+              <Badge className="ml-2 bg-gradient-to-r from-primary to-accent text-white border-0">ADMIN</Badge>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Maintenance Control */}
+            <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2 text-white">
-                  <Bell className="h-5 w-5 text-purple-400" />
-                  <span className="font-mono">BROADCAST SYSTEM</span>
-                  <Badge className="ml-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">BROADCAST</Badge>
+                  <Settings className="h-5 w-5 text-primary" />
+                  <span className="font-mono">SITE CONTROL</span>
                 </CardTitle>
                 <CardDescription className="text-slate-400 font-mono">
-                  Send notifications to all users on the platform
+                  Control website maintenance mode and site-wide settings
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30">
-                    <AlertTriangle className="h-4 w-4 text-yellow-400" />
-                    <span className="text-sm text-yellow-300 font-mono">
-                      WARNING: Broadcast notifications will be sent to ALL users on the platform.
+                <MaintenanceToggle />
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Activity className="h-5 w-5 text-accent" />
+                  <span className="font-mono">SYSTEM STATS</span>
+                </CardTitle>
+                <CardDescription className="text-slate-400 font-mono">
+                  Overview of site activity and user statistics
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg border border-primary/30">
+                    <div className="text-2xl font-bold text-primary font-mono">
+                      {users.length}
+                    </div>
+                    <div className="text-sm text-slate-400 font-mono">TOTAL USERS</div>
+                  </div>
+                  <div className="text-center p-4 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg border border-accent/30">
+                    <div className="text-2xl font-bold text-accent font-mono">
+                      {/* Add active users here */}
+                      -
+                    </div>
+                    <div className="text-sm text-slate-400 font-mono">ACTIVE TODAY</div>
+                  </div>
+                </div>
+                
+                <div className="text-sm text-slate-500 font-mono">
+                  <p>More detailed analytics coming soon...</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Push Notifications */}
+            {showPushNotification ? (
+              <div className="lg:col-span-2">
+                <PushNotificationForm onClose={() => setShowPushNotification(false)} />
+              </div>
+            ) : (
+              <Card className="lg:col-span-2 bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2 text-white">
+                    <Bell className="h-5 w-5 text-purple-400" />
+                    <span className="font-mono">BROADCAST SYSTEM</span>
+                    <Badge className="ml-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">BROADCAST</Badge>
+                  </CardTitle>
+                  <CardDescription className="text-slate-400 font-mono">
+                    Send notifications to all users on the platform
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30">
+                      <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                      <span className="text-sm text-yellow-300 font-mono">
+                        WARNING: Broadcast notifications will be sent to ALL users on the platform.
+                      </span>
+                    </div>
+                    
+                    <Button
+                      onClick={() => setShowPushNotification(true)}
+                      className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white border-0 font-mono transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
+                    >
+                      <Bell className="h-4 w-4 mr-2" />
+                      SEND BROADCAST NOTIFICATION
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* System Status */}
+            <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center space-x-2 text-white">
+                    <Server className="h-5 w-5 text-green-400" />
+                    <span className="font-mono">SYSTEM STATUS</span>
+                  </CardTitle>
+                  <div className="flex items-center space-x-2">
+                    {isRefreshing && (
+                      <div className="flex items-center space-x-1">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                        <span className="text-xs text-blue-400 font-mono">REFRESHING</span>
+                      </div>
+                    )}
+                    <span className="text-xs text-slate-500 font-mono">
+                      Last: {lastRefresh.toLocaleTimeString()}
+                    </span>
+                  </div>
+                </div>
+                <CardDescription className="text-slate-400 font-mono">
+                  Real-time system health and performance (updates every 20s)
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.database.status)}-500/10 to-${getStatusColor(systemStatus.database.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.database.status)}-500/30`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.database.status)}-400 rounded-full ${systemStatus.database.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                      <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>DATABASE</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>
+                        {getStatusText(systemStatus.database.status)}
+                      </span>
+                      {systemStatus.database.latency && (
+                        <span className="text-xs text-slate-500 font-mono">
+                          ({systemStatus.database.latency}ms)
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.authentication.status)}-500/10 to-${getStatusColor(systemStatus.authentication.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.authentication.status)}-500/30`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.authentication.status)}-400 rounded-full ${systemStatus.authentication.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                      <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>AUTHENTICATION</span>
+                    </div>
+                    <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>
+                      {getStatusText(systemStatus.authentication.status)}
                     </span>
                   </div>
                   
-                  <Button
-                    onClick={() => setShowPushNotification(true)}
-                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white border-0 font-mono transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
+                  <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.realtime.status)}-500/10 to-${getStatusColor(systemStatus.realtime.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.realtime.status)}-500/30`}>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.realtime.status)}-400 rounded-full ${systemStatus.realtime.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                      <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>REALTIME</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>
+                        {getStatusText(systemStatus.realtime.status)}
+                      </span>
+                      <span className="text-xs text-slate-500 font-mono">
+                        ({getConnectedChannelsCount()}/{getTotalChannelsCount()})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Channel Details */}
+                  <div className="mt-4 p-3 bg-slate-700/30 rounded-lg border border-slate-600/30">
+                    <div className="text-xs text-slate-400 font-mono mb-2">CHANNEL STATUS:</div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {Object.entries(systemStatus.realtime.channels).map(([channel, isConnected]) => (
+                        <div key={channel} className="flex items-center justify-between">
+                          <span className={`font-mono ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+                            {channel.toUpperCase()}
+                          </span>
+                          <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Admin Actions */}
+            <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Terminal className="h-5 w-5 text-cyan-400" />
+                  <span className="font-mono">ADMIN ACTIONS</span>
+                </CardTitle>
+                <CardDescription className="text-slate-400 font-mono">
+                  Quick actions for site administration
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 gap-3">
+                  <Button 
+                    onClick={() => {
+                      setShowUserManagement(true);
+                      loadUsers();
+                    }}
+                    variant="outline" 
+                    className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
                   >
-                    <Bell className="h-4 w-4 mr-2" />
-                    SEND BROADCAST NOTIFICATION
+                    <div className="flex items-center space-x-2">
+                      <Users className="h-4 w-4 text-blue-400" />
+                      <span>USER MANAGEMENT</span>
+                    </div>
+                    <span className="text-xs text-slate-500">MANAGE USERS</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
+                    <div className="flex items-center space-x-2">
+                      <Activity className="h-4 w-4 text-green-400" />
+                      <span>ANALYTICS</span>
+                    </div>
+                    <span className="text-xs text-slate-500">COMING SOON</span>
+                  </Button>
+                  
+                  <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
+                    <div className="flex items-center space-x-2">
+                      <Settings className="h-4 w-4 text-purple-400" />
+                      <span>SITE SETTINGS</span>
+                    </div>
+                    <span className="text-xs text-slate-500">COMING SOON</span>
                   </Button>
                 </div>
               </CardContent>
             </Card>
-          )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* System Status */}
-          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center space-x-2 text-white">
-                  <Server className="h-5 w-5 text-green-400" />
-                  <span className="font-mono">SYSTEM STATUS</span>
-                </CardTitle>
-                <div className="flex items-center space-x-2">
-                  {isRefreshing && (
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-blue-400 font-mono">REFRESHING</span>
-                    </div>
-                  )}
-                  <span className="text-xs text-slate-500 font-mono">
-                    Last: {lastRefresh.toLocaleTimeString()}
-                  </span>
-                </div>
+      {/* User Management Modal */}
+      <Dialog open={showUserManagement} onOpenChange={setShowUserManagement}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <Users className="h-5 w-5 text-blue-400" />
+              <span className="font-mono">USER MANAGEMENT</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-slate-400 font-mono">
+                Total Users: {users.length}
               </div>
-              <CardDescription className="text-slate-400 font-mono">
-                Real-time system health and performance (updates every 20s)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.database.status)}-500/10 to-${getStatusColor(systemStatus.database.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.database.status)}-500/30`}>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.database.status)}-400 rounded-full ${systemStatus.database.status === 'checking' ? 'animate-pulse' : ''}`}></div>
-                    <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>DATABASE</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>
-                      {getStatusText(systemStatus.database.status)}
-                    </span>
-                    {systemStatus.database.latency && (
-                      <span className="text-xs text-slate-500 font-mono">
-                        ({systemStatus.database.latency}ms)
-                      </span>
-                    )}
-                  </div>
-                </div>
-                
-                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.authentication.status)}-500/10 to-${getStatusColor(systemStatus.authentication.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.authentication.status)}-500/30`}>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.authentication.status)}-400 rounded-full ${systemStatus.authentication.status === 'checking' ? 'animate-pulse' : ''}`}></div>
-                    <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>AUTHENTICATION</span>
-                  </div>
-                  <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>
-                    {getStatusText(systemStatus.authentication.status)}
-                  </span>
-                </div>
-                
-                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.realtime.status)}-500/10 to-${getStatusColor(systemStatus.realtime.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.realtime.status)}-500/30`}>
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.realtime.status)}-400 rounded-full ${systemStatus.realtime.status === 'checking' ? 'animate-pulse' : ''}`}></div>
-                    <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>REALTIME</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>
-                      {getStatusText(systemStatus.realtime.status)}
-                    </span>
-                    <span className="text-xs text-slate-500 font-mono">
-                      ({getConnectedChannelsCount()}/{getTotalChannelsCount()})
-                    </span>
-                  </div>
-                </div>
+              <Button
+                onClick={loadUsers}
+                disabled={loadingUsers}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
 
-                {/* Channel Details */}
-                <div className="mt-4 p-3 bg-slate-700/30 rounded-lg border border-slate-600/30">
-                  <div className="text-xs text-slate-400 font-mono mb-2">CHANNEL STATUS:</div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {Object.entries(systemStatus.realtime.channels).map(([channel, isConnected]) => (
-                      <div key={channel} className="flex items-center justify-between">
-                        <span className={`font-mono ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
-                          {channel.toUpperCase()}
-                        </span>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            {loadingUsers ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {users.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700/50 rounded-lg hover:bg-slate-700/50 transition-colors"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <User className="h-4 w-4 text-blue-400" />
+                        <div>
+                          <div className="text-white font-mono">{user.username}</div>
+                          <div className="text-xs text-slate-400 font-mono">{user.email}</div>
+                        </div>
                       </div>
-                    ))}
+                      
+                      <div className="flex items-center space-x-4 text-sm">
+                        <div className="flex items-center space-x-1">
+                          <Crown className="h-3 w-3 text-yellow-400" />
+                          <span className="text-yellow-400 font-mono">Lv.{user.level}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Target className="h-3 w-3 text-green-400" />
+                          <span className="text-green-400 font-mono">{user.xp} XP</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Coins className="h-3 w-3 text-purple-400" />
+                          <span className="text-purple-400 font-mono">${user.balance}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={() => {
+                        setSelectedUser(user);
+                        setShowResetConfirm(true);
+                      }}
+                      variant="outline"
+                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Reset Stats
+                    </Button>
                   </div>
-                </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          {/* Admin Actions */}
-          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Terminal className="h-5 w-5 text-cyan-400" />
-                <span className="font-mono">ADMIN ACTIONS</span>
-              </CardTitle>
-              <CardDescription className="text-slate-400 font-mono">
-                Quick actions for site administration
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-3">
-                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-blue-400" />
-                    <span>USER MANAGEMENT</span>
-                  </div>
-                  <span className="text-xs text-slate-500">COMING SOON</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
-                  <div className="flex items-center space-x-2">
-                    <Activity className="h-4 w-4 text-green-400" />
-                    <span>ANALYTICS</span>
-                  </div>
-                  <span className="text-xs text-slate-500">COMING SOON</span>
-                </Button>
-                
-                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
-                  <div className="flex items-center space-x-2">
-                    <Settings className="h-4 w-4 text-purple-400" />
-                    <span>SITE SETTINGS</span>
-                  </div>
-                  <span className="text-xs text-slate-500">COMING SOON</span>
-                </Button>
+      {/* Reset Confirmation Modal */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <span className="font-mono">CONFIRM RESET</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-white font-mono mb-2">
+                Reset statistics for user:
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </DialogContent>
-    </Dialog>
+              <div className="text-lg font-bold text-blue-400 font-mono mb-4">
+                {selectedUser?.username}
+              </div>
+              <div className="text-sm text-slate-400 font-mono">
+                This will reset ALL statistics including:
+              </div>
+              <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
+                • Level and XP
+                • Game statistics
+                • Achievement progress
+                • Case history
+                • Daily cases
+                • All achievements
+              </div>
+              <div className="text-sm text-green-400 font-mono mt-2">
+                Balance will remain unchanged
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => setShowResetConfirm(false)}
+                variant="outline"
+                className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => selectedUser && resetUserStats(selectedUser.id)}
+                disabled={resettingUser}
+                className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
+              >
+                {resettingUser ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Reset Statistics
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
