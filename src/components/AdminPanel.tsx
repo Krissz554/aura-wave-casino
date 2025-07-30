@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -241,70 +241,243 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const resetUserStats = async (userId: string) => {
     setResettingUser(true);
     try {
-      // Reset all user statistics
-      const { error } = await supabase
+      // Reset basic profile statistics (only columns that exist in profiles table)
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           level: 1,
           xp: 0,
           total_wagered: 0,
-          games_played: 0,
-          games_won: 0,
-          total_bets: 0,
-          total_wins: 0,
-          total_losses: 0,
-          biggest_win: 0,
-          biggest_loss: 0,
-          current_streak: 0,
-          longest_streak: 0,
-          achievements_unlocked: 0,
-          cases_opened: 0,
-          total_rewards_claimed: 0
+          total_profit: 0,
+          current_level: 1,
+          current_xp: 0,
+          xp_to_next_level: 100,
+          lifetime_xp: 0,
+          border_tier: 1,
+          available_cases: 0,
+          total_cases_opened: 0,
+          total_xp: 0
         })
         .eq('id', userId);
 
-      if (error) {
-        console.error('Error resetting user stats:', error);
+      if (profileError) {
+        console.error('Error resetting profile stats:', profileError);
         toast({
           title: "Error",
-          description: "Failed to reset user statistics",
+          description: "Failed to reset user profile statistics",
           variant: "destructive",
         });
-      } else {
-        // Reset achievements
-        await supabase
-          .from('user_achievements')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset case history
-        await supabase
-          .from('case_rewards')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset daily cases
-        await supabase
-          .from('free_case_claims')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset notifications
-        await supabase
-          .from('notifications')
-          .delete()
-          .eq('user_id', userId);
-
-        toast({
-          title: "Success",
-          description: "User statistics have been reset",
-        });
-
-        setShowResetConfirm(false);
-        setSelectedUser(null);
-        setVerificationText('');
-        loadUsers(); // Refresh the user list
+        return;
       }
+
+      // Reset user_level_stats table - first check if record exists
+      const { data: existingStats, error: checkError } = await supabase
+        .from('user_level_stats')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') { // PGRST116 is "not found"
+        console.error('Error checking level stats:', checkError);
+        toast({
+          title: "Error",
+          description: "Failed to check user level statistics",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (existingStats) {
+        // Update existing record
+        const { error: levelStatsError } = await supabase
+          .from('user_level_stats')
+          .update({
+            current_level: 1,
+            lifetime_xp: 0,
+            current_level_xp: 0,
+            xp_to_next_level: 100,
+            border_tier: 1,
+            available_cases: 0,
+            total_cases_opened: 0,
+            total_case_value: 0,
+            coinflip_games: 0,
+            coinflip_wins: 0,
+            coinflip_wagered: 0,
+            coinflip_profit: 0,
+            best_coinflip_streak: 0,
+            current_coinflip_streak: 0,
+            crash_games: 0,
+            crash_wins: 0,
+            crash_wagered: 0,
+            crash_profit: 0,
+            roulette_games: 0,
+            roulette_wins: 0,
+            roulette_wagered: 0,
+            roulette_profit: 0,
+            roulette_highest_win: 0,
+            roulette_highest_loss: 0,
+            roulette_green_wins: 0,
+            roulette_red_wins: 0,
+            roulette_black_wins: 0,
+            roulette_favorite_color: 'none',
+            roulette_best_streak: 0,
+            roulette_current_streak: 0,
+            roulette_biggest_bet: 0,
+            tower_games: 0,
+            tower_wins: 0,
+            tower_wagered: 0,
+            tower_profit: 0,
+            total_games: 0,
+            total_wins: 0,
+            total_wagered: 0,
+            total_profit: 0,
+            biggest_win: 0,
+            biggest_loss: 0,
+            chat_messages_count: 0,
+            login_days_count: 0,
+            biggest_single_bet: 0,
+            current_win_streak: 0,
+            best_win_streak: 0,
+            tower_highest_level: 0,
+            tower_biggest_win: 0,
+            tower_biggest_loss: 0,
+            tower_best_streak: 0,
+            tower_current_streak: 0,
+            tower_perfect_games: 0
+          })
+          .eq('user_id', userId);
+
+        if (levelStatsError) {
+          console.error('Error resetting level stats:', levelStatsError);
+          toast({
+            title: "Error",
+            description: "Failed to reset user level statistics",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        // Create new record if it doesn't exist
+        const { error: insertError } = await supabase
+          .from('user_level_stats')
+          .insert({
+            user_id: userId,
+            current_level: 1,
+            lifetime_xp: 0,
+            current_level_xp: 0,
+            xp_to_next_level: 100,
+            border_tier: 1,
+            available_cases: 0,
+            total_cases_opened: 0,
+            total_case_value: 0,
+            coinflip_games: 0,
+            coinflip_wins: 0,
+            coinflip_wagered: 0,
+            coinflip_profit: 0,
+            best_coinflip_streak: 0,
+            current_coinflip_streak: 0,
+            crash_games: 0,
+            crash_wins: 0,
+            crash_wagered: 0,
+            crash_profit: 0,
+            roulette_games: 0,
+            roulette_wins: 0,
+            roulette_wagered: 0,
+            roulette_profit: 0,
+            roulette_highest_win: 0,
+            roulette_highest_loss: 0,
+            roulette_green_wins: 0,
+            roulette_red_wins: 0,
+            roulette_black_wins: 0,
+            roulette_favorite_color: 'none',
+            roulette_best_streak: 0,
+            roulette_current_streak: 0,
+            roulette_biggest_bet: 0,
+            tower_games: 0,
+            tower_wins: 0,
+            tower_wagered: 0,
+            tower_profit: 0,
+            total_games: 0,
+            total_wins: 0,
+            total_wagered: 0,
+            total_profit: 0,
+            biggest_win: 0,
+            biggest_loss: 0,
+            chat_messages_count: 0,
+            login_days_count: 0,
+            biggest_single_bet: 0,
+            current_win_streak: 0,
+            best_win_streak: 0,
+            tower_highest_level: 0,
+            tower_biggest_win: 0,
+            tower_biggest_loss: 0,
+            tower_best_streak: 0,
+            tower_current_streak: 0,
+            tower_perfect_games: 0
+          });
+
+        if (insertError) {
+          console.error('Error creating level stats:', insertError);
+          toast({
+            title: "Error",
+            description: "Failed to create user level statistics",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+
+      // Reset achievements
+      await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset unlocked achievements
+      await supabase
+        .from('unlocked_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset case history
+      await supabase
+        .from('case_rewards')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset daily cases
+      await supabase
+        .from('free_case_claims')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset notifications
+      await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset game history
+      await supabase
+        .from('game_history')
+        .delete()
+        .eq('user_id', userId);
+
+      // Reset game stats
+      await supabase
+        .from('game_stats')
+        .delete()
+        .eq('user_id', userId);
+
+      toast({
+        title: "Success",
+        description: "User statistics have been reset",
+      });
+
+      setShowResetConfirm(false);
+      setSelectedUser(null);
+      setVerificationText('');
+      loadUsers(); // Refresh the user list
     } catch (error) {
       console.error('Error resetting user stats:', error);
       toast({
@@ -568,6 +741,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <Shield className="h-5 w-5 text-primary" />
               <span className="font-mono">ADMIN_PANEL</span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Loading admin panel and checking permissions...
+            </DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center p-8">
             <div className="relative">
@@ -589,6 +765,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <Shield className="h-5 w-5 text-red-500" />
               <span className="font-mono">ACCESS_DENIED</span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              You don't have permission to access the admin panel.
+            </DialogDescription>
           </DialogHeader>
           <div className="text-center p-6">
             <div className="relative mb-6">
@@ -682,6 +861,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <span className="font-mono">ADMIN CONTROL CENTER</span>
               <Badge className="ml-2 bg-gradient-to-r from-primary to-accent text-white border-0">ADMIN</Badge>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Manage site maintenance, user statistics, and system controls
+            </DialogDescription>
           </DialogHeader>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -932,6 +1114,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <Users className="h-5 w-5 text-blue-400" />
               <span className="font-mono">USER MANAGEMENT</span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              View and manage user accounts, statistics, and permissions
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -1087,6 +1272,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <MessageSquare className="h-5 w-5 text-green-400" />
               <span className="font-mono">PRIVATE NOTIFICATION</span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Send a private notification to the selected user
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -1226,6 +1414,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               <span className="font-mono">CONFIRM RESET</span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              Confirm the reset of user statistics and achievements
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
@@ -1310,6 +1501,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 {adminRoleAction === 'add' ? 'MAKE ADMIN' : 'REMOVE ADMIN'}
               </span>
             </DialogTitle>
+            <DialogDescription className="text-slate-400">
+              {adminRoleAction === 'add' ? 'Grant admin privileges to the selected user' : 'Remove admin privileges from the selected user'}
+            </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-4">
