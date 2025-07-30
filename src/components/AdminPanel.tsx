@@ -143,12 +143,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setSendingNotification(true);
     try {
       const { error } = await supabase
-        .from('user_notifications')
+        .from('notifications')
         .insert({
           user_id: userId,
+          type: 'admin_message',
           title: notification.title,
           message: notification.message,
-          level: notification.level,
+          data: {
+            level: notification.level,
+            admin_sent: true
+          },
           is_read: false,
           created_at: new Date().toISOString()
         });
