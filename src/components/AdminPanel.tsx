@@ -241,75 +241,156 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const resetUserStats = async (userId: string) => {
     setResettingUser(true);
     try {
-      // Reset all user statistics
-      const { error } = await supabase
+      console.log('Attempting to reset stats for user:', userId);
+      
+      // Reset profile statistics
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           level: 1,
           xp: 0,
           total_wagered: 0,
-          games_played: 0,
-          games_won: 0,
-          total_bets: 0,
-          total_wins: 0,
-          total_losses: 0,
-          biggest_win: 0,
-          biggest_loss: 0,
-          current_streak: 0,
-          longest_streak: 0,
-          achievements_unlocked: 0,
-          cases_opened: 0,
-          total_rewards_claimed: 0
+          total_profit: 0,
+          current_level: 1,
+          current_xp: 0,
+          xp_to_next_level: 100,
+          lifetime_xp: 0,
+          border_tier: 1,
+          available_cases: 0,
+          total_cases_opened: 0,
+          total_xp: 0
         })
         .eq('id', userId);
 
-      if (error) {
-        console.error('Error resetting user stats:', error);
+      if (profileError) {
+        console.error('Error resetting profile stats:', profileError);
         toast({
           title: "Error",
-          description: "Failed to reset user statistics",
+          description: `Failed to reset profile statistics: ${profileError.message}`,
           variant: "destructive",
         });
-      } else {
-        // Reset achievements
-        await supabase
-          .from('user_achievements')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset case history
-        await supabase
-          .from('case_rewards')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset daily cases
-        await supabase
-          .from('free_case_claims')
-          .delete()
-          .eq('user_id', userId);
-
-        // Reset notifications
-        await supabase
-          .from('notifications')
-          .delete()
-          .eq('user_id', userId);
-
-        toast({
-          title: "Success",
-          description: "User statistics have been reset",
-        });
-
-        setShowResetConfirm(false);
-        setSelectedUser(null);
-        setVerificationText('');
-        loadUsers(); // Refresh the user list
+        return;
       }
+
+      // Reset user_level_stats
+      const { error: levelStatsError } = await supabase
+        .from('user_level_stats')
+        .update({
+          current_level: 1,
+          current_level_xp: 0,
+          lifetime_xp: 0,
+          xp_to_next_level: 100,
+          border_tier: 1,
+          available_cases: 0,
+          total_cases_opened: 0,
+          coinflip_games: 0,
+          coinflip_wins: 0,
+          coinflip_wagered: 0,
+          coinflip_profit: 0,
+          crash_games: 0,
+          crash_wins: 0,
+          crash_wagered: 0,
+          crash_profit: 0,
+          roulette_games: 0,
+          roulette_wins: 0,
+          roulette_wagered: 0,
+          roulette_profit: 0,
+          tower_games: 0,
+          tower_wins: 0,
+          tower_wagered: 0,
+          tower_profit: 0,
+          total_games: 0,
+          total_wins: 0,
+          total_wagered: 0,
+          total_profit: 0
+        })
+        .eq('user_id', userId);
+
+      if (levelStatsError) {
+        console.error('Error resetting level stats:', levelStatsError);
+        toast({
+          title: "Error",
+          description: `Failed to reset level statistics: ${levelStatsError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Reset game_stats
+      const { error: gameStatsError } = await supabase
+        .from('game_stats')
+        .delete()
+        .eq('user_id', userId);
+
+      if (gameStatsError) {
+        console.error('Error resetting game stats:', gameStatsError);
+      }
+
+      // Reset game_history
+      const { error: gameHistoryError } = await supabase
+        .from('game_history')
+        .delete()
+        .eq('user_id', userId);
+
+      if (gameHistoryError) {
+        console.error('Error resetting game history:', gameHistoryError);
+      }
+
+      // Reset achievements
+      const { error: achievementsError } = await supabase
+        .from('user_achievements')
+        .delete()
+        .eq('user_id', userId);
+
+      if (achievementsError) {
+        console.error('Error resetting achievements:', achievementsError);
+      }
+
+      // Reset case history
+      const { error: caseRewardsError } = await supabase
+        .from('case_rewards')
+        .delete()
+        .eq('user_id', userId);
+
+      if (caseRewardsError) {
+        console.error('Error resetting case rewards:', caseRewardsError);
+      }
+
+      // Reset daily cases
+      const { error: dailyCasesError } = await supabase
+        .from('free_case_claims')
+        .delete()
+        .eq('user_id', userId);
+
+      if (dailyCasesError) {
+        console.error('Error resetting daily cases:', dailyCasesError);
+      }
+
+      // Reset notifications
+      const { error: notificationsError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId);
+
+      if (notificationsError) {
+        console.error('Error resetting notifications:', notificationsError);
+      }
+
+      console.log('User statistics reset successfully');
+      toast({
+        title: "Success",
+        description: "User statistics have been reset",
+      });
+
+      setShowResetConfirm(false);
+      setSelectedUser(null);
+      setVerificationText('');
+      loadUsers(); // Refresh the user list
     } catch (error) {
       console.error('Error resetting user stats:', error);
       toast({
         title: "Error",
-        description: "Failed to reset user statistics",
+        description: `Failed to reset user statistics: ${error}`,
         variant: "destructive",
       });
     } finally {
