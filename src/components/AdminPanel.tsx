@@ -145,7 +145,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       checkSystemStatus();
       
       // Set up periodic health checks
-      const interval = setInterval(checkSystemStatus, 30000); // Check every 30 seconds
+      const interval = setInterval(checkSystemStatus, 10000); // Check every 10 seconds
       
       return () => clearInterval(interval);
     }
