@@ -52,31 +52,35 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       }
 
       const userId = user.id;
-      console.log('=== PERFORMING COMPLETE ACCOUNT DELETION ===');
+      console.log('=== PERFORMING SERVER-SIDE ACCOUNT DELETION ===');
       console.log('User ID:', userId);
+      console.log('Deletion time:', deletionTime);
 
-      // Use the comprehensive database function to delete everything
-      console.log('Calling delete_user_complete database function...');
-      const { data: deletionResult, error: functionError } = await supabase.rpc('delete_user_complete', {
-        user_uuid: userId
+      // Call the server-side Edge Function for secure deletion
+      console.log('Calling server-side deletion function...');
+      const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${supabase.supabaseKey}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          deletion_time: deletionTime
+        })
       });
 
-      if (functionError) {
-        console.error('Error calling delete_user_complete function:', functionError);
-        toast({
-          title: "Deletion Error",
-          description: "Failed to delete account. You will be logged out.",
-          variant: "destructive",
-        });
-        signOut();
-        return;
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      console.log('Deletion result:', deletionResult);
+      const deletionResult = await response.json();
+      console.log('Server deletion result:', deletionResult);
 
-      if (deletionResult && deletionResult.success) {
-        console.log('✅ Account deletion completed successfully');
+      if (deletionResult.success) {
+        console.log('✅ Server-side account deletion completed successfully');
         console.log('Deleted tables:', deletionResult.deleted_tables);
+        console.log('Auth deleted:', deletionResult.auth_deleted);
         
         if (deletionResult.errors && deletionResult.errors.length > 0) {
           console.log('⚠️ Some errors occurred:', deletionResult.errors);
@@ -87,8 +91,8 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
           description: "Your account has been completely removed from the system.",
         });
       } else {
-        console.error('❌ Account deletion failed');
-        console.error('Errors:', deletionResult?.errors || 'Unknown error');
+        console.error('❌ Server-side account deletion failed');
+        console.error('Errors:', deletionResult.errors || 'Unknown error');
         
         toast({
           title: "Deletion Error",
@@ -101,7 +105,7 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       signOut();
       
     } catch (error) {
-      console.error('Error during account deletion:', error);
+      console.error('Error during server-side account deletion:', error);
       toast({
         title: "Deletion Error",
         description: "An error occurred during account deletion. You will be logged out.",

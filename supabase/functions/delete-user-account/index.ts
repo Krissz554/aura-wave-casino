@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client with service role key
+    // Create Supabase client with service role key for admin access
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -25,9 +25,9 @@ serve(async (req) => {
       }
     )
 
-    const { userId } = await req.json()
+    const { user_id, deletion_time } = await req.json()
 
-    if (!userId) {
+    if (!user_id) {
       return new Response(
         JSON.stringify({ error: 'User ID is required' }),
         { 
@@ -37,89 +37,173 @@ serve(async (req) => {
       )
     }
 
-    console.log('=== STARTING COMPLETE USER ACCOUNT DELETION ===')
-    console.log('User ID:', userId)
+    console.log(`=== SERVER-SIDE ACCOUNT DELETION ===`)
+    console.log(`User ID: ${user_id}`)
+    console.log(`Deletion time: ${deletion_time}`)
 
-    // Delete from all related tables (in correct order to avoid foreign key constraints)
-    console.log('Deleting user data from all tables...')
-    
+    // Check if it's time to delete (30 seconds after initiation)
+    const now = new Date().getTime()
+    const targetTime = new Date(deletion_time).getTime()
+    const timeDiff = targetTime - now
+
+    if (timeDiff > 0) {
+      console.log(`Deletion not yet due. Time remaining: ${Math.floor(timeDiff / 1000)} seconds`)
+      return new Response(
+        JSON.stringify({ 
+          status: 'pending',
+          message: 'Deletion not yet due',
+          timeRemaining: Math.floor(timeDiff / 1000)
+        }),
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      )
+    }
+
+    console.log('Proceeding with account deletion...')
+
+    // Delete from all tables
     const tablesToDelete = [
-      { table: 'notifications', field: 'user_id' },
-      { table: 'tips', field: 'from_user_id' },
-      { table: 'tips', field: 'to_user_id' },
-      { table: 'user_achievements', field: 'user_id' },
-      { table: 'user_daily_logins', field: 'user_id' },
-      { table: 'user_level_stats', field: 'user_id' },
-      { table: 'game_history', field: 'user_id' },
-      { table: 'game_stats', field: 'user_id' },
-      { table: 'case_rewards', field: 'user_id' },
-      { table: 'free_case_claims', field: 'user_id' },
-      { table: 'level_daily_cases', field: 'user_id' },
-      { table: 'user_rate_limits', field: 'user_id' },
-      { table: 'admin_users', field: 'user_id' },
-      { table: 'chat_messages', field: 'user_id' },
-      { table: 'unlocked_achievements', field: 'user_id' },
-      { table: 'live_bet_feed', field: 'user_id' },
-      { table: 'crash_bets', field: 'user_id' },
-      { table: 'roulette_bets', field: 'user_id' },
-      { table: 'tower_games', field: 'user_id' },
-      { table: 'roulette_client_seeds', field: 'user_id' },
-      { table: 'audit_logs', field: 'user_id' }
+      'notifications',
+      'user_achievements', 
+      'user_daily_logins',
+      'user_level_stats',
+      'game_history',
+      'game_stats',
+      'case_rewards',
+      'free_case_claims',
+      'level_daily_cases',
+      'user_rate_limits',
+      'admin_users',
+      'chat_messages',
+      'unlocked_achievements',
+      'live_bet_feed',
+      'crash_bets',
+      'roulette_bets',
+      'tower_games',
+      'roulette_client_seeds',
+      'audit_logs'
     ]
 
-    for (const { table, field } of tablesToDelete) {
-      console.log(`Deleting from ${table}...`)
-      const { error } = await supabaseClient
-        .from(table)
-        .delete()
-        .eq(field, userId)
+    const deletedTables = []
+    const errors = []
 
-      if (error) {
-        console.error(`Error deleting from ${table}:`, error)
+    // Delete tips (both sent and received)
+    try {
+      const { error: tipsError1 } = await supabaseClient
+        .from('tips')
+        .delete()
+        .eq('from_user_id', user_id)
+      
+      const { error: tipsError2 } = await supabaseClient
+        .from('tips')
+        .delete()
+        .eq('to_user_id', user_id)
+
+      if (!tipsError1 && !tipsError2) {
+        deletedTables.push('tips')
       } else {
-        console.log(`${table} deleted successfully`)
+        errors.push(`tips: ${tipsError1?.message || tipsError2?.message}`)
+      }
+    } catch (error) {
+      errors.push(`tips: ${error.message}`)
+    }
+
+    // Delete from all other tables
+    for (const table of tablesToDelete) {
+      try {
+        console.log(`Deleting from ${table}...`)
+        
+        const { error } = await supabaseClient
+          .from(table)
+          .delete()
+          .eq('user_id', user_id)
+
+        if (error) {
+          console.error(`Error deleting from ${table}:`, error)
+          errors.push(`${table}: ${error.message}`)
+        } else {
+          console.log(`${table} deleted successfully`)
+          deletedTables.push(table)
+        }
+      } catch (error) {
+        console.error(`Exception deleting from ${table}:`, error)
+        errors.push(`${table}: ${error.message}`)
       }
     }
 
     // Delete from profiles table
-    console.log('Deleting from profiles table...')
-    const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .delete()
-      .eq('id', userId)
+    try {
+      console.log('Deleting from profiles table...')
+      const { error: profileError } = await supabaseClient
+        .from('profiles')
+        .delete()
+        .eq('id', user_id)
 
-    if (profileError) {
-      console.error('Error deleting profile:', profileError)
-    } else {
-      console.log('Profile deleted successfully')
-    }
-    
-    // Delete from auth.users (Supabase Auth) - This requires service role
-    console.log('Deleting from auth.users...')
-    const { error: authError } = await supabaseClient.auth.admin.deleteUser(userId)
-
-    if (authError) {
-      console.error('Error deleting from auth:', authError)
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to delete user from authentication',
-          details: authError.message 
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
-    } else {
-      console.log('User deleted from auth successfully')
+      if (profileError) {
+        console.error('Error deleting profile:', profileError)
+        errors.push(`profiles: ${profileError.message}`)
+      } else {
+        console.log('Profile deleted successfully')
+        deletedTables.push('profiles')
+      }
+    } catch (error) {
+      console.error('Exception deleting profile:', error)
+      errors.push(`profiles: ${error.message}`)
     }
 
-    console.log('=== ACCOUNT DELETION COMPLETED SUCCESSFULLY ===')
+    // Delete from Supabase Auth (this requires admin privileges)
+    let authDeleted = false
+    try {
+      console.log('Deleting from Supabase Auth...')
+      const { error: authError } = await supabaseClient.auth.admin.deleteUser(user_id)
+      
+      if (authError) {
+        console.error('Error deleting from Auth:', authError)
+        errors.push(`auth.users: ${authError.message}`)
+      } else {
+        console.log('✅ User successfully deleted from Supabase Auth')
+        authDeleted = true
+        deletedTables.push('auth.users')
+      }
+    } catch (error) {
+      console.error('Exception deleting from Auth:', error)
+      errors.push(`auth.users: ${error.message}`)
+    }
+
+    // Log the deletion completion
+    try {
+      await supabaseClient
+        .from('audit_logs')
+        .insert({
+          user_id: user_id,
+          action: 'account_deletion_completed_server',
+          details: {
+            timestamp: new Date().toISOString(),
+            deleted_tables: deletedTables,
+            errors: errors,
+            auth_deleted: authDeleted
+          }
+        })
+    } catch (error) {
+      console.error('Error logging deletion completion:', error)
+    }
+
+    const success = errors.length === 0 || (errors.length === 1 && errors[0].includes('auth.users'))
+
+    console.log('=== DELETION COMPLETED ===')
+    console.log('Success:', success)
+    console.log('Deleted tables:', deletedTables)
+    console.log('Errors:', errors)
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'User account completely deleted from all tables and authentication' 
+      JSON.stringify({
+        success,
+        deleted_tables: deletedTables,
+        errors,
+        auth_deleted: authDeleted,
+        user_id
       }),
       { 
         status: 200, 
@@ -128,12 +212,9 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Error in delete-user-account function:', error)
+    console.error('Server error:', error)
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message 
-      }),
+      JSON.stringify({ error: error.message }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
