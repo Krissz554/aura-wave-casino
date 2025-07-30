@@ -116,57 +116,51 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }));
     }
 
-    // Check realtime channels by testing each one
+    // Check realtime connectivity with a simple test
     try {
-      const channelTests = [
-        { name: 'maintenance', channel: supabase.channel('maintenance_settings') },
-        { name: 'liveBets', channel: supabase.channel(`live_bet_feed_${Date.now()}`) },
-        { name: 'crashRounds', channel: supabase.channel(`crash_rounds_${Date.now()}`) },
-        { name: 'crashBets', channel: supabase.channel(`crash_bets_${Date.now()}`) },
-        { name: 'notifications', channel: supabase.channel(`notifications_${user?.id || 'test'}`) },
-        { name: 'chat', channel: supabase.channel('chat_messages') },
-        { name: 'roulette', channel: supabase.channel(`roulette_rounds_${Date.now()}`) },
-        { name: 'userStats', channel: supabase.channel(`user_stats_${user?.id || 'test'}_${Date.now()}`) },
-        { name: 'caseHistory', channel: supabase.channel('case_history') },
-        { name: 'caseRewards', channel: supabase.channel('case_rewards_changes') },
-        { name: 'levelDailyCases', channel: supabase.channel('level_daily_cases') },
-        { name: 'levelUp', channel: supabase.channel(`level_up_live_${user?.id || 'test'}`) },
-        { name: 'balanceUpdates', channel: supabase.channel(`balance_updates_${user?.id || 'test'}_${Date.now()}`) }
-      ];
-
-      const channelStatuses = { ...systemStatus.realtime.channels };
-      let connectedChannels = 0;
-      let totalChannels = channelTests.length;
-
-      // Test each channel
-      for (const test of channelTests) {
-        try {
-          const status = await new Promise((resolve) => {
-            const subscription = test.channel.subscribe((status) => {
-              resolve(status);
-            });
-            
-            // Cleanup after 2 seconds
-            setTimeout(() => {
-              supabase.removeChannel(test.channel);
-            }, 2000);
-          });
-
-          const isConnected = status === 'SUBSCRIBED';
-          channelStatuses[test.name as keyof typeof channelStatuses] = isConnected;
-          if (isConnected) connectedChannels++;
-        } catch (err) {
-          channelStatuses[test.name as keyof typeof channelStatuses] = false;
-        }
-      }
-
-      // Determine overall realtime status
-      const overallStatus = connectedChannels > 0 ? 'connected' : 'disconnected';
+      // Create a simple test channel to check realtime connectivity
+      const testChannel = supabase.channel('admin-health-check');
       
+      // Set a timeout for the test
+      const testPromise = new Promise((resolve) => {
+        const timeout = setTimeout(() => {
+          resolve('timeout');
+        }, 3000);
+
+        testChannel.subscribe((status) => {
+          clearTimeout(timeout);
+          resolve(status);
+        });
+      });
+
+      const result = await testPromise;
+      
+      // Clean up the test channel
+      supabase.removeChannel(testChannel);
+
+      const isConnected = result === 'SUBSCRIBED';
+      
+      // Update channel statuses based on the overall realtime connectivity
+      const channelStatuses = {
+        maintenance: isConnected,
+        liveBets: isConnected,
+        crashRounds: isConnected,
+        crashBets: isConnected,
+        notifications: isConnected,
+        chat: isConnected,
+        roulette: isConnected,
+        userStats: isConnected,
+        caseHistory: isConnected,
+        caseRewards: isConnected,
+        levelDailyCases: isConnected,
+        levelUp: isConnected,
+        balanceUpdates: isConnected
+      };
+
       setSystemStatus(prev => ({
         ...prev,
         realtime: { 
-          status: overallStatus,
+          status: isConnected ? 'connected' : 'disconnected',
           channels: channelStatuses
         }
       }));
@@ -175,7 +169,21 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         ...prev,
         realtime: { 
           status: 'disconnected',
-          channels: { ...prev.realtime.channels }
+          channels: {
+            maintenance: false,
+            liveBets: false,
+            crashRounds: false,
+            crashBets: false,
+            notifications: false,
+            chat: false,
+            roulette: false,
+            userStats: false,
+            caseHistory: false,
+            caseRewards: false,
+            levelDailyCases: false,
+            levelUp: false,
+            balanceUpdates: false
+          }
         }
       }));
     }
