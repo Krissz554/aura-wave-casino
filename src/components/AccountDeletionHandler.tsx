@@ -5,6 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+// Supabase configuration for Edge Function calls
+const SUPABASE_URL = "https://hqdbdczxottbupwbupdu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxZGJkY3p4b3R0YnVwd2J1cGR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxMTU2MjQsImV4cCI6MjA2ODY5MTYyNH0.HVC17e9vmf0qV5Qn2qdf7t1U9T0Im8v7jf7cpZZqmNQ";
+
 interface AccountDeletionHandlerProps {
   isOpen: boolean;
   onClose: () => void;
@@ -36,16 +40,121 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       if (remaining <= 0) {
         clearInterval(timer);
         setIsDeleting(true);
-        // Server will handle the deletion automatically
-        // We just wait for the completion notification
-        setTimeout(() => {
-          checkDeletionStatus();
-        }, 5000); // Check status after 5 seconds
+        // Trigger the deletion immediately when countdown reaches zero
+        performAccountDeletion();
       }
     }, 1000);
 
     return () => clearInterval(timer);
   }, [isOpen, deletionTime]);
+
+  const performAccountDeletion = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        // User already deleted somehow
+        setDeletionCompleted(true);
+        setTimeout(() => {
+          signOut();
+        }, 3000);
+        return;
+      }
+
+      const userId = user.id;
+      console.log('=== PERFORMING CLIENT-SIDE ACCOUNT DELETION ===');
+      console.log('User ID:', userId);
+      console.log('Deletion time:', deletionTime);
+
+      // Try to use the new process-pending-deletions function first
+      console.log('Attempting to trigger server-side deletion...');
+      try {
+                          const processingResponse = await fetch(`${SUPABASE_URL}/functions/v1/process-pending-deletions`, {
+           method: 'POST',
+           headers: {
+             'Content-Type': 'application/json',
+             'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+           }
+         });
+
+        if (processingResponse.ok) {
+          const processingResult = await processingResponse.json();
+          console.log('Server processing result:', processingResult);
+          
+          if (processingResult.processed_count > 0) {
+            console.log('✅ Deletion processed by server');
+            setDeletionCompleted(true);
+            setTimeout(() => {
+              signOut();
+            }, 3000);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log('Server processing not available, falling back to direct deletion:', error);
+      }
+
+      // Fallback to direct Edge Function call
+      console.log('Calling delete-user-account Edge Function...');
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          deletion_time: deletionTime
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const deletionResult = await response.json();
+      console.log('Deletion result:', deletionResult);
+
+      if (deletionResult.success) {
+        console.log('✅ Account deletion completed successfully');
+        setDeletionCompleted(true);
+        
+        toast({
+          title: "Account Deleted",
+          description: "Your account has been completely removed from the system.",
+        });
+        
+        setTimeout(() => {
+          signOut();
+        }, 3000);
+      } else {
+        console.error('❌ Account deletion failed');
+        console.error('Errors:', deletionResult.errors || 'Unknown error');
+        
+        toast({
+          title: "Deletion Error",
+          description: "Failed to delete account completely. You will be logged out.",
+          variant: "destructive",
+        });
+        
+        setTimeout(() => {
+          signOut();
+        }, 5000);
+      }
+
+    } catch (error) {
+      console.error('Error during account deletion:', error);
+      toast({
+        title: "Deletion Error",
+        description: "An error occurred during account deletion. You will be logged out.",
+        variant: "destructive",
+      });
+      
+      // Still logout even if deletion fails
+      setTimeout(() => {
+        signOut();
+      }, 5000);
+    }
+  };
 
   const checkDeletionStatus = async () => {
     try {

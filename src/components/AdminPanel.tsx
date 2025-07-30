@@ -11,6 +11,10 @@ import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+// Supabase configuration for Edge Function calls
+const SUPABASE_URL = "https://hqdbdczxottbupwbupdu.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxZGJkY3p4b3R0YnVwd2J1cGR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMxMTU2MjQsImV4cCI6MjA2ODY5MTYyNH0.HVC17e9vmf0qV5Qn2qdf7t1U9T0Im8v7jf7cpZZqmNQ";
+
 interface AdminPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -564,11 +568,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             console.log('Executing fallback deletion after 30 seconds...');
             
             // Call the existing Edge Function directly
-            const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user-account`, {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${supabase.supabaseKey}`,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
               },
               body: JSON.stringify({
                 user_id: userId,
