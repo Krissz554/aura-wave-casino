@@ -7,6 +7,7 @@ NOTIFY pgrst, 'reload schema';
 DO $$
 DECLARE
   column_count INTEGER;
+  column_info RECORD;
 BEGIN
   -- Count columns in profiles table
   SELECT COUNT(*) INTO column_count 
