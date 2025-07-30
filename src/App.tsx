@@ -13,6 +13,7 @@ import Rewards from "./pages/Rewards";
 import NotFound from "./pages/NotFound";
 import { ProvablyFair } from "./pages/ProvablyFair";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import ResponsibleGambling from "./pages/ResponsibleGambling";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/provably-fair" element={<ProvablyFair />} />
             <Route path="/terms" element={<TermsAndConditions />} />
+            <Route path="/responsible-gambling" element={<ResponsibleGambling />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

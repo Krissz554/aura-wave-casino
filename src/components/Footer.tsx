@@ -82,12 +82,12 @@ export function Footer() {
               >
                 Privacy Policy
               </Link>
-              <a 
-                href="#" 
+              <Link 
+                to="/responsible-gambling" 
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Responsible Gaming
-              </a>
+              </Link>
             </div>
           </div>
 
