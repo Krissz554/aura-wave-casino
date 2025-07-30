@@ -70,18 +70,18 @@ export function Footer() {
               Legal
             </h3>
             <div className="space-y-2">
-              <a 
-                href="#" 
+              <Link 
+                to="/terms" 
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Terms of Service
-              </a>
-              <a 
-                href="#" 
+              </Link>
+              <Link 
+                to="/terms#privacy" 
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Privacy Policy
-              </a>
+              </Link>
               <a 
                 href="#" 
                 className="block text-sm text-muted-foreground hover:text-foreground transition-colors"

@@ -12,6 +12,7 @@ import Index from "./pages/Index";
 import Rewards from "./pages/Rewards";
 import NotFound from "./pages/NotFound";
 import { ProvablyFair } from "./pages/ProvablyFair";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/tower" element={<Index initialGame="tower" />} />
             <Route path="/rewards" element={<Rewards />} />
             <Route path="/provably-fair" element={<ProvablyFair />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

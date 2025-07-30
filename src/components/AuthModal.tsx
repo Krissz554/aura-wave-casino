@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Lock, User, Mail, Eye, EyeOff, Cpu, Terminal, Shield } from 'lucide-react';
+import { Lock, User, Mail, Eye, EyeOff, Cpu, Terminal, Shield, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -20,7 +22,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     username: '', 
     email: '', 
     password: '', 
-    confirmPassword: '' 
+    confirmPassword: '',
+    acceptTerms: false
   });
   const [loading, setLoading] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -79,6 +82,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
 
+    if (!registerData.acceptTerms) {
+      toast({
+        title: "TERMS NOT ACCEPTED",
+        description: "You must accept the Terms and Conditions to register",
+        variant: "destructive",
+      });
+      return;
+    }
+
     // Import validation functions
     const { validateUsername, validateEmail, validatePassword } = await import('@/lib/utils');
     
@@ -115,10 +127,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       return;
     }
 
+    // Check if passwords match
     if (registerData.password !== registerData.confirmPassword) {
       toast({
         title: "PASSWORD MISMATCH",
-        description: "Password confirmation failed",
+        description: "Access keys do not match",
         variant: "destructive",
       });
       return;
@@ -382,6 +395,20 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                       </button>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-500/10 to-transparent pointer-events-none" />
                     </div>
+                  </div>
+
+                  {/* Terms Acceptance Checkbox */}
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="accept-terms"
+                      checked={registerData.acceptTerms}
+                      onCheckedChange={(checked) => setRegisterData({ ...registerData, acceptTerms: checked as boolean })}
+                      className="h-4 w-4 text-purple-400 focus:ring-purple-500/40"
+                    />
+                    <Label htmlFor="accept-terms" className="text-sm text-slate-300 font-mono tracking-wider flex items-center">
+                      <FileText className="w-4 h-4 mr-2 text-purple-400" />
+                      I agree to the <Link to="/terms" className="underline hover:text-indigo-400 ml-1">Terms and Conditions</Link>
+                    </Label>
                   </div>
 
                   {/* Register Button */}
