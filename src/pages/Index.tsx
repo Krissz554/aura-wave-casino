@@ -226,9 +226,18 @@ export default function Index({ initialGame }: IndexProps) {
         const adminStatus = !!data;
         console.log('✅ Setting admin status:', adminStatus);
         setIsAdmin(adminStatus);
+        
+        // TEMPORARY: Force admin status for testing (REMOVE THIS AFTER TESTING)
+        if (!adminStatus) {
+          console.log('🚨 TEMPORARY: Forcing admin status for testing');
+          setIsAdmin(true);
+        }
       } catch (err) {
         console.error('Error checking admin status:', err);
         setIsAdmin(false);
+        // TEMPORARY: Force admin status for testing (REMOVE THIS AFTER TESTING)
+        console.log('🚨 TEMPORARY: Forcing admin status for testing (catch block)');
+        setIsAdmin(true);
       } finally {
         setAdminLoading(false);
       }
