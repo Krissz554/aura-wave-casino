@@ -1397,7 +1397,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       {/* User Management Modal */}
       <Dialog open={showUserManagement} onOpenChange={setShowUserManagement}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+        <DialogContent className="max-w-6xl max-h-[85vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
           <DialogHeader>
             <DialogTitle className="flex items-center space-x-2 text-white">
               <Users className="h-5 w-5 text-blue-400" />
@@ -1459,21 +1459,21 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 </Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 max-h-[65vh] overflow-y-auto">
                 {users.map((user) => (
                   <div
                     key={user.id}
-                    className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-4 hover:bg-slate-700/50 transition-colors"
+                    className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 hover:bg-slate-700/50 transition-colors"
                   >
-                    {/* User Header */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center">
-                          <User className="h-4 w-4 text-blue-400" />
+                    {/* Compact User Info */}
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center">
+                          <User className="h-3 w-3 text-blue-400" />
                         </div>
                         <div>
-                          <div className="text-white font-mono font-semibold">{user.username}</div>
-                          <div className="text-xs text-slate-500 font-mono">ID: {user.id.slice(0, 8)}...</div>
+                          <div className="text-white font-mono text-sm font-semibold">{user.username}</div>
+                          <div className="text-xs text-slate-500 font-mono">ID: {user.id.slice(0, 6)}...</div>
                         </div>
                       </div>
                       <div className="text-xs text-slate-500 font-mono">
@@ -1481,28 +1481,28 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </div>
                     </div>
                     
-                    {/* User Stats */}
-                    <div className="grid grid-cols-2 gap-2 mb-4">
-                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
-                        <Crown className="h-3 w-3 text-yellow-400" />
-                        <span className="text-yellow-400 font-mono text-sm">Lv.{user.level}</span>
+                    {/* Compact Stats */}
+                    <div className="grid grid-cols-4 gap-1 mb-3">
+                      <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
+                        <Crown className="h-2.5 w-2.5 text-yellow-400" />
+                        <span className="text-yellow-400 font-mono">Lv.{user.level}</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
-                        <Target className="h-3 w-3 text-green-400" />
-                        <span className="text-green-400 font-mono text-sm">{user.xp} XP</span>
+                      <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
+                        <Target className="h-2.5 w-2.5 text-green-400" />
+                        <span className="text-green-400 font-mono">{user.xp}</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
-                        <Coins className="h-3 w-3 text-purple-400" />
-                        <span className="text-purple-400 font-mono text-sm">${user.balance}</span>
+                      <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
+                        <Coins className="h-2.5 w-2.5 text-purple-400" />
+                        <span className="text-purple-400 font-mono">${user.balance}</span>
                       </div>
-                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
-                        <TrendingUp className="h-3 w-3 text-orange-400" />
-                        <span className="text-orange-400 font-mono text-sm">${user.total_wagered}</span>
+                      <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
+                        <TrendingUp className="h-2.5 w-2.5 text-orange-400" />
+                        <span className="text-orange-400 font-mono">${user.total_wagered}</span>
                       </div>
                     </div>
                     
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2">
+                    {/* Compact Action Buttons */}
+                    <div className="grid grid-cols-3 gap-1">
                       <Button
                         onClick={() => {
                           setSelectedUser(user);
@@ -1510,10 +1510,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }}
                         size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono text-xs"
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono text-xs h-7"
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
-                        Message
+                        <MessageSquare className="h-2.5 w-2.5 mr-1" />
+                        Msg
                       </Button>
                       <Button
                         onClick={() => {
@@ -1523,10 +1523,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }}
                         size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono text-xs"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono text-xs h-7"
                       >
-                        <Shield className="h-3 w-3 mr-1" />
-                        Make Admin
+                        <Shield className="h-2.5 w-2.5 mr-1" />
+                        Admin
                       </Button>
                       <Button
                         onClick={() => {
@@ -1536,10 +1536,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }}
                         size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono text-xs"
+                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono text-xs h-7"
                       >
-                        <Shield className="h-3 w-3 mr-1" />
-                        Remove Admin
+                        <Shield className="h-2.5 w-2.5 mr-1" />
+                        Remove
                       </Button>
                       <Button
                         onClick={() => {
@@ -1548,10 +1548,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }}
                         size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono text-xs"
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono text-xs h-7"
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Reset Stats
+                        <Trash2 className="h-2.5 w-2.5 mr-1" />
+                        Reset
                       </Button>
                       <Button
                         onClick={() => {
@@ -1560,10 +1560,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         }}
                         size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono text-xs col-span-2"
+                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono text-xs h-7 col-span-2"
                       >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete Account
+                        <Trash2 className="h-2.5 w-2.5 mr-1" />
+                        Delete
                       </Button>
                     </div>
                   </div>
