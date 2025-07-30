@@ -69,9 +69,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
     }
   });
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Check system status
   const checkSystemStatus = async () => {
+    setIsRefreshing(true);
+    
     // Check database connectivity
     try {
       const startTime = Date.now();
@@ -187,6 +191,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         }
       }));
     }
+
+    setLastRefresh(new Date());
+    setIsRefreshing(false);
   };
 
   useEffect(() => {
@@ -226,7 +233,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       checkSystemStatus();
       
       // Set up periodic health checks
-      const interval = setInterval(checkSystemStatus, 10000); // Check every 10 seconds
+      const interval = setInterval(checkSystemStatus, 20000); // Check every 20 seconds
       
       return () => clearInterval(interval);
     }
@@ -423,12 +430,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           {/* System Status */}
           <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2 text-white">
-                <Server className="h-5 w-5 text-green-400" />
-                <span className="font-mono">SYSTEM STATUS</span>
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Server className="h-5 w-5 text-green-400" />
+                  <span className="font-mono">SYSTEM STATUS</span>
+                </CardTitle>
+                <div className="flex items-center space-x-2">
+                  {isRefreshing && (
+                    <div className="flex items-center space-x-1">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-blue-400 font-mono">REFRESHING</span>
+                    </div>
+                  )}
+                  <span className="text-xs text-slate-500 font-mono">
+                    Last: {lastRefresh.toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
               <CardDescription className="text-slate-400 font-mono">
-                Real-time system health and performance
+                Real-time system health and performance (updates every 20s)
               </CardDescription>
             </CardHeader>
             <CardContent>
