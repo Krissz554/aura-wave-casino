@@ -1459,52 +1459,61 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 max-h-[70vh] overflow-y-auto">
                 {users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-4 bg-slate-800/50 border border-slate-700/50 rounded-lg hover:bg-slate-700/50 transition-colors"
+                    className="bg-slate-800/50 border border-slate-700/50 rounded-lg p-4 hover:bg-slate-700/50 transition-colors"
                   >
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-blue-400" />
+                    {/* User Header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500/20 to-blue-600/20 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-blue-400" />
+                        </div>
                         <div>
-                          <div className="text-white font-mono">{user.username}</div>
-                          <div className="text-xs text-slate-500 font-mono">ID: {user.id}</div>
+                          <div className="text-white font-mono font-semibold">{user.username}</div>
+                          <div className="text-xs text-slate-500 font-mono">ID: {user.id.slice(0, 8)}...</div>
                         </div>
                       </div>
-                      
-                      <div className="flex items-center space-x-4 text-sm">
-                        <div className="flex items-center space-x-1">
-                          <Crown className="h-3 w-3 text-yellow-400" />
-                          <span className="text-yellow-400 font-mono">Lv.{user.level}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Target className="h-3 w-3 text-green-400" />
-                          <span className="text-green-400 font-mono">{user.xp} XP</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <Coins className="h-3 w-3 text-purple-400" />
-                          <span className="text-purple-400 font-mono">${user.balance}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
-                          <TrendingUp className="h-3 w-3 text-orange-400" />
-                          <span className="text-orange-400 font-mono">${user.total_wagered}</span>
-                        </div>
+                      <div className="text-xs text-slate-500 font-mono">
+                        {new Date(user.created_at).toLocaleDateString()}
                       </div>
                     </div>
                     
-                    <div className="flex flex-wrap items-center gap-2">
+                    {/* User Stats */}
+                    <div className="grid grid-cols-2 gap-2 mb-4">
+                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
+                        <Crown className="h-3 w-3 text-yellow-400" />
+                        <span className="text-yellow-400 font-mono text-sm">Lv.{user.level}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
+                        <Target className="h-3 w-3 text-green-400" />
+                        <span className="text-green-400 font-mono text-sm">{user.xp} XP</span>
+                      </div>
+                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
+                        <Coins className="h-3 w-3 text-purple-400" />
+                        <span className="text-purple-400 font-mono text-sm">${user.balance}</span>
+                      </div>
+                      <div className="flex items-center space-x-2 p-2 bg-slate-700/30 rounded">
+                        <TrendingUp className="h-3 w-3 text-orange-400" />
+                        <span className="text-orange-400 font-mono text-sm">${user.total_wagered}</span>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2">
                       <Button
                         onClick={() => {
                           setSelectedUser(user);
                           setShowPrivateNotification(true);
                         }}
+                        size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono"
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono text-xs"
                       >
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Send Message
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Message
                       </Button>
                       <Button
                         onClick={() => {
@@ -1512,10 +1521,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           setAdminRoleAction('add');
                           setShowAdminRoleModal(true);
                         }}
+                        size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono text-xs"
                       >
-                        <Shield className="h-4 w-4 mr-2" />
+                        <Shield className="h-3 w-3 mr-1" />
                         Make Admin
                       </Button>
                       <Button
@@ -1524,10 +1534,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           setAdminRoleAction('remove');
                           setShowAdminRoleModal(true);
                         }}
+                        size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono"
+                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono text-xs"
                       >
-                        <Shield className="h-4 w-4 mr-2" />
+                        <Shield className="h-3 w-3 mr-1" />
                         Remove Admin
                       </Button>
                       <Button
@@ -1535,10 +1546,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           setSelectedUser(user);
                           setShowResetConfirm(true);
                         }}
+                        size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono text-xs"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-3 w-3 mr-1" />
                         Reset Stats
                       </Button>
                       <Button
@@ -1546,10 +1558,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           setSelectedUser(user);
                           setShowDeleteConfirm(true);
                         }}
+                        size="sm"
                         variant="outline"
-                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono"
+                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono text-xs col-span-2"
                       >
-                        <Trash2 className="h-4 w-4 mr-2" />
+                        <Trash2 className="h-3 w-3 mr-1" />
                         Delete Account
                       </Button>
                     </div>
