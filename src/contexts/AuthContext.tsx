@@ -83,35 +83,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (profileError) {
           console.error('❌ Profile creation failed:', profileError)
           
-          // Try to manually create the profile
-          console.log('🔧 Attempting manual profile creation...')
+          // Try to manually create the profile using the new RPC function
+          console.log('🔧 Attempting manual profile creation via RPC...')
           const { data: manualProfile, error: manualError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
+            .rpc('create_user_profile', {
+              user_id: data.user.id,
               username: username,
-              email: email,
-              balance: 1000,
-              level: 1,
-              xp: 0,
-              total_wagered: 0,
-              total_profit: 0,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+              user_email: email
             })
-            .select()
-            .single()
           
           console.log('🔧 Manual profile creation result:', { manualProfile, manualError })
           
           if (manualError) {
             console.error('❌ Manual profile creation also failed:', manualError)
-            return { 
-              data, 
-              error: { 
-                message: 'Registration completed but profile setup failed. Please contact support.',
-                details: { profileError, manualError }
-              } 
+            
+            // Try direct insert as last resort
+            console.log('🔧 Attempting direct profile insert...')
+            const { data: directProfile, error: directError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                username: username,
+                email: email,
+                balance: 1000,
+                level: 1,
+                xp: 0,
+                total_wagered: 0,
+                total_profit: 0,
+                last_claim_time: '1970-01-01T00:00:00Z',
+                badges: ['welcome'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                last_seen: new Date().toISOString()
+              })
+              .select()
+              .single()
+            
+            console.log('🔧 Direct profile insert result:', { directProfile, directError })
+            
+            if (directError) {
+              console.error('❌ Direct profile insert also failed:', directError)
+              return { 
+                data, 
+                error: { 
+                  message: 'Registration completed but profile setup failed. Please contact support.',
+                  details: { profileError, manualError, directError }
+                } 
+              }
+            } else {
+              console.log('✅ Direct profile creation successful')
             }
           } else {
             console.log('✅ Manual profile creation successful')
