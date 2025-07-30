@@ -237,63 +237,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
-  // Reset user statistics - NEW VERSION
-  const resetUserStatsNew = async (userId: string) => {
+  // Reset user statistics - MINIMAL VERSION
+  const resetUserStatsMinimal = async (userId: string) => {
     setResettingUser(true);
     try {
-      console.log('=== RESET USER STATS FUNCTION v3.0 - CACHE BUSTED ===');
-      console.log('Random cache buster:', Math.random());
-      console.log('Timestamp:', new Date().toISOString());
-      console.log('Attempting to reset stats for user:', userId);
+      console.log('=== RESET USER STATS FUNCTION v4.0 - MINIMAL ===');
+      console.log('Cache buster:', Date.now());
+      console.log('User ID:', userId);
       
-      // Test database connectivity first
-      console.log('Testing database connectivity...');
-      const { data: testData, error: testError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-      
-      if (testError) {
-        console.error('Database connectivity test failed:', testError);
-        toast({
-          title: "Error",
-          description: `Database connection failed: ${testError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log('Database connectivity test passed');
-      
-      // First, test if we can access the user's profile
-      console.log('Testing profile access...');
-      const { data: profileData, error: profileTestError } = await supabase
-        .from('profiles')
-        .select('id, username')
-        .eq('id', userId)
-        .single();
-      
-      if (profileTestError) {
-        console.error('Error accessing user profile:', profileTestError);
-        console.error('Profile test error details:', {
-          code: profileTestError.code,
-          message: profileTestError.message,
-          details: profileTestError.details,
-          hint: profileTestError.hint
-        });
-        toast({
-          title: "Error",
-          description: `Cannot access user profile: ${profileTestError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log('User profile found:', profileData);
-      
-      // Reset profile statistics
-      console.log('Resetting profile statistics...');
-      console.log('Updating only existing columns in profiles table...');
+      // Only update the most basic columns that we know exist
+      console.log('Updating profiles table with minimal columns...');
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -301,26 +254,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           xp: 0,
           total_wagered: 0,
           total_profit: 0,
-          current_level: 1,
-          current_xp: 0,
-          xp_to_next_level: 100,
-          lifetime_xp: 0,
-          border_tier: 1,
-          available_cases: 0,
-          total_cases_opened: 0,
-          total_xp: 0,
-          balance: 0  // Reset balance to 0 as well
+          balance: 0
         })
         .eq('id', userId);
 
       if (profileError) {
         console.error('Error resetting profile stats:', profileError);
-        console.error('Profile update error details:', {
-          code: profileError.code,
-          message: profileError.message,
-          details: profileError.details,
-          hint: profileError.hint
-        });
         toast({
           title: "Error",
           description: `Failed to reset profile statistics: ${profileError.message}`,
@@ -330,248 +269,19 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
       
       console.log('Profile statistics reset successfully');
-
-      // Reset user_level_stats
-      console.log('Attempting to reset user_level_stats for user:', userId);
       
-      // First check if user_level_stats exists for this user
-      console.log('Checking if user_level_stats exists...');
-      const { data: existingStats, error: checkError } = await supabase
-        .from('user_level_stats')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        console.error('Error checking user_level_stats:', checkError);
-        console.error('User level stats check error details:', {
-          code: checkError.code,
-          message: checkError.message,
-          details: checkError.details,
-          hint: checkError.hint
-        });
-        toast({
-          title: "Error",
-          description: `Failed to check user level stats: ${checkError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log('User level stats check result:', { existingStats, checkError });
-
-      let levelStatsError = null;
-      
-      if (existingStats) {
-        // Update existing record
-        console.log('Updating existing user_level_stats record...');
-        const { error } = await supabase
-          .from('user_level_stats')
-          .update({
-            current_level: 1,
-            current_level_xp: 0,
-            lifetime_xp: 0,
-            xp_to_next_level: 100,
-            border_tier: 1,
-            available_cases: 0,
-            total_cases_opened: 0,
-            coinflip_games: 0,
-            coinflip_wins: 0,
-            coinflip_wagered: 0,
-            coinflip_profit: 0,
-            crash_games: 0,
-            crash_wins: 0,
-            crash_wagered: 0,
-            crash_profit: 0,
-            roulette_games: 0,
-            roulette_wins: 0,
-            roulette_wagered: 0,
-            roulette_profit: 0,
-            tower_games: 0,
-            tower_wins: 0,
-            tower_wagered: 0,
-            tower_profit: 0,
-            total_games: 0,
-            total_wins: 0,
-            total_wagered: 0,
-            total_profit: 0
-          })
-          .eq('user_id', userId);
-        
-        levelStatsError = error;
-        console.log('User level stats update result:', { error });
-      } else {
-        // Create new record if it doesn't exist
-        console.log('Creating new user_level_stats record...');
-        const { error } = await supabase
-          .from('user_level_stats')
-          .insert({
-            user_id: userId,
-            current_level: 1,
-            current_level_xp: 0,
-            lifetime_xp: 0,
-            xp_to_next_level: 100,
-            border_tier: 1,
-            available_cases: 0,
-            total_cases_opened: 0,
-            coinflip_games: 0,
-            coinflip_wins: 0,
-            coinflip_wagered: 0,
-            coinflip_profit: 0,
-            crash_games: 0,
-            crash_wins: 0,
-            crash_wagered: 0,
-            crash_profit: 0,
-            roulette_games: 0,
-            roulette_wins: 0,
-            roulette_wagered: 0,
-            roulette_profit: 0,
-            tower_games: 0,
-            tower_wins: 0,
-            tower_wagered: 0,
-            tower_profit: 0,
-            total_games: 0,
-            total_wins: 0,
-            total_wagered: 0,
-            total_profit: 0
-          });
-        
-        levelStatsError = error;
-        console.log('User level stats insert result:', { error });
-      }
-
-      if (levelStatsError) {
-        console.error('Error resetting level stats:', levelStatsError);
-        console.error('Level stats error details:', {
-          code: levelStatsError.code,
-          message: levelStatsError.message,
-          details: levelStatsError.details,
-          hint: levelStatsError.hint
-        });
-        toast({
-          title: "Error",
-          description: `Failed to reset level statistics: ${levelStatsError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log('User level stats reset successfully');
-
-      // Reset game_stats
-      console.log('Resetting game_stats for user:', userId);
-      const { error: gameStatsError } = await supabase
-        .from('game_stats')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameStatsError) {
-        console.error('Error resetting game stats:', gameStatsError);
-      } else {
-        console.log('Game stats reset successfully');
-      }
-
-      // Reset game_history
-      console.log('Resetting game_history for user:', userId);
-      const { error: gameHistoryError } = await supabase
-        .from('game_history')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameHistoryError) {
-        console.error('Error resetting game history:', gameHistoryError);
-      } else {
-        console.log('Game history reset successfully');
-      }
-
-      // Reset achievements
-      console.log('Resetting user_achievements for user:', userId);
-      const { error: achievementsError } = await supabase
-        .from('user_achievements')
-        .delete()
-        .eq('user_id', userId);
-
-      if (achievementsError) {
-        console.error('Error resetting achievements:', achievementsError);
-      } else {
-        console.log('Achievements reset successfully');
-      }
-
-      // Reset case history
-      console.log('Resetting case_rewards for user:', userId);
-      const { error: caseRewardsError } = await supabase
-        .from('case_rewards')
-        .delete()
-        .eq('user_id', userId);
-
-      if (caseRewardsError) {
-        console.error('Error resetting case rewards:', caseRewardsError);
-      } else {
-        console.log('Case rewards reset successfully');
-      }
-
-      // Reset daily cases
-      console.log('Resetting free_case_claims for user:', userId);
-      const { error: dailyCasesError } = await supabase
-        .from('free_case_claims')
-        .delete()
-        .eq('user_id', userId);
-
-      if (dailyCasesError) {
-        console.error('Error resetting daily cases:', dailyCasesError);
-      } else {
-        console.log('Daily cases reset successfully');
-      }
-
-      // Reset notifications
-      console.log('Resetting notifications for user:', userId);
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', userId);
-
-      if (notificationsError) {
-        console.error('Error resetting notifications:', notificationsError);
-      } else {
-        console.log('Notifications reset successfully');
-      }
-
-      // Reset level_daily_cases
-      console.log('Resetting level_daily_cases for user:', userId);
-      const { error: levelDailyCasesError } = await supabase
-        .from('level_daily_cases')
-        .delete()
-        .eq('user_id', userId);
-
-      if (levelDailyCasesError) {
-        console.error('Error resetting level daily cases:', levelDailyCasesError);
-      } else {
-        console.log('Level daily cases reset successfully');
-      }
-
-      // Reset user_rate_limits
-      console.log('Resetting user_rate_limits for user:', userId);
-      const { error: rateLimitsError } = await supabase
-        .from('user_rate_limits')
-        .delete()
-        .eq('user_id', userId);
-
-      if (rateLimitsError) {
-        console.error('Error resetting rate limits:', rateLimitsError);
-      } else {
-        console.log('Rate limits reset successfully');
-      }
-
-      console.log('User statistics reset successfully');
+      // Success message
       toast({
         title: "Success",
         description: "User statistics have been reset",
       });
-
+      
       setShowResetConfirm(false);
       setSelectedUser(null);
       setVerificationText('');
       loadUsers(); // Refresh the user list
+
+            console.log('Reset completed successfully');
     } catch (error) {
       console.error('Error resetting user stats:', error);
       toast({
@@ -1558,7 +1268,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 Cancel
               </Button>
               <Button
-                onClick={() => selectedUser && resetUserStatsNew(selectedUser.id)}
+                onClick={() => selectedUser && resetUserStatsMinimal(selectedUser.id)}
                 disabled={resettingUser || verificationText !== selectedUser?.username}
                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
               >
