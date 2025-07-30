@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 
 interface AdminPanelProps {
@@ -54,12 +54,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   if (loading) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
           <DialogHeader>
-            <DialogTitle>Admin Panel</DialogTitle>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <Shield className="h-5 w-5 text-primary" />
+              <span className="font-mono">ADMIN_PANEL</span>
+            </DialogTitle>
           </DialogHeader>
           <div className="flex items-center justify-center p-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <div className="relative">
+              <div className="w-8 h-8 border-2 border-primary/30 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 w-8 h-8 border-2 border-accent/30 rounded-full animate-spin-reverse" style={{ animationDuration: '2s' }}></div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -69,17 +75,22 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   if (!isAdmin) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
           <DialogHeader>
-            <DialogTitle className="flex items-center space-x-2">
+            <DialogTitle className="flex items-center space-x-2 text-white">
               <Shield className="h-5 w-5 text-red-500" />
-              <span>Access Denied</span>
+              <span className="font-mono">ACCESS_DENIED</span>
             </DialogTitle>
           </DialogHeader>
           <div className="text-center p-6">
-            <Shield className="h-16 w-16 text-red-500 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Admin Access Required</h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <div className="relative mb-6">
+              <div className="w-16 h-16 bg-gradient-to-br from-red-500/20 to-red-600/20 rounded-full flex items-center justify-center border border-red-500/30">
+                <Shield className="h-8 w-8 text-red-500" />
+              </div>
+              <div className="absolute -inset-2 border border-red-500/20 rounded-full animate-ping"></div>
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2 font-mono">ADMIN ACCESS REQUIRED</h3>
+            <p className="text-slate-400 font-mono text-sm">
               You don't have permission to access the admin panel.
             </p>
           </div>
@@ -90,24 +101,24 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
         <DialogHeader>
-          <DialogTitle className="flex items-center space-x-2">
-            <Shield className="h-5 w-5 text-blue-500" />
-            <span>Admin Panel</span>
-            <Badge variant="secondary" className="ml-2">Admin</Badge>
+          <DialogTitle className="flex items-center space-x-2 text-white">
+            <Shield className="h-5 w-5 text-primary" />
+            <span className="font-mono">ADMIN CONTROL CENTER</span>
+            <Badge className="ml-2 bg-gradient-to-r from-primary to-accent text-white border-0">ADMIN</Badge>
           </DialogTitle>
         </DialogHeader>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Maintenance Control */}
-          <Card>
+          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Settings className="h-5 w-5" />
-                <span>Site Control</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Settings className="h-5 w-5 text-primary" />
+                <span className="font-mono">SITE CONTROL</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400 font-mono">
                 Control website maintenance mode and site-wide settings
               </CardDescription>
             </CardHeader>
@@ -117,35 +128,35 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           </Card>
 
           {/* Quick Stats */}
-          <Card>
+          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Activity className="h-5 w-5" />
-                <span>Quick Stats</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Activity className="h-5 w-5 text-accent" />
+                <span className="font-mono">SYSTEM STATS</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400 font-mono">
                 Overview of site activity and user statistics
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="text-center p-4 bg-gradient-to-br from-primary/20 to-primary/10 rounded-lg border border-primary/30">
+                  <div className="text-2xl font-bold text-primary font-mono">
                     {/* Add user count here */}
                     -
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total Users</div>
+                  <div className="text-sm text-slate-400 font-mono">TOTAL USERS</div>
                 </div>
-                <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                <div className="text-center p-4 bg-gradient-to-br from-accent/20 to-accent/10 rounded-lg border border-accent/30">
+                  <div className="text-2xl font-bold text-accent font-mono">
                     {/* Add active users here */}
                     -
                   </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Active Today</div>
+                  <div className="text-sm text-slate-400 font-mono">ACTIVE TODAY</div>
                 </div>
               </div>
               
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-slate-500 font-mono">
                 <p>More detailed analytics coming soon...</p>
               </div>
             </CardContent>
@@ -153,69 +164,117 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
           {/* Push Notifications */}
           {showPushNotification ? (
-            <div className="md:col-span-2">
+            <div className="lg:col-span-2">
               <PushNotificationForm onClose={() => setShowPushNotification(false)} />
             </div>
           ) : (
-            <Card className="md:col-span-2">
+            <Card className="lg:col-span-2 bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Bell className="h-5 w-5" />
-                  <span>Push Notifications</span>
-                  <Badge variant="secondary" className="ml-2">Broadcast</Badge>
+                <CardTitle className="flex items-center space-x-2 text-white">
+                  <Bell className="h-5 w-5 text-purple-400" />
+                  <span className="font-mono">BROADCAST SYSTEM</span>
+                  <Badge className="ml-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white border-0">BROADCAST</Badge>
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-slate-400 font-mono">
                   Send notifications to all users on the platform
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-2 p-3 bg-warning/10 rounded-lg border border-warning/20">
-                    <AlertTriangle className="h-4 w-4 text-warning" />
-                    <span className="text-sm text-warning-foreground">
-                      Broadcast notifications will be sent to ALL users on the platform.
+                  <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30">
+                    <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                    <span className="text-sm text-yellow-300 font-mono">
+                      WARNING: Broadcast notifications will be sent to ALL users on the platform.
                     </span>
                   </div>
                   
                   <Button
                     onClick={() => setShowPushNotification(true)}
-                    className="gradient-primary text-white"
+                    className="w-full bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white border-0 font-mono transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/25"
                   >
                     <Bell className="h-4 w-4 mr-2" />
-                    Send Push Notification
+                    SEND BROADCAST NOTIFICATION
                   </Button>
                 </div>
               </CardContent>
             </Card>
           )}
 
-          {/* Admin Actions */}
-          <Card className="md:col-span-2">
+          {/* System Status */}
+          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Users className="h-5 w-5" />
-                <span>Admin Actions</span>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Server className="h-5 w-5 text-green-400" />
+                <span className="font-mono">SYSTEM STATUS</span>
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-slate-400 font-mono">
+                Real-time system health and performance
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500/10 to-green-600/10 rounded-lg border border-green-500/30">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-green-400 font-mono">DATABASE</span>
+                  </div>
+                  <span className="text-sm text-green-400 font-mono">ONLINE</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-lg border border-blue-500/30">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-blue-400 font-mono">AUTHENTICATION</span>
+                  </div>
+                  <span className="text-sm text-blue-400 font-mono">ACTIVE</span>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-purple-600/10 rounded-lg border border-purple-500/30">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+                    <span className="text-sm text-purple-400 font-mono">REALTIME</span>
+                  </div>
+                  <span className="text-sm text-purple-400 font-mono">CONNECTED</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Admin Actions */}
+          <Card className="bg-slate-800/50 border border-slate-700/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-white">
+                <Terminal className="h-5 w-5 text-cyan-400" />
+                <span className="font-mono">ADMIN ACTIONS</span>
+              </CardTitle>
+              <CardDescription className="text-slate-400 font-mono">
                 Quick actions for site administration
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <Users className="h-5 w-5" />
-                  <span>User Management</span>
-                  <span className="text-xs text-gray-500">Coming Soon</span>
+              <div className="grid grid-cols-1 gap-3">
+                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
+                  <div className="flex items-center space-x-2">
+                    <Users className="h-4 w-4 text-blue-400" />
+                    <span>USER MANAGEMENT</span>
+                  </div>
+                  <span className="text-xs text-slate-500">COMING SOON</span>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <Activity className="h-5 w-5" />
-                  <span>Analytics</span>
-                  <span className="text-xs text-gray-500">Coming Soon</span>
+                
+                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
+                  <div className="flex items-center space-x-2">
+                    <Activity className="h-4 w-4 text-green-400" />
+                    <span>ANALYTICS</span>
+                  </div>
+                  <span className="text-xs text-slate-500">COMING SOON</span>
                 </Button>
-                <Button variant="outline" className="h-auto p-4 flex flex-col items-center space-y-2">
-                  <Settings className="h-5 w-5" />
-                  <span>Site Settings</span>
-                  <span className="text-xs text-gray-500">Coming Soon</span>
+                
+                <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
+                  <div className="flex items-center space-x-2">
+                    <Settings className="h-4 w-4 text-purple-400" />
+                    <span>SITE SETTINGS</span>
+                  </div>
+                  <span className="text-xs text-slate-500">COMING SOON</span>
                 </Button>
               </div>
             </CardContent>
