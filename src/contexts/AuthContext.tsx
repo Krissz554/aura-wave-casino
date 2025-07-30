@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signUp = async (email: string, password: string, username: string) => {
-    console.log('Starting registration process...', { email, username })
+    console.log('🚀 Starting registration process...', { email, username })
     
     const redirectUrl = `${window.location.origin}/`
     
@@ -56,19 +56,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       })
 
-      console.log('Registration response:', { data, error })
+      console.log('📧 Registration response:', { data, error })
 
       if (error) {
-        console.error('Registration error:', error)
+        console.error('❌ Registration error:', error)
         return { data, error }
       }
 
       // If registration is successful, wait a moment for the trigger to complete
       if (data.user) {
-        console.log('User created successfully, waiting for profile creation...')
+        console.log('✅ User created successfully, waiting for profile creation...')
+        console.log('👤 User ID:', data.user.id)
         
         // Wait a bit for the trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
         // Check if profile was created
         const { data: profileData, error: profileError } = await supabase
@@ -77,28 +78,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq('id', data.user.id)
           .single()
         
-        console.log('Profile check result:', { profileData, profileError })
+        console.log('📋 Profile check result:', { profileData, profileError })
         
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('Profile creation failed:', profileError)
-          return { 
-            data, 
-            error: { 
-              message: 'Registration completed but profile setup failed. Please contact support.',
-              details: profileError 
-            } 
+        if (profileError) {
+          console.error('❌ Profile creation failed:', profileError)
+          
+          // Try to manually create the profile
+          console.log('🔧 Attempting manual profile creation...')
+          const { data: manualProfile, error: manualError } = await supabase
+            .from('profiles')
+            .insert({
+              id: data.user.id,
+              username: username,
+              email: email,
+              balance: 1000,
+              level: 1,
+              xp: 0,
+              total_wagered: 0,
+              total_profit: 0,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            })
+            .select()
+            .single()
+          
+          console.log('🔧 Manual profile creation result:', { manualProfile, manualError })
+          
+          if (manualError) {
+            console.error('❌ Manual profile creation also failed:', manualError)
+            return { 
+              data, 
+              error: { 
+                message: 'Registration completed but profile setup failed. Please contact support.',
+                details: { profileError, manualError }
+              } 
+            }
+          } else {
+            console.log('✅ Manual profile creation successful')
           }
+        } else {
+          console.log('✅ Profile created successfully via trigger')
         }
       }
 
       return { data, error }
     } catch (err) {
-      console.error('Unexpected registration error:', err)
+      console.error('💥 Unexpected registration error:', err)
       return { 
         data: null, 
         error: { 
           message: 'An unexpected error occurred during registration',
-          details: err 
+          details: err
         } 
       }
     }
