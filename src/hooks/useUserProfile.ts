@@ -186,6 +186,8 @@ export function useUserProfile() {
     }
 
     try {
+      console.log('[useUserProfile] Fetching profile for user:', user.id);
+      
       // Fetch profile
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -195,9 +197,53 @@ export function useUserProfile() {
 
       if (profileError) {
         console.error('[useUserProfile] Error fetching profile:', profileError);
-        setUserData(null);
-        setLoading(false);
-        return;
+        
+        // Try to create profile manually if it doesn't exist
+        console.log('[useUserProfile] Attempting to create profile manually...');
+        const { data: manualProfile, error: manualError } = await supabase
+          .rpc('create_user_profile_manual', {
+            user_id: user.id,
+            username: user.user_metadata?.username || 'User' + user.id.substring(0, 8)
+          });
+        
+        if (manualError) {
+          console.error('[useUserProfile] Failed to create profile manually:', manualError);
+          setUserData(null);
+          setLoading(false);
+          return;
+        }
+        
+        // Try fetching profile again
+        const { data: retryProfile, error: retryError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+        
+        if (retryError) {
+          console.error('[useUserProfile] Still cannot fetch profile after creation:', retryError);
+          setUserData(null);
+          setLoading(false);
+          return;
+        }
+        
+        // Use the retry profile
+        const finalProfile = retryProfile;
+        console.log('[useUserProfile] Profile created and fetched successfully');
+      } else {
+        console.log('[useUserProfile] Profile fetched successfully');
+        const finalProfile = profile;
+      }
+
+      // Ensure user_level_stats exists
+      console.log('[useUserProfile] Ensuring user_level_stats exists...');
+      const { data: statsResult, error: statsError } = await supabase
+        .rpc('ensure_user_level_stats', { user_uuid: user.id });
+      
+      if (statsError) {
+        console.error('[useUserProfile] Error ensuring user_level_stats:', statsError);
+      } else {
+        console.log('[useUserProfile] User level stats ensured');
       }
 
       // Fetch level stats
@@ -207,56 +253,15 @@ export function useUserProfile() {
         .eq('user_id', user.id)
         .single();
 
-      if (levelStatsError && levelStatsError.code === 'PGRST116') {
-        console.log('[useUserProfile] No level stats found, creating initial stats for user:', user.id);
-        const { data: newLevelStats, error: createError } = await supabase
-          .from('user_level_stats')
-          .insert({ user_id: user.id })
-          .select('*')
-          .single();
-
-        if (createError) {
-          console.error('[useUserProfile] Error creating level stats:', createError);
-          setUserData(null);
-          setLoading(false);
-          return;
-        }
-
-        const combinedData = {
-          ...profile,
-          ...newLevelStats,
-          gameStats: {
-            coinflip: {
-              wins: newLevelStats?.coinflip_wins || 0,
-              losses: Math.max(0, (newLevelStats?.coinflip_games || 0) - (newLevelStats?.coinflip_wins || 0)),
-              profit: newLevelStats?.coinflip_profit || 0,
-            },
-            crash: {
-              wins: newLevelStats?.crash_wins || 0,
-              losses: Math.max(0, (newLevelStats?.crash_games || 0) - (newLevelStats?.crash_wins || 0)),
-              profit: newLevelStats?.crash_profit || 0,
-            },
-            roulette: {
-              wins: newLevelStats?.roulette_wins || 0,
-              losses: Math.max(0, (newLevelStats?.roulette_games || 0) - (newLevelStats?.roulette_wins || 0)),
-              profit: newLevelStats?.roulette_profit || 0,
-            },
-            tower: {
-              wins: newLevelStats?.tower_wins || 0,
-              losses: Math.max(0, (newLevelStats?.tower_games || 0) - (newLevelStats?.tower_wins || 0)),
-              profit: newLevelStats?.tower_profit || 0,
-            },
-          }
-        };
-        setUserData(combinedData);
-        setLoading(false);
-        return;
-      }
-
       if (levelStatsError) {
         console.error('[useUserProfile] Error fetching level stats:', levelStatsError);
+        // Create a default profile with game stats
         const profileWithGameStats = {
           ...profile,
+          current_level: 1,
+          current_xp: 0,
+          xp_to_next_level: 100,
+          lifetime_xp: 0,
           gameStats: {
             coinflip: { wins: 0, losses: 0, profit: 0 },
             crash: { wins: 0, losses: 0, profit: 0 },
@@ -268,6 +273,8 @@ export function useUserProfile() {
         setLoading(false);
         return;
       }
+
+      console.log('[useUserProfile] Level stats fetched successfully');
 
       const combinedData = {
         ...profile,
@@ -295,10 +302,12 @@ export function useUserProfile() {
           },
         }
       };
+
+      console.log('[useUserProfile] Combined data created successfully');
       setUserData(combinedData);
       setLoading(false);
-    } catch (err) {
-      console.error('[useUserProfile] Unexpected error:', err);
+    } catch (error) {
+      console.error('[useUserProfile] Unexpected error:', error);
       setUserData(null);
       setLoading(false);
     }
