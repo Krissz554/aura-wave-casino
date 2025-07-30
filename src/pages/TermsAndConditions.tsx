@@ -190,12 +190,15 @@ export default function TermsAndConditions() {
 
         </div>
 
-        {/* Footer Note */}
-        <div className="text-center mt-8 text-slate-400 text-sm">
-          <p>
-            Would you like this exported as a downloadable .txt or .pdf file? 
-            I can also generate a Privacy Policy when you're ready to implement tracking or analytics.
-          </p>
+        {/* Back Button */}
+        <div className="text-center mt-8">
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-primary to-accent text-white rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 transform hover:scale-105 border border-primary/30"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>Back to Main Page</span>
+          </button>
         </div>
       </div>
     </div>
