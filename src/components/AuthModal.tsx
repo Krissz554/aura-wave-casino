@@ -407,7 +407,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     />
                     <Label htmlFor="accept-terms" className="text-sm text-slate-300 font-mono tracking-wider flex items-center">
                       <FileText className="w-4 h-4 mr-2 text-purple-400" />
-                      I agree to the <Link to="/terms" className="underline hover:text-indigo-400 ml-1">Terms and Conditions</Link>
+                      I agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline hover:text-indigo-400 ml-1">Terms and Conditions</a>
                     </Label>
                   </div>
 
