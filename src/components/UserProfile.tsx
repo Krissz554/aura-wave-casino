@@ -10,7 +10,7 @@ import {
   Trophy, Target, TrendingUp, Calendar, Star, DollarSign, 
   Crown, Flame, Sparkles, Zap, Award, Medal, Gamepad2,
   BarChart3, Coins, X, Wallet, Gift, Globe, Users,
-  ChevronUp, ChevronDown, Eye, EyeOff, Loader2, Building
+  ChevronUp, ChevronDown, Eye, EyeOff, Loader2, Building, Shield
 } from 'lucide-react';
 import { UserProfile as UserProfileType } from '@/hooks/useUserProfile';
 import { ProfileBorder } from './ProfileBorder';
