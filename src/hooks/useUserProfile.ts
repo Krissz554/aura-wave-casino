@@ -195,6 +195,8 @@ export function useUserProfile() {
         .eq('id', user.id)
         .single();
 
+      let finalProfile;
+      
       if (profileError) {
         console.error('[useUserProfile] Error fetching profile:', profileError);
         
@@ -228,11 +230,11 @@ export function useUserProfile() {
         }
         
         // Use the retry profile
-        const finalProfile = retryProfile;
+        finalProfile = retryProfile;
         console.log('[useUserProfile] Profile created and fetched successfully');
       } else {
         console.log('[useUserProfile] Profile fetched successfully');
-        const finalProfile = profile;
+        finalProfile = profile;
       }
 
       // Ensure user_level_stats exists

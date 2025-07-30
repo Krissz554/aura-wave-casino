@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 id: data.user.id,
                 username: username,
                 registration_date: new Date().toISOString(),
-                balance: 1000,
+                balance: 0,  // Changed from 1000 to 0 - new users start with $0
                 level: 1,
                 xp: 0,
                 total_wagered: 0,
