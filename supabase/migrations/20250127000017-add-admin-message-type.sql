@@ -10,7 +10,7 @@ CHECK (type IN ('tip_sent', 'tip_received', 'achievement_unlocked', 'level_up', 
 CREATE POLICY "Admins can insert notifications for any user" 
 ON public.notifications 
 FOR INSERT 
-USING (
+WITH CHECK (
   EXISTS (
     SELECT 1 FROM public.admin_users 
     WHERE user_id = auth.uid()
