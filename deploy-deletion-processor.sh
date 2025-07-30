@@ -8,7 +8,7 @@ echo "🚀 Deploying Account Deletion Processor System..."
 echo "📦 Deploying process-pending-deletions Edge Function..."
 supabase functions deploy process-pending-deletions
 
-if [ $? -eq 0 ]; then
+if [ \$? -eq 0 ]; then
     echo "✅ Edge Function deployed successfully"
 else
     echo "❌ Failed to deploy Edge Function"
@@ -19,7 +19,7 @@ fi
 echo "🗄️  Running database migration..."
 supabase db push
 
-if [ $? -eq 0 ]; then
+if [ \$? -eq 0 ]; then
     echo "✅ Database migration completed successfully"
 else
     echo "❌ Failed to run database migration"
@@ -27,21 +27,21 @@ else
 fi
 
 # Get the function URL
-SUPABASE_URL=$(supabase status --output env | grep SUPABASE_URL | cut -d'=' -f2)
-ANON_KEY=$(supabase status --output env | grep SUPABASE_ANON_KEY | cut -d'=' -f2)
+SUPABASE_URL=\$(supabase status --output env | grep SUPABASE_URL | cut -d'=' -f2)
+ANON_KEY=\$(supabase status --output env | grep SUPABASE_ANON_KEY | cut -d'=' -f2)
 
 echo ""
 echo "🎯 Deployment Complete!"
 echo ""
-echo "Edge Function URL: ${SUPABASE_URL}/functions/v1/process-pending-deletions"
+echo "Edge Function URL: \${SUPABASE_URL}/functions/v1/process-pending-deletions"
 echo ""
 echo "📋 Next Steps:"
 echo ""
 echo "1. Set up a cron job to call the deletion processor every minute:"
 echo "   Add this to your server's crontab (crontab -e):"
 echo ""
-echo "   * * * * * curl -X POST '${SUPABASE_URL}/functions/v1/process-pending-deletions' \\"
-echo "     -H 'Authorization: Bearer ${ANON_KEY}' \\"
+echo "   * * * * * curl -X POST '\${SUPABASE_URL}/functions/v1/process-pending-deletions' \\"
+echo "     -H 'Authorization: Bearer \${ANON_KEY}' \\"
 echo "     -H 'Content-Type: application/json' \\"
 echo "     --silent --output /dev/null"
 echo ""
@@ -59,7 +59,7 @@ echo ""
 
 # Create a test file to verify the system works
 echo "🧪 Creating test script..."
-cat > test-deletion-system.sh << EOF
+cat > test-deletion-system.sh << TEST_EOF
 #!/bin/bash
 
 # Test script for the account deletion system
@@ -68,15 +68,15 @@ echo "🧪 Testing Account Deletion System..."
 
 # Call the deletion processor manually
 echo "📞 Calling deletion processor..."
-curl -X POST '${SUPABASE_URL}/functions/v1/process-pending-deletions' \\
-  -H 'Authorization: Bearer ${ANON_KEY}' \\
+curl -X POST '\${SUPABASE_URL}/functions/v1/process-pending-deletions' \\
+  -H 'Authorization: Bearer \${ANON_KEY}' \\
   -H 'Content-Type: application/json' \\
   -v
 
 echo ""
 echo "✅ Test completed. Check the response above."
 echo "If there are no pending deletions, you should see processed_count: 0"
-EOF
+TEST_EOF
 
 chmod +x test-deletion-system.sh
 

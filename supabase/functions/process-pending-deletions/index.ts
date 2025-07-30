@@ -52,19 +52,19 @@ serve(async (req) => {
 
     // If we processed any deletions, log them
     if (result.processed_count > 0) {
-      console.log(`✅ Successfully processed ${result.processed_count} pending deletions`)
+      console.log(\`✅ Successfully processed \${result.processed_count} pending deletions\`)
       
       // Log details for each deletion
       const details = Array.isArray(result.details) ? result.details : []
       details.forEach((detail: any, index: number) => {
-        console.log(`Deletion ${index + 1}:`, {
+        console.log(\`Deletion \${index + 1}:\`, {
           user_id: detail.user_id,
           success: detail.success,
           deletion_id: detail.deletion_id
         })
         
         if (!detail.success && detail.error) {
-          console.error(`Error in deletion ${index + 1}:`, detail.error)
+          console.error(\`Error in deletion \${index + 1}:\`, detail.error)
         }
       })
     } else {
