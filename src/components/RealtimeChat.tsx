@@ -14,6 +14,7 @@ import ClickableUsername from '@/components/ClickableUsername';
 import { UserLevelDisplay } from '@/components/UserLevelDisplay';
 import { ProfileBorder } from '@/components/ProfileBorder';
 import { Badge } from '@/components/ui/badge';
+import { useMultipleAdminStatus } from '@/hooks/useAdminStatus';
 
 interface ChatMessage {
   id: string;
@@ -34,6 +35,10 @@ export const RealtimeChat = () => {
   
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Get admin status for all users in current messages
+  const userIds = messages.map(msg => msg.user_id);
+  const { adminStatuses } = useMultipleAdminStatus(userIds);
 
   useEffect(() => {
     // Load initial messages
@@ -271,6 +276,12 @@ export const RealtimeChat = () => {
                          } rounded-md`}>
                            L{msg.user_level}
                          </Badge>
+                         {/* Admin Shield Icon */}
+                         {adminStatuses[msg.user_id] && (
+                           <div className="flex items-center gap-1 text-xs text-red-400 drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" title="Admin">
+                             <Shield className="w-3 h-3" />
+                           </div>
+                         )}
                          {badge && (
                            <div className={`flex items-center gap-1 text-xs ${badge.color} drop-shadow-[0_0_4px_currentColor]`}>
                              <badge.icon className="w-3 h-3" />

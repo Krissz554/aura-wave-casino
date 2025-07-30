@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
 import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
+import { useAdminStatus } from '@/hooks/useAdminStatus';
 
 interface UserProfileProps {
   isOpen: boolean;
@@ -106,6 +107,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   
   // Check if this should be treated as the user's own profile (no username provided, opening from header)
   const shouldShowOwnProfile = user && !username;
+  
+  // Check admin status for the user whose profile is being viewed
+  const profileUserId = userData?.id || (shouldShowOwnProfile ? user?.id : undefined);
+  const { isAdmin: profileUserIsAdmin } = useAdminStatus(profileUserId);
   
 
 
@@ -445,9 +450,17 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
                 <div className="flex-1 text-center md:text-left space-y-4">
                   {/* Username and VIP Badge */}
                   <div className="flex items-center justify-center md:justify-start gap-4 mb-4">
-                    <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-cyber-logo-shine">
-                      {userData.username}
-                    </h1>
+                    <div className="flex items-center gap-3">
+                      <h1 className="text-5xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(99,102,241,0.5)] animate-cyber-logo-shine">
+                        {userData.username}
+                      </h1>
+                      {/* Admin Shield Icon */}
+                      {profileUserIsAdmin && (
+                        <div className="flex items-center text-red-400 drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]" title="Admin">
+                          <Shield className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
                     
                     {currentLevel >= 50 && (
                       <div className="relative group/vip">
