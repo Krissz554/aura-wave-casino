@@ -242,26 +242,28 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setResettingUser(true);
     try {
       // Reset basic profile statistics (only columns that exist in profiles table)
+      const updateData = {
+        level: 1,
+        xp: 0,
+        total_wagered: 0,
+        total_profit: 0
+      };
+      
+      console.log('Updating profiles with data:', updateData);
+      
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({
-          level: 1,
-          xp: 0,
-          total_wagered: 0,
-          total_profit: 0,
-          current_level: 1,
-          current_xp: 0,
-          xp_to_next_level: 100,
-          lifetime_xp: 0,
-          border_tier: 1,
-          available_cases: 0,
-          total_cases_opened: 0,
-          total_xp: 0
-        })
+        .update(updateData)
         .eq('id', userId);
 
       if (profileError) {
         console.error('Error resetting profile stats:', profileError);
+        console.error('Error details:', {
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint
+        });
         toast({
           title: "Error",
           description: "Failed to reset user profile statistics",
