@@ -55,26 +55,41 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       console.log('=== PERFORMING ACCOUNT DELETION ===');
       console.log('User ID:', userId);
 
-      // Call the Edge Function to handle complete account deletion
-      console.log('Calling delete-user-account Edge Function...');
+      // Call the database function to handle complete account deletion
+      console.log('Calling delete_user_account_complete database function...');
       
-      const { data, error } = await supabase.functions.invoke('delete-user-account', {
-        body: { userId }
+      const { data, error } = await supabase.rpc('delete_user_account_complete', {
+        user_id_to_delete: userId
       });
 
       if (error) {
-        console.error('Error calling delete-user-account function:', error);
+        console.error('Error calling delete_user_account_complete function:', error);
         toast({
           title: "Deletion Error",
-          description: "Failed to delete account. You will be logged out.",
+          description: "Failed to delete account data. You will be logged out.",
           variant: "destructive",
         });
       } else {
         console.log('Account deletion completed successfully:', data);
-        toast({
-          title: "Account Deleted",
-          description: "Your account has been completely removed from the system.",
-        });
+        
+        // Now try to delete from Supabase Auth
+        console.log('Attempting to delete from Supabase Auth...');
+        const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+        
+        if (authError) {
+          console.error('Error deleting from Supabase Auth:', authError);
+          toast({
+            title: "Partial Deletion",
+            description: "Account data deleted but authentication removal failed. You will be logged out.",
+            variant: "destructive",
+          });
+        } else {
+          console.log('User deleted from Supabase Auth successfully');
+          toast({
+            title: "Account Deleted",
+            description: "Your account has been completely removed from the system.",
+          });
+        }
       }
 
       // Logout the user regardless of deletion success/failure
