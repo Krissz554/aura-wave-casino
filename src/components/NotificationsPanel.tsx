@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
 interface Notification {
   id: string;
   user_id: string;
-  type: 'tip_sent' | 'tip_received' | 'achievement_unlocked' | 'level_up' | 'level_reward_case' | 'admin_broadcast';
+  type: 'tip_sent' | 'tip_received' | 'achievement_unlocked' | 'level_up' | 'level_reward_case' | 'admin_broadcast' | 'admin_message';
   title: string;
   message: string;
   data: any;
@@ -263,12 +263,14 @@ export default function NotificationsPanel() {
         return <Gift className="w-5 h-5" />;
       case 'admin_broadcast':
         return <AlertTriangle className="w-5 h-5" />;
+      case 'admin_message':
+        return <AlertTriangle className="w-5 h-5" />;
       default:
         return <Bell className="w-5 h-5" />;
     }
   };
 
-  const getNotificationTheme = (type: string) => {
+  const getNotificationTheme = (type: string, data?: any) => {
     switch (type) {
       case 'tip_received':
         return {
@@ -324,6 +326,47 @@ export default function NotificationsPanel() {
           accent: 'bg-red-400/20',
           emoji: ''
         };
+      case 'admin_message':
+        // Get priority level from data
+        const level = data?.level || 'normal';
+        switch (level) {
+          case 'urgent':
+            return {
+              gradient: 'from-red-400/20 via-rose-500/15 to-red-600/10',
+              border: 'border-red-400/40',
+              glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
+              icon: 'text-red-400',
+              accent: 'bg-red-400/20',
+              emoji: '🚨'
+            };
+          case 'normal':
+            return {
+              gradient: 'from-yellow-400/20 via-orange-500/15 to-yellow-600/10',
+              border: 'border-yellow-400/40',
+              glow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)]',
+              icon: 'text-yellow-400',
+              accent: 'bg-yellow-400/20',
+              emoji: '⚠️'
+            };
+          case 'low':
+            return {
+              gradient: 'from-green-400/20 via-emerald-500/15 to-green-600/10',
+              border: 'border-green-400/40',
+              glow: 'shadow-[0_0_20px_rgba(34,197,94,0.3)]',
+              icon: 'text-green-400',
+              accent: 'bg-green-400/20',
+              emoji: 'ℹ️'
+            };
+          default:
+            return {
+              gradient: 'from-yellow-400/20 via-orange-500/15 to-yellow-600/10',
+              border: 'border-yellow-400/40',
+              glow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)]',
+              icon: 'text-yellow-400',
+              accent: 'bg-yellow-400/20',
+              emoji: '⚠️'
+            };
+        }
       default:
         return {
           gradient: 'from-gray-400/20 via-slate-500/15 to-gray-600/10',
@@ -460,7 +503,7 @@ export default function NotificationsPanel() {
                     );
                   }
 
-                  const theme = getNotificationTheme(notification.type);
+                  const theme = getNotificationTheme(notification.type, notification.data);
                   const isNew = newNotificationIds.has(notification.id);
                   
                   return (
