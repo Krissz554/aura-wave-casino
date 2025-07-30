@@ -46,14 +46,12 @@ interface SystemStatus {
 
 interface User {
   id: string;
-  email: string;
   username: string;
   level: number;
   xp: number;
   balance: number;
   total_wagered: number;
   created_at: string;
-  last_seen: string;
 }
 
 type NotificationLevel = 'low' | 'normal' | 'urgent';
@@ -141,7 +139,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       const { data, error, count } = await supabase
         .from('profiles')
-        .select('*', { count: 'exact' })
+        .select('id, username, level, xp, balance, total_wagered, created_at', { count: 'exact' })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -154,7 +152,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       } else {
         console.log(`✅ Loaded ${data?.length || 0} users`);
         console.log('📊 Users data:', data);
-        setUsers(data || []);
+        setUsers((data || []).map(user => ({
+          id: user.id,
+          username: user.username || '',
+          level: user.level || 1,
+          xp: user.xp || 0,
+          balance: user.balance || 0,
+          total_wagered: user.total_wagered || 0,
+          created_at: user.created_at || ''
+        })));
         
         // Show success message with count
         const message = totalCount && totalCount !== data?.length 
@@ -279,7 +285,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
         // Reset daily cases
         await supabase
-          .from('level_daily_cases')
+          .from('free_case_claims')
           .delete()
           .eq('user_id', userId);
 
@@ -321,7 +327,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .from('admin_users')
           .insert({
             user_id: userId,
-            permissions: 'admin',
+            permissions: ['admin'],
             created_at: new Date().toISOString()
           });
 
@@ -499,34 +505,35 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setIsRefreshing(false);
   };
 
+  // Check admin status function
+  const checkAdminStatus = async () => {
+    if (!user) {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking admin status:', error);
+      }
+
+      setIsAdmin(!!data);
+    } catch (err) {
+      console.error('Error checking admin status:', err);
+      setIsAdmin(false);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const checkAdminStatus = async () => {
-      if (!user) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error checking admin status:', error);
-        }
-
-        setIsAdmin(!!data);
-      } catch (err) {
-        console.error('Error checking admin status:', err);
-        setIsAdmin(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     checkAdminStatus();
   }, [user]);
 
@@ -992,7 +999,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <User className="h-4 w-4 text-blue-400" />
                         <div>
                           <div className="text-white font-mono">{user.username}</div>
-                          <div className="text-xs text-slate-400 font-mono">{user.email}</div>
                           <div className="text-xs text-slate-500 font-mono">ID: {user.id}</div>
                         </div>
                       </div>
@@ -1094,7 +1100,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     {selectedUser.username}
                   </div>
                   <div className="text-xs text-slate-400 font-mono">
-                    {selectedUser.email}
+                    ID: {selectedUser.id}
                   </div>
                 </div>
 
@@ -1195,7 +1201,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <User className="h-4 w-4 text-blue-400" />
                         <div>
                           <div className="text-white font-mono">{user.username}</div>
-                          <div className="text-xs text-slate-400 font-mono">{user.email}</div>
+                          <div className="text-xs text-slate-400 font-mono">ID: {user.id}</div>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2 text-sm">
