@@ -258,7 +258,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           border_tier: 1,
           available_cases: 0,
           total_cases_opened: 0,
-          total_xp: 0
+          total_xp: 0,
+          balance: 0  // Reset balance to 0 as well
         })
         .eq('id', userId);
 
@@ -273,38 +274,100 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
 
       // Reset user_level_stats
-      const { error: levelStatsError } = await supabase
+      console.log('Attempting to reset user_level_stats for user:', userId);
+      
+      // First check if user_level_stats exists for this user
+      const { data: existingStats, error: checkError } = await supabase
         .from('user_level_stats')
-        .update({
-          current_level: 1,
-          current_level_xp: 0,
-          lifetime_xp: 0,
-          xp_to_next_level: 100,
-          border_tier: 1,
-          available_cases: 0,
-          total_cases_opened: 0,
-          coinflip_games: 0,
-          coinflip_wins: 0,
-          coinflip_wagered: 0,
-          coinflip_profit: 0,
-          crash_games: 0,
-          crash_wins: 0,
-          crash_wagered: 0,
-          crash_profit: 0,
-          roulette_games: 0,
-          roulette_wins: 0,
-          roulette_wagered: 0,
-          roulette_profit: 0,
-          tower_games: 0,
-          tower_wins: 0,
-          tower_wagered: 0,
-          tower_profit: 0,
-          total_games: 0,
-          total_wins: 0,
-          total_wagered: 0,
-          total_profit: 0
-        })
-        .eq('user_id', userId);
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        console.error('Error checking user_level_stats:', checkError);
+        toast({
+          title: "Error",
+          description: `Failed to check user level stats: ${checkError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      let levelStatsError = null;
+      
+      if (existingStats) {
+        // Update existing record
+        const { error } = await supabase
+          .from('user_level_stats')
+          .update({
+            current_level: 1,
+            current_level_xp: 0,
+            lifetime_xp: 0,
+            xp_to_next_level: 100,
+            border_tier: 1,
+            available_cases: 0,
+            total_cases_opened: 0,
+            coinflip_games: 0,
+            coinflip_wins: 0,
+            coinflip_wagered: 0,
+            coinflip_profit: 0,
+            crash_games: 0,
+            crash_wins: 0,
+            crash_wagered: 0,
+            crash_profit: 0,
+            roulette_games: 0,
+            roulette_wins: 0,
+            roulette_wagered: 0,
+            roulette_profit: 0,
+            tower_games: 0,
+            tower_wins: 0,
+            tower_wagered: 0,
+            tower_profit: 0,
+            total_games: 0,
+            total_wins: 0,
+            total_wagered: 0,
+            total_profit: 0
+          })
+          .eq('user_id', userId);
+        
+        levelStatsError = error;
+      } else {
+        // Create new record if it doesn't exist
+        const { error } = await supabase
+          .from('user_level_stats')
+          .insert({
+            user_id: userId,
+            current_level: 1,
+            current_level_xp: 0,
+            lifetime_xp: 0,
+            xp_to_next_level: 100,
+            border_tier: 1,
+            available_cases: 0,
+            total_cases_opened: 0,
+            coinflip_games: 0,
+            coinflip_wins: 0,
+            coinflip_wagered: 0,
+            coinflip_profit: 0,
+            crash_games: 0,
+            crash_wins: 0,
+            crash_wagered: 0,
+            crash_profit: 0,
+            roulette_games: 0,
+            roulette_wins: 0,
+            roulette_wagered: 0,
+            roulette_profit: 0,
+            tower_games: 0,
+            tower_wins: 0,
+            tower_wagered: 0,
+            tower_profit: 0,
+            total_games: 0,
+            total_wins: 0,
+            total_wagered: 0,
+            total_profit: 0
+          });
+        
+        levelStatsError = error;
+      }
 
       if (levelStatsError) {
         console.error('Error resetting level stats:', levelStatsError);
@@ -317,6 +380,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
 
       // Reset game_stats
+      console.log('Resetting game_stats for user:', userId);
       const { error: gameStatsError } = await supabase
         .from('game_stats')
         .delete()
@@ -324,9 +388,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (gameStatsError) {
         console.error('Error resetting game stats:', gameStatsError);
+      } else {
+        console.log('Game stats reset successfully');
       }
 
       // Reset game_history
+      console.log('Resetting game_history for user:', userId);
       const { error: gameHistoryError } = await supabase
         .from('game_history')
         .delete()
@@ -334,9 +401,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (gameHistoryError) {
         console.error('Error resetting game history:', gameHistoryError);
+      } else {
+        console.log('Game history reset successfully');
       }
 
       // Reset achievements
+      console.log('Resetting user_achievements for user:', userId);
       const { error: achievementsError } = await supabase
         .from('user_achievements')
         .delete()
@@ -344,9 +414,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (achievementsError) {
         console.error('Error resetting achievements:', achievementsError);
+      } else {
+        console.log('Achievements reset successfully');
       }
 
       // Reset case history
+      console.log('Resetting case_rewards for user:', userId);
       const { error: caseRewardsError } = await supabase
         .from('case_rewards')
         .delete()
@@ -354,9 +427,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (caseRewardsError) {
         console.error('Error resetting case rewards:', caseRewardsError);
+      } else {
+        console.log('Case rewards reset successfully');
       }
 
       // Reset daily cases
+      console.log('Resetting free_case_claims for user:', userId);
       const { error: dailyCasesError } = await supabase
         .from('free_case_claims')
         .delete()
@@ -364,9 +440,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (dailyCasesError) {
         console.error('Error resetting daily cases:', dailyCasesError);
+      } else {
+        console.log('Daily cases reset successfully');
       }
 
       // Reset notifications
+      console.log('Resetting notifications for user:', userId);
       const { error: notificationsError } = await supabase
         .from('notifications')
         .delete()
@@ -374,6 +453,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       if (notificationsError) {
         console.error('Error resetting notifications:', notificationsError);
+      } else {
+        console.log('Notifications reset successfully');
       }
 
       console.log('User statistics reset successfully');
