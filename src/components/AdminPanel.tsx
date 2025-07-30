@@ -323,22 +323,28 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     try {
       if (action === 'add') {
         // Add user to admin_users table
-        const { error } = await supabase
+        console.log('Attempting to add admin role for user:', userId);
+        
+        const { data, error } = await supabase
           .from('admin_users')
           .insert({
             user_id: userId,
             permissions: ['admin'],
             created_at: new Date().toISOString()
-          });
+          })
+          .select();
+
+        console.log('Admin role insert result:', { data, error });
 
         if (error) {
           console.error('Error adding admin role:', error);
           toast({
             title: "Error",
-            description: "Failed to add admin role",
+            description: `Failed to add admin role: ${error.message}`,
             variant: "destructive",
           });
         } else {
+          console.log('Admin role added successfully:', data);
           toast({
             title: "Success",
             description: "Admin role added successfully",
@@ -346,19 +352,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         }
       } else {
         // Remove user from admin_users table
-        const { error } = await supabase
+        console.log('Attempting to remove admin role for user:', userId);
+        
+        const { data, error } = await supabase
           .from('admin_users')
           .delete()
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .select();
+
+        console.log('Admin role delete result:', { data, error });
 
         if (error) {
           console.error('Error removing admin role:', error);
           toast({
             title: "Error",
-            description: "Failed to remove admin role",
+            description: `Failed to remove admin role: ${error.message}`,
             variant: "destructive",
           });
         } else {
+          console.log('Admin role removed successfully:', data);
           toast({
             title: "Success",
             description: "Admin role removed successfully",
