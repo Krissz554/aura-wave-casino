@@ -9,6 +9,7 @@ import MaintenanceToggle from './MaintenanceToggle';
 import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -82,6 +83,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     message: '',
     level: 'normal'
   });
+  const [showAdminRoleModal, setShowAdminRoleModal] = useState(false);
+  const [adminRoleAction, setAdminRoleAction] = useState<'add' | 'remove'>('add');
+  const [adminRoleLoading, setAdminRoleLoading] = useState(false);
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     database: { status: 'checking' },
     authentication: { status: 'checking' },
@@ -237,26 +241,30 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .delete()
           .eq('user_id', userId);
 
-        // Reset level daily cases
+        // Reset daily cases
         await supabase
           .from('level_daily_cases')
           .delete()
           .eq('user_id', userId);
 
-        // Refresh users list
-        await loadUsers();
+        // Reset notifications
+        await supabase
+          .from('notifications')
+          .delete()
+          .eq('user_id', userId);
 
         toast({
           title: "Success",
-          description: "User statistics have been reset successfully",
+          description: "User statistics have been reset",
         });
 
-        setSelectedUser(null);
         setShowResetConfirm(false);
+        setSelectedUser(null);
         setVerificationText('');
+        loadUsers(); // Refresh the user list
       }
-    } catch (err) {
-      console.error('Error resetting user stats:', err);
+    } catch (error) {
+      console.error('Error resetting user stats:', error);
       toast({
         title: "Error",
         description: "Failed to reset user statistics",
@@ -264,6 +272,70 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       });
     } finally {
       setResettingUser(false);
+    }
+  };
+
+  // Handle admin role changes
+  const handleAdminRoleChange = async (userId: string, action: 'add' | 'remove') => {
+    setAdminRoleLoading(true);
+    try {
+      if (action === 'add') {
+        // Add user to admin_users table
+        const { error } = await supabase
+          .from('admin_users')
+          .insert({
+            user_id: userId,
+            permissions: 'admin',
+            created_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('Error adding admin role:', error);
+          toast({
+            title: "Error",
+            description: "Failed to add admin role",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Admin role added successfully",
+          });
+        }
+      } else {
+        // Remove user from admin_users table
+        const { error } = await supabase
+          .from('admin_users')
+          .delete()
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Error removing admin role:', error);
+          toast({
+            title: "Error",
+            description: "Failed to remove admin role",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Admin role removed successfully",
+          });
+        }
+      }
+
+      setShowAdminRoleModal(false);
+      setSelectedUser(null);
+      loadUsers(); // Refresh the user list
+    } catch (error) {
+      console.error('Error changing admin role:', error);
+      toast({
+        title: "Error",
+        description: "Failed to change admin role",
+        variant: "destructive",
+      });
+    } finally {
+      setAdminRoleLoading(false);
     }
   };
 
@@ -875,6 +947,30 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <Button
                         onClick={() => {
                           setSelectedUser(user);
+                          setAdminRoleAction('add');
+                          setShowAdminRoleModal(true);
+                        }}
+                        variant="outline"
+                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Make Admin
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setAdminRoleAction('remove');
+                          setShowAdminRoleModal(true);
+                        }}
+                        variant="outline"
+                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono"
+                      >
+                        <Shield className="h-4 w-4 mr-2" />
+                        Remove Admin
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(user);
                           setShowResetConfirm(true);
                         }}
                         variant="outline"
@@ -1107,6 +1203,81 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     Reset Statistics
                   </>
                 )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Admin Role Confirmation Modal */}
+      <Dialog open={showAdminRoleModal} onOpenChange={setShowAdminRoleModal}>
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <Shield className="h-5 w-5 text-blue-400" />
+              <span className="font-mono">
+                {adminRoleAction === 'add' ? 'MAKE ADMIN' : 'REMOVE ADMIN'}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-slate-300 font-mono">
+              {adminRoleAction === 'add' ? (
+                <p>
+                  Are you sure you want to make <span className="text-blue-400 font-bold">{selectedUser?.username}</span> an admin?
+                </p>
+              ) : (
+                <p>
+                  Are you sure you want to remove admin privileges from <span className="text-orange-400 font-bold">{selectedUser?.username}</span>?
+                </p>
+              )}
+            </div>
+            
+            <div className="flex items-center space-x-2 p-4 bg-gradient-to-r from-yellow-500/10 to-orange-500/10 rounded-lg border border-yellow-500/30">
+              <AlertTriangle className="h-4 w-4 text-yellow-400" />
+              <span className="text-sm text-yellow-300 font-mono">
+                {adminRoleAction === 'add' 
+                  ? 'This will give the user full admin access to the platform.'
+                  : 'This will remove all admin privileges from the user.'
+                }
+              </span>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={() => {
+                  if (selectedUser) {
+                    handleAdminRoleChange(selectedUser.id, adminRoleAction);
+                  }
+                }}
+                disabled={adminRoleLoading}
+                className={cn(
+                  "flex-1 font-mono",
+                  adminRoleAction === 'add'
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0"
+                    : "bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0"
+                )}
+              >
+                {adminRoleLoading ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <Shield className="h-4 w-4 mr-2" />
+                    {adminRoleAction === 'add' ? 'Make Admin' : 'Remove Admin'}
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                onClick={() => {
+                  setShowAdminRoleModal(false);
+                  setSelectedUser(null);
+                }}
+                variant="outline"
+                className="flex-1 bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 font-mono"
+              >
+                Cancel
               </Button>
             </div>
           </div>
