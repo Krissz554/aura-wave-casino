@@ -10,6 +10,7 @@ import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, 
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useMultipleAdminStatus } from '@/hooks/useAdminStatus';
 
 // Supabase configuration for Edge Function calls
 const SUPABASE_URL = "https://hqdbdczxottbupwbupdu.supabase.co";
@@ -76,6 +77,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  
+  // Get admin status for all users in the list
+  const userIds = users.map(user => user.id);
+  const { adminStatuses } = useMultipleAdminStatus(userIds);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resettingUser, setResettingUser] = useState(false);
   const [verificationText, setVerificationText] = useState('');
@@ -475,6 +480,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Delete user account completely
   const deleteUserAccount = async (userId: string) => {
+    // Prevent deletion of admin accounts
+    if (adminStatuses[userId]) {
+      toast({
+        title: "Access Denied",
+        description: "Admin accounts cannot be deleted for security reasons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setDeletingUser(true);
     try {
       console.log('=== INITIATE USER ACCOUNT DELETION ===');
@@ -613,6 +628,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Handle admin role changes
   const handleAdminRoleChange = async (userId: string, action: 'add' | 'remove') => {
+    // Prevent admins from removing their own admin rights
+    if (action === 'remove' && userId === user?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You cannot remove your own admin rights.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setAdminRoleLoading(true);
     try {
       if (action === 'add') {
@@ -1307,7 +1332,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           <User className="h-3 w-3 text-blue-400" />
                         </div>
                         <div>
-                          <div className="text-white font-mono text-sm font-semibold">{user.username}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-white font-mono text-sm font-semibold">{user.username}</div>
+                            {/* Admin Shield Icon */}
+                            {adminStatuses[user.id] && (
+                              <div className="flex items-center text-red-400 drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" title="Admin">
+                                <Shield className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
                           <div className="text-xs text-slate-500 font-mono">ID: {user.id.slice(0, 6)}...</div>
                         </div>
                       </div>
@@ -1363,19 +1396,33 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <Shield className="h-2.5 w-2.5 mr-1" />
                         Admin
                       </Button>
-                      <Button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setAdminRoleAction('remove');
-                          setShowAdminRoleModal(true);
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono text-xs h-7"
-                      >
-                        <Shield className="h-2.5 w-2.5 mr-1" />
-                        Remove
-                      </Button>
+                      {/* Hide Remove Admin button if user is admin and trying to remove themselves or if target is admin */}
+                      {!(adminStatuses[user.id] && user.id === user?.id) && adminStatuses[user.id] ? (
+                        <Button
+                          disabled
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 border-0 font-mono text-xs h-7 cursor-not-allowed"
+                          title="Cannot remove admin rights from admin users"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Protected
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setAdminRoleAction('remove');
+                            setShowAdminRoleModal(true);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-500 hover:to-orange-600 text-white border-0 font-mono text-xs h-7"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Remove
+                        </Button>
+                      )}
                       <Button
                         onClick={() => {
                           setSelectedUser(user);
@@ -1388,18 +1435,32 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <Trash2 className="h-2.5 w-2.5 mr-1" />
                         Reset
                       </Button>
-                      <Button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowDeleteConfirm(true);
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono text-xs h-7 col-span-2"
-                      >
-                        <Trash2 className="h-2.5 w-2.5 mr-1" />
-                        Delete
-                      </Button>
+                      {/* Hide Delete button for admin users */}
+                      {adminStatuses[user.id] ? (
+                        <Button
+                          disabled
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 border-0 font-mono text-xs h-7 col-span-2 cursor-not-allowed"
+                          title="Admin accounts cannot be deleted"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Protected
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowDeleteConfirm(true);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-red-800 to-red-900 hover:from-red-700 hover:to-red-800 text-white border-0 font-mono text-xs h-7 col-span-2"
+                        >
+                          <Trash2 className="h-2.5 w-2.5 mr-1" />
+                          Delete
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}

@@ -36,6 +36,7 @@ import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useConnectionMonitor } from '@/hooks/useConnectionMonitor';
+import { useAdminStatus } from '@/hooks/useAdminStatus';
 
 interface Notification {
   id: string;
@@ -112,6 +113,7 @@ export default function Index({ initialGame }: IndexProps) {
 
   const [currentGame, setCurrentGame] = useState(getCurrentGame());
   const { increases, checkBalanceChange } = useBalanceAnimation();
+  const { isAdmin: userIsAdmin } = useAdminStatus();
 
   // Notification theme helper
   const getNotificationTheme = (type: string) => {
@@ -1491,9 +1493,17 @@ export default function Index({ initialGame }: IndexProps) {
                           
                           {/* Enhanced Username and Level */}
                           <div className="flex flex-col">
-                            <span className="font-bold text-sm bg-gradient-to-r from-slate-200 to-slate-400 bg-clip-text text-transparent">
-                              {userData.username}
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-sm bg-gradient-to-r from-slate-200 to-slate-400 bg-clip-text text-transparent">
+                                {userData.username}
+                              </span>
+                              {/* Admin Shield Icon */}
+                              {userIsAdmin && (
+                                <div className="flex items-center text-red-400 drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" title="Admin">
+                                  <Shield className="w-3 h-3" />
+                                </div>
+                              )}
+                            </div>
                             <div className="flex items-center space-x-2 text-xs">
                               <span className="text-primary/80 font-mono">LVL</span>
                               <span className="text-accent font-bold">{effectiveStats.current_level}</span>
