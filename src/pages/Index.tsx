@@ -30,6 +30,7 @@ import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
 import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
 import AccountDeletionNotification from '@/components/AccountDeletionNotification';
+import AccountDeletionHandler from '@/components/AccountDeletionHandler';
 import { formatDistanceToNow } from 'date-fns';
 import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -84,6 +85,9 @@ export default function Index({ initialGame }: IndexProps) {
   const [profileModalLoading, setProfileModalLoading] = useState(false);
   const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
   const [showAccountDeletionNotification, setShowAccountDeletionNotification] = useState(false);
+  const [showAccountDeletionHandler, setShowAccountDeletionHandler] = useState(false);
+  const [deletionTime, setDeletionTime] = useState<string>('');
+  const [isUserLocked, setIsUserLocked] = useState(false);
   
   // XP Animation states
   const [animatedXP, setAnimatedXP] = useState(0); // For main lifetime XP display
@@ -242,15 +246,27 @@ export default function Index({ initialGame }: IndexProps) {
       if (error) throw error;
       setNotifications((data || []) as Notification[]);
       
-      // Check for account deletion notification
-      const deletionNotification = data?.find(n => 
+      // Check for account deletion notifications
+      const pendingDeletionNotification = data?.find(n => 
+        n.type === 'admin_message' && 
+        n.title === 'Account Deletion Initiated' &&
+        n.data?.deletion_pending &&
+        n.data?.deletion_time
+      );
+      
+      const completedDeletionNotification = data?.find(n => 
         n.type === 'admin_message' && 
         n.title === 'Account Deleted' &&
         n.data?.deletion_time
       );
       
-      if (deletionNotification) {
-        console.log('Account deletion notification found, showing popup');
+      if (pendingDeletionNotification) {
+        console.log('Pending account deletion notification found, showing handler');
+        setShowAccountDeletionHandler(true);
+        setDeletionTime(pendingDeletionNotification.data.deletion_time);
+        setIsUserLocked(true);
+      } else if (completedDeletionNotification) {
+        console.log('Completed account deletion notification found, showing popup');
         setShowAccountDeletionNotification(true);
       }
     } catch (error) {
@@ -368,11 +384,19 @@ export default function Index({ initialGame }: IndexProps) {
               // Get notification theme for enhanced toast
               const theme = getNotificationTheme(newNotification.type);
               
-              // Check for account deletion notification
+              // Check for account deletion notifications
               if (newNotification.type === 'admin_message' && 
-                  newNotification.title === 'Account Deleted' &&
+                  newNotification.title === 'Account Deletion Initiated' &&
+                  newNotification.data?.deletion_pending &&
                   newNotification.data?.deletion_time) {
-                console.log('Account deletion notification received, showing popup');
+                console.log('Pending account deletion notification received, showing handler');
+                setShowAccountDeletionHandler(true);
+                setDeletionTime(newNotification.data.deletion_time);
+                setIsUserLocked(true);
+              } else if (newNotification.type === 'admin_message' && 
+                        newNotification.title === 'Account Deleted' &&
+                        newNotification.data?.deletion_time) {
+                console.log('Completed account deletion notification received, showing popup');
                 setShowAccountDeletionNotification(true);
               } else {
                 // Enhanced toast notification with type-specific styling
@@ -730,7 +754,7 @@ export default function Index({ initialGame }: IndexProps) {
         </div>
       
       {/* Main Content Container */}
-      <div className="relative z-10 p-4 pb-32">
+      <div className={`relative z-10 p-4 pb-32 ${isUserLocked ? 'pointer-events-none' : ''}`}>
         {/* Header */}
         <header className="mb-6">
           <div className="relative overflow-hidden group">
@@ -2012,6 +2036,13 @@ export default function Index({ initialGame }: IndexProps) {
       <AccountDeletionNotification
         isOpen={showAccountDeletionNotification}
         onClose={() => setShowAccountDeletionNotification(false)}
+      />
+
+      {/* Account Deletion Handler */}
+      <AccountDeletionHandler
+        isOpen={showAccountDeletionHandler}
+        onClose={() => setShowAccountDeletionHandler(false)}
+        deletionTime={deletionTime}
       />
 
       {/* Cyberpunk Logout Confirmation Dialog */}

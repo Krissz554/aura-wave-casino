@@ -473,107 +473,41 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const deleteUserAccount = async (userId: string) => {
     setDeletingUser(true);
     try {
-      console.log('=== DELETE USER ACCOUNT FUNCTION ===');
+      console.log('=== INITIATE USER ACCOUNT DELETION ===');
       console.log('User ID:', userId);
       
-      // 1. Send final notification BEFORE deleting anything
-      console.log('Sending final deletion notification to user...');
-      const { error: finalNotificationError } = await supabase
+      // Send pending deletion notification to the user
+      console.log('Sending pending deletion notification to user...');
+      const { error: pendingNotificationError } = await supabase
         .from('notifications')
         .insert({
           user_id: userId,
           type: 'admin_message',
-          title: 'Account Deleted',
-          message: 'Your account has been permanently deleted by an administrator. You will be logged out in 15 seconds.',
-          data: { deletion_time: new Date().toISOString() }
+          title: 'Account Deletion Initiated',
+          message: 'Your account has been marked for deletion by an administrator. Your account will be permanently deleted in 30 seconds.',
+          data: { 
+            deletion_pending: true,
+            deletion_time: new Date(Date.now() + 30000).toISOString(), // 30 seconds from now
+            initiated_at: new Date().toISOString()
+          }
         });
 
-      if (finalNotificationError) {
-        console.error('Error sending final notification:', finalNotificationError);
-      } else {
-        console.log('Final deletion notification sent successfully');
-      }
-      
-      // 2. Delete from all related tables (in correct order to avoid foreign key constraints)
-      console.log('Deleting user data from all tables...');
-      
-      // Delete from tables that reference profiles first
-      const tablesToDelete = [
-        { table: 'notifications', field: 'user_id' },
-        { table: 'tips', field: 'from_user_id' },
-        { table: 'tips', field: 'to_user_id' },
-        { table: 'user_achievements', field: 'user_id' },
-        { table: 'user_daily_logins', field: 'user_id' },
-        { table: 'user_level_stats', field: 'user_id' },
-        { table: 'game_history', field: 'user_id' },
-        { table: 'game_stats', field: 'user_id' },
-        { table: 'case_rewards', field: 'user_id' },
-        { table: 'free_case_claims', field: 'user_id' },
-        { table: 'level_daily_cases', field: 'user_id' },
-        { table: 'user_rate_limits', field: 'user_id' },
-        { table: 'admin_users', field: 'user_id' },
-        { table: 'chat_messages', field: 'user_id' },
-        { table: 'unlocked_achievements', field: 'user_id' },
-        { table: 'live_bet_feed', field: 'user_id' },
-        { table: 'crash_bets', field: 'user_id' },
-        { table: 'roulette_bets', field: 'user_id' },
-        { table: 'tower_games', field: 'user_id' },
-        { table: 'roulette_client_seeds', field: 'user_id' },
-        { table: 'audit_logs', field: 'user_id' }
-      ];
-
-      for (const { table, field } of tablesToDelete) {
-        console.log(`Deleting from ${table}...`);
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq(field, userId);
-
-        if (error) {
-          console.error(`Error deleting from ${table}:`, error);
-        } else {
-          console.log(`${table} deleted successfully`);
-        }
-      }
-
-      // 3. Delete from profiles table
-      console.log('Deleting from profiles table...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Error deleting profile:', profileError);
+      if (pendingNotificationError) {
+        console.error('Error sending pending deletion notification:', pendingNotificationError);
         toast({
           title: "Error",
-          description: `Failed to delete user profile: ${profileError.message}`,
+          description: "Failed to initiate account deletion",
           variant: "destructive",
         });
         return;
-      }
-      
-      console.log('Profile deleted successfully');
-      
-      // 4. Delete from auth.users (Supabase Auth)
-      console.log('Deleting from auth.users...');
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (authError) {
-        console.error('Error deleting from auth:', authError);
-        toast({
-          title: "Warning",
-          description: `User data deleted but auth deletion failed: ${authError.message}`,
-          variant: "destructive",
-        });
       } else {
-        console.log('User deleted from auth successfully');
+        console.log('Pending deletion notification sent successfully');
       }
       
       // Success message
       toast({
-        title: "Success",
-        description: "User account has been completely deleted",
+        title: "Deletion Initiated",
+        description: "User account deletion has been initiated. The user will be notified and their account will be deleted in 30 seconds.",
       });
       
       setShowDeleteConfirm(false);
@@ -582,12 +516,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setDeleteConfirmText('');
       loadUsers(); // Refresh the user list
 
-      console.log('User deletion completed successfully');
+      console.log('User deletion initiated successfully');
     } catch (error) {
-      console.error('Error deleting user account:', error);
+      console.error('Error initiating user deletion:', error);
       toast({
         title: "Error",
-        description: `Failed to delete user account: ${error}`,
+        description: "Failed to initiate account deletion",
         variant: "destructive",
       });
     } finally {
