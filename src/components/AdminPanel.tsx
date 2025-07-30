@@ -243,6 +243,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     try {
       console.log('Attempting to reset stats for user:', userId);
       
+      // First, test if we can access the user's profile
+      const { data: profileData, error: profileTestError } = await supabase
+        .from('profiles')
+        .select('id, username')
+        .eq('id', userId)
+        .single();
+      
+      if (profileTestError) {
+        console.error('Error accessing user profile:', profileTestError);
+        toast({
+          title: "Error",
+          description: `Cannot access user profile: ${profileTestError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('User profile found:', profileData);
+      
       // Reset profile statistics
       const { error: profileError } = await supabase
         .from('profiles')
@@ -455,6 +474,32 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         console.error('Error resetting notifications:', notificationsError);
       } else {
         console.log('Notifications reset successfully');
+      }
+
+      // Reset level_daily_cases
+      console.log('Resetting level_daily_cases for user:', userId);
+      const { error: levelDailyCasesError } = await supabase
+        .from('level_daily_cases')
+        .delete()
+        .eq('user_id', userId);
+
+      if (levelDailyCasesError) {
+        console.error('Error resetting level daily cases:', levelDailyCasesError);
+      } else {
+        console.log('Level daily cases reset successfully');
+      }
+
+      // Reset user_rate_limits
+      console.log('Resetting user_rate_limits for user:', userId);
+      const { error: rateLimitsError } = await supabase
+        .from('user_rate_limits')
+        .delete()
+        .eq('user_id', userId);
+
+      if (rateLimitsError) {
+        console.error('Error resetting rate limits:', rateLimitsError);
+      } else {
+        console.log('Rate limits reset successfully');
       }
 
       console.log('User statistics reset successfully');
