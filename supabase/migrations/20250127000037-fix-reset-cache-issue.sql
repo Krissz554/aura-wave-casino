@@ -26,7 +26,7 @@ BEGIN
     AND table_schema = 'public'
     ORDER BY ordinal_position
   LOOP
-    RAISE NOTICE '  % (%%)', column_info.column_name, column_info.data_type;
+    RAISE NOTICE '  % (%)', column_info.column_name, column_info.data_type;
   END LOOP;
   
   -- Verify no achievements_unlocked column exists
