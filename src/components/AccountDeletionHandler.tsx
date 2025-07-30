@@ -55,77 +55,38 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       console.log('=== PERFORMING ACCOUNT DELETION ===');
       console.log('User ID:', userId);
 
-      // Delete from all related tables (in correct order to avoid foreign key constraints)
-      console.log('Deleting user data from all tables...');
+      // Call the Edge Function to handle complete account deletion
+      console.log('Calling delete-user-account Edge Function...');
       
-      const tablesToDelete = [
-        { table: 'notifications', field: 'user_id' },
-        { table: 'tips', field: 'from_user_id' },
-        { table: 'tips', field: 'to_user_id' },
-        { table: 'user_achievements', field: 'user_id' },
-        { table: 'user_daily_logins', field: 'user_id' },
-        { table: 'user_level_stats', field: 'user_id' },
-        { table: 'game_history', field: 'user_id' },
-        { table: 'game_stats', field: 'user_id' },
-        { table: 'case_rewards', field: 'user_id' },
-        { table: 'free_case_claims', field: 'user_id' },
-        { table: 'level_daily_cases', field: 'user_id' },
-        { table: 'user_rate_limits', field: 'user_id' },
-        { table: 'admin_users', field: 'user_id' },
-        { table: 'chat_messages', field: 'user_id' },
-        { table: 'unlocked_achievements', field: 'user_id' },
-        { table: 'live_bet_feed', field: 'user_id' },
-        { table: 'crash_bets', field: 'user_id' },
-        { table: 'roulette_bets', field: 'user_id' },
-        { table: 'tower_games', field: 'user_id' },
-        { table: 'roulette_client_seeds', field: 'user_id' },
-        { table: 'audit_logs', field: 'user_id' }
-      ];
+      const { data, error } = await supabase.functions.invoke('delete-user-account', {
+        body: { userId }
+      });
 
-      for (const { table, field } of tablesToDelete) {
-        console.log(`Deleting from ${table}...`);
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq(field, userId);
-
-        if (error) {
-          console.error(`Error deleting from ${table}:`, error);
-        } else {
-          console.log(`${table} deleted successfully`);
-        }
-      }
-
-      // Delete from profiles table
-      console.log('Deleting from profiles table...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Error deleting profile:', profileError);
+      if (error) {
+        console.error('Error calling delete-user-account function:', error);
+        toast({
+          title: "Deletion Error",
+          description: "Failed to delete account. You will be logged out.",
+          variant: "destructive",
+        });
       } else {
-        console.log('Profile deleted successfully');
-      }
-      
-      // Delete from auth.users (Supabase Auth)
-      console.log('Deleting from auth.users...');
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (authError) {
-        console.error('Error deleting from auth:', authError);
-      } else {
-        console.log('User deleted from auth successfully');
+        console.log('Account deletion completed successfully:', data);
+        toast({
+          title: "Account Deleted",
+          description: "Your account has been completely removed from the system.",
+        });
       }
 
-      console.log('Account deletion completed successfully');
-      
-      // Logout the user
+      // Logout the user regardless of deletion success/failure
       signOut();
       
     } catch (error) {
       console.error('Error during account deletion:', error);
+      toast({
+        title: "Deletion Error",
+        description: "An error occurred during account deletion. You will be logged out.",
+        variant: "destructive",
+      });
       // Still logout even if deletion fails
       signOut();
     }

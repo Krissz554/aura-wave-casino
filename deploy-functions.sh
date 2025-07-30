@@ -36,5 +36,8 @@ supabase functions deploy case-opening-engine --project-ref $PROJECT_REF
 echo "🎁 Deploying claim-free-case..."
 supabase functions deploy claim-free-case --project-ref $PROJECT_REF
 
+echo "🗑️ Deploying delete-user-account..."
+supabase functions deploy delete-user-account --project-ref $PROJECT_REF
+
 echo "✅ All Edge Functions deployed successfully!"
 echo "🎯 The roulette game now uses 25-second betting phases!"
