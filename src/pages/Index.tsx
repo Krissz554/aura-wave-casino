@@ -29,6 +29,7 @@ import { useBalanceAnimation } from '@/hooks/useBalanceAnimation';
 import { FloatingBalanceIncrease } from '@/components/FloatingBalanceIncrease';
 import { AnimatedBalance } from '@/components/AnimatedBalance';
 import { MaintenanceAwareGame } from '@/components/MaintenanceAwareGame';
+import AccountDeletionNotification from '@/components/AccountDeletionNotification';
 import { formatDistanceToNow } from 'date-fns';
 import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useToast } from '@/hooks/use-toast';
@@ -38,7 +39,7 @@ import { useConnectionMonitor } from '@/hooks/useConnectionMonitor';
 interface Notification {
   id: string;
   user_id: string;
-  type: 'tip_sent' | 'tip_received' | 'achievement_unlocked' | 'level_up' | 'level_reward_case' | 'admin_broadcast';
+  type: 'tip_sent' | 'tip_received' | 'achievement_unlocked' | 'level_up' | 'level_reward_case' | 'admin_broadcast' | 'admin_message';
   title: string;
   message: string;
   data?: any;
@@ -82,6 +83,7 @@ export default function Index({ initialGame }: IndexProps) {
   const [rewardsLoading, setRewardsLoading] = useState(false);
   const [profileModalLoading, setProfileModalLoading] = useState(false);
   const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
+  const [showAccountDeletionNotification, setShowAccountDeletionNotification] = useState(false);
   
   // XP Animation states
   const [animatedXP, setAnimatedXP] = useState(0); // For main lifetime XP display
@@ -170,6 +172,16 @@ export default function Index({ initialGame }: IndexProps) {
           emoji: '',
           iconComponent: <AlertTriangle className="w-5 h-5" />
         };
+      case 'admin_message':
+        return {
+          gradient: 'from-red-400/20 via-rose-500/15 to-red-600/10',
+          border: 'border-red-400/40',
+          glow: 'shadow-[0_0_20px_rgba(239,68,68,0.3)]',
+          icon: 'text-red-400',
+          accent: 'bg-red-400/20',
+          emoji: '',
+          iconComponent: <AlertTriangle className="w-5 h-5" />
+        };
       default:
         return {
           gradient: 'from-gray-400/20 via-slate-500/15 to-gray-600/10',
@@ -229,6 +241,18 @@ export default function Index({ initialGame }: IndexProps) {
 
       if (error) throw error;
       setNotifications((data || []) as Notification[]);
+      
+      // Check for account deletion notification
+      const deletionNotification = data?.find(n => 
+        n.type === 'admin_message' && 
+        n.title === 'Account Deleted' &&
+        n.data?.deletion_time
+      );
+      
+      if (deletionNotification) {
+        console.log('Account deletion notification found, showing popup');
+        setShowAccountDeletionNotification(true);
+      }
     } catch (error) {
       console.error('Error fetching notifications:', error);
     }
@@ -344,12 +368,20 @@ export default function Index({ initialGame }: IndexProps) {
               // Get notification theme for enhanced toast
               const theme = getNotificationTheme(newNotification.type);
               
-              // Enhanced toast notification with type-specific styling
-              toast({
-                title: `${theme.emoji} ${newNotification.title}`,
-                description: newNotification.message,
-                duration: 6000,
-              });
+              // Check for account deletion notification
+              if (newNotification.type === 'admin_message' && 
+                  newNotification.title === 'Account Deleted' &&
+                  newNotification.data?.deletion_time) {
+                console.log('Account deletion notification received, showing popup');
+                setShowAccountDeletionNotification(true);
+              } else {
+                // Enhanced toast notification with type-specific styling
+                toast({
+                  title: `${theme.emoji} ${newNotification.title}`,
+                  description: newNotification.message,
+                  duration: 6000,
+                });
+              }
 
               // Add button pulse effect for new notifications
               const notificationButton = document.querySelector('[data-notification-button]');
@@ -1974,6 +2006,12 @@ export default function Index({ initialGame }: IndexProps) {
       <AdminPanel
         isOpen={showAdminPanel}
         onClose={() => setShowAdminPanel(false)}
+      />
+
+      {/* Account Deletion Notification */}
+      <AccountDeletionNotification
+        isOpen={showAccountDeletionNotification}
+        onClose={() => setShowAccountDeletionNotification(false)}
       />
 
       {/* Cyberpunk Logout Confirmation Dialog */}

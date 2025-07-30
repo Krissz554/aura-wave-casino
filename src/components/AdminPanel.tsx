@@ -79,6 +79,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [deletingUser, setDeletingUser] = useState(false);
   const [deleteVerificationText, setDeleteVerificationText] = useState('');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletedUserNotification, setDeletedUserNotification] = useState<string | null>(null);
   const [sendingNotification, setSendingNotification] = useState(false);
   const [notificationForm, setNotificationForm] = useState<NotificationForm>({
     title: '',
@@ -749,6 +750,24 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
       } else {
         console.log('User deleted from auth successfully');
+      }
+      
+      // Send final notification to the deleted user
+      console.log('Sending final deletion notification to user...');
+      const { error: finalNotificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          type: 'admin_message',
+          title: 'Account Deleted',
+          message: 'Your account has been permanently deleted by an administrator. You will be logged out in 15 seconds.',
+          data: { deletion_time: new Date().toISOString() }
+        });
+
+      if (finalNotificationError) {
+        console.error('Error sending final notification:', finalNotificationError);
+      } else {
+        console.log('Final deletion notification sent successfully');
       }
       
       // Success message
