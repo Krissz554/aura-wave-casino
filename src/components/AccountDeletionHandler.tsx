@@ -52,151 +52,47 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       }
 
       const userId = user.id;
-      console.log('=== PERFORMING ACCOUNT DELETION ===');
+      console.log('=== PERFORMING COMPLETE ACCOUNT DELETION ===');
       console.log('User ID:', userId);
 
-      // Delete user data from all tables directly
-      console.log('Deleting user data from all tables...');
-      
-      const tablesToDelete = [
-        { table: 'notifications', field: 'user_id' },
-        { table: 'tips', field: 'from_user_id' },
-        { table: 'tips', field: 'to_user_id' },
-        { table: 'user_achievements', field: 'user_id' },
-        { table: 'user_daily_logins', field: 'user_id' },
-        { table: 'user_level_stats', field: 'user_id' },
-        { table: 'game_history', field: 'user_id' },
-        { table: 'game_stats', field: 'user_id' },
-        { table: 'case_rewards', field: 'user_id' },
-        { table: 'free_case_claims', field: 'user_id' },
-        { table: 'level_daily_cases', field: 'user_id' },
-        { table: 'user_rate_limits', field: 'user_id' },
-        { table: 'admin_users', field: 'user_id' },
-        { table: 'chat_messages', field: 'user_id' },
-        { table: 'unlocked_achievements', field: 'user_id' },
-        { table: 'live_bet_feed', field: 'user_id' },
-        { table: 'crash_bets', field: 'user_id' },
-        { table: 'roulette_bets', field: 'user_id' },
-        { table: 'tower_games', field: 'user_id' },
-        { table: 'roulette_client_seeds', field: 'user_id' },
-        { table: 'audit_logs', field: 'user_id' }
-      ];
+      // Use the comprehensive database function to delete everything
+      console.log('Calling delete_user_complete database function...');
+      const { data: deletionResult, error: functionError } = await supabase.rpc('delete_user_complete', {
+        user_uuid: userId
+      });
 
-      let deletionErrors = [];
-      let deletionSuccess = true;
-
-      // Delete from all tables
-      for (const { table, field } of tablesToDelete) {
-        console.log(`Deleting from ${table}...`);
-        
-        // Special handling for user_level_stats to ensure it's deleted
-        if (table === 'user_level_stats') {
-          console.log('Special handling for user_level_stats...');
-          
-          // First, try to verify the record exists
-          const { data: existingData, error: checkError } = await supabase
-            .from('user_level_stats')
-            .select('id')
-            .eq('user_id', userId)
-            .single();
-          
-          if (checkError && checkError.code !== 'PGRST116') {
-            console.error('Error checking user_level_stats:', checkError);
-          } else if (existingData) {
-            console.log('Found user_level_stats record, proceeding with deletion...');
-          }
-        }
-        
-        const { error } = await supabase
-          .from(table)
-          .delete()
-          .eq(field, userId);
-
-        if (error) {
-          console.error(`Error deleting from ${table}:`, error);
-          deletionErrors.push(`${table}: ${error.message}`);
-          deletionSuccess = false;
-        } else {
-          console.log(`${table} deleted successfully`);
-          
-          // Verify deletion for user_level_stats
-          if (table === 'user_level_stats') {
-            const { data: verifyData, error: verifyError } = await supabase
-              .from('user_level_stats')
-              .select('id')
-              .eq('user_id', userId)
-              .single();
-            
-            if (verifyError && verifyError.code === 'PGRST116') {
-              console.log('✅ user_level_stats deletion verified - record not found');
-            } else if (verifyData) {
-              console.error('❌ user_level_stats deletion failed - record still exists');
-              deletionErrors.push('user_level_stats: Record still exists after deletion');
-              deletionSuccess = false;
-            }
-          }
-        }
-      }
-
-      // Delete from profiles table
-      console.log('Deleting from profiles table...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userId);
-
-      if (profileError) {
-        console.error('Error deleting profile:', profileError);
-        deletionErrors.push(`profiles: ${profileError.message}`);
-        deletionSuccess = false;
-      } else {
-        console.log('Profile deleted successfully');
-      }
-
-      if (deletionSuccess) {
-        console.log('All database tables deleted successfully');
-        
-        // Final verification - check if user_level_stats still exists
-        console.log('Performing final verification...');
-        const { data: finalCheck, error: finalCheckError } = await supabase
-          .from('user_level_stats')
-          .select('id')
-          .eq('user_id', userId)
-          .single();
-        
-        if (finalCheckError && finalCheckError.code === 'PGRST116') {
-          console.log('✅ Final verification: user_level_stats successfully deleted');
-        } else if (finalCheck) {
-          console.error('❌ Final verification: user_level_stats still exists');
-          deletionErrors.push('user_level_stats: Final verification failed');
-          deletionSuccess = false;
-        }
-        
-        // Attempt to delete from Supabase Auth (may fail due to permissions)
-        console.log('Attempting to delete from Supabase Auth...');
-        try {
-          const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-          if (authError) {
-            console.log('Auth deletion failed (expected for client-side):', authError.message);
-            // This is expected to fail on client-side, but we'll still proceed
-          } else {
-            console.log('✅ User successfully deleted from Supabase Auth');
-          }
-        } catch (authError) {
-          console.log('Auth deletion error (expected):', authError);
-          // This is expected to fail on client-side
-        }
-        
-        console.log('Database deletion completed successfully');
-        toast({
-          title: "Account Deleted",
-          description: "Your account data has been completely removed from the system.",
-        });
-      } else {
-        console.error('Deletion errors:', deletionErrors);
+      if (functionError) {
+        console.error('Error calling delete_user_complete function:', functionError);
         toast({
           title: "Deletion Error",
-          description: `Failed to delete account data: ${deletionErrors.join(', ')}. You will be logged out.`,
+          description: "Failed to delete account. You will be logged out.",
+          variant: "destructive",
+        });
+        signOut();
+        return;
+      }
+
+      console.log('Deletion result:', deletionResult);
+
+      if (deletionResult && deletionResult.success) {
+        console.log('✅ Account deletion completed successfully');
+        console.log('Deleted tables:', deletionResult.deleted_tables);
+        
+        if (deletionResult.errors && deletionResult.errors.length > 0) {
+          console.log('⚠️ Some errors occurred:', deletionResult.errors);
+        }
+
+        toast({
+          title: "Account Deleted",
+          description: "Your account has been completely removed from the system.",
+        });
+      } else {
+        console.error('❌ Account deletion failed');
+        console.error('Errors:', deletionResult?.errors || 'Unknown error');
+        
+        toast({
+          title: "Deletion Error",
+          description: "Failed to delete account completely. You will be logged out.",
           variant: "destructive",
         });
       }
