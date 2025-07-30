@@ -208,8 +208,6 @@ export default function Index({ initialGame }: IndexProps) {
         return;
       }
 
-      console.log('🔍 Checking admin status for user:', user.id);
-
       try {
         const { data, error } = await supabase
           .from('admin_users')
@@ -217,27 +215,14 @@ export default function Index({ initialGame }: IndexProps) {
           .eq('user_id', user.id)
           .single();
 
-        console.log('🛡️ Admin check result:', { data, error, userId: user.id });
-
         if (error && error.code !== 'PGRST116') {
           console.error('Error checking admin status:', error);
         }
 
-        const adminStatus = !!data;
-        console.log('✅ Setting admin status:', adminStatus);
-        setIsAdmin(adminStatus);
-        
-        // TEMPORARY: Force admin status for testing (REMOVE THIS AFTER TESTING)
-        if (!adminStatus) {
-          console.log('🚨 TEMPORARY: Forcing admin status for testing');
-          setIsAdmin(true);
-        }
+        setIsAdmin(!!data);
       } catch (err) {
         console.error('Error checking admin status:', err);
         setIsAdmin(false);
-        // TEMPORARY: Force admin status for testing (REMOVE THIS AFTER TESTING)
-        console.log('🚨 TEMPORARY: Forcing admin status for testing (catch block)');
-        setIsAdmin(true);
       } finally {
         setAdminLoading(false);
       }
@@ -1423,7 +1408,6 @@ export default function Index({ initialGame }: IndexProps) {
                   )}
 
                   {/* Cyberpunk Admin Panel Button - Only show for admin users */}
-                  {console.log('🎛️ Admin button visibility check:', { user: !!user, adminLoading, isAdmin })}
                   {user && !adminLoading && isAdmin && (
                     <div className="relative group/admin">
                       <Button
