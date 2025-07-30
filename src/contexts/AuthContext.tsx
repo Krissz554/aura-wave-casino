@@ -63,62 +63,87 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data, error }
       }
 
-      // If registration is successful, create profile immediately
+      // If registration is successful, wait for trigger and then verify
       if (data.user) {
-        console.log('✅ User created successfully, creating profile...')
+        console.log('✅ User created successfully, waiting for profile creation...')
         console.log('👤 User ID:', data.user.id)
         
-        // Try to create profile using the simple function
-        console.log('🔧 Creating profile via RPC function...')
-        const { data: profileResult, error: profileError } = await supabase
-          .rpc('create_user_profile_simple', {
-            user_id: data.user.id,
-            username: username,
-            user_email: email
-          })
+        // Wait a bit for the trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
-        console.log('🔧 Profile creation result:', { profileResult, profileError })
+        // Check if profile was created by trigger
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single()
+        
+        console.log('📋 Profile check result:', { profileData, profileError })
         
         if (profileError) {
-          console.error('❌ RPC profile creation failed:', profileError)
+          console.error('❌ Profile creation failed:', profileError)
           
-          // Try direct insert as fallback
-          console.log('🔧 Attempting direct profile insert...')
-          const { data: directProfile, error: directError } = await supabase
-            .from('profiles')
-            .insert({
-              id: data.user.id,
-              username: username,
-              email: email,
-              balance: 1000,
-              level: 1,
-              xp: 0,
-              total_wagered: 0,
-              total_profit: 0,
-              last_claim_time: '1970-01-01T00:00:00Z',
-              badges: ['welcome'],
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
+          // Try to manually create the profile using the correct function
+          console.log('🔧 Attempting manual profile creation...')
+          const { data: manualProfile, error: manualError } = await supabase
+            .rpc('create_user_profile_manual', {
+              user_id: data.user.id,
+              username: username
             })
-            .select()
-            .single()
           
-          console.log('🔧 Direct profile insert result:', { directProfile, directError })
+          console.log('🔧 Manual profile creation result:', { manualProfile, manualError })
           
-          if (directError) {
-            console.error('❌ Direct profile insert also failed:', directError)
-            return { 
-              data, 
-              error: { 
-                message: 'Registration completed but profile setup failed. Please contact support.',
-                details: { profileError, directError }
-              } 
+          if (manualError) {
+            console.error('❌ Manual profile creation also failed:', manualError)
+            
+            // Try direct insert with ALL required columns as last resort
+            console.log('🔧 Attempting direct profile insert with all columns...')
+            const { data: directProfile, error: directError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                username: username,
+                registration_date: new Date().toISOString(),
+                balance: 1000,
+                level: 1,
+                xp: 0,
+                total_wagered: 0,
+                total_profit: 0,
+                last_claim_time: '1970-01-01T00:00:00Z',
+                badges: ['welcome'],
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                current_level: 1,
+                current_xp: 0,
+                xp_to_next_level: 100,
+                lifetime_xp: 0,
+                border_tier: 1,
+                available_cases: 0,
+                total_cases_opened: 0,
+                total_xp: 0
+              })
+              .select()
+              .single()
+            
+            console.log('🔧 Direct profile insert result:', { directProfile, directError })
+            
+            if (directError) {
+              console.error('❌ Direct profile insert also failed:', directError)
+              return { 
+                data, 
+                error: { 
+                  message: 'Registration completed but profile setup failed. Please contact support.',
+                  details: { profileError, manualError, directError }
+                } 
+              }
+            } else {
+              console.log('✅ Direct profile creation successful')
             }
           } else {
-            console.log('✅ Direct profile creation successful')
+            console.log('✅ Manual profile creation successful')
           }
         } else {
-          console.log('✅ Profile created successfully via RPC')
+          console.log('✅ Profile created successfully via trigger')
         }
       }
 
