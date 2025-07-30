@@ -478,31 +478,60 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       const deletionTime = new Date(Date.now() + 30000); // 30 seconds from now
       
-      // Create pending deletion record
+      // Try to create pending deletion record (fallback if table doesn't exist)
       console.log('Creating pending deletion record...');
-      const { data: pendingDeletion, error: pendingError } = await supabase
-        .from('pending_account_deletions')
-        .insert({
-          user_id: userId,
-          initiated_by: user?.id,
-          scheduled_deletion_time: deletionTime.toISOString(),
-          status: 'pending'
-        })
-        .select()
-        .single();
+      let pendingDeletion = null;
+      let useFallbackMethod = false;
+      
+      try {
+        const { data, error: pendingError } = await supabase
+          .from('pending_account_deletions')
+          .insert({
+            user_id: userId,
+            initiated_by: user?.id,
+            scheduled_deletion_time: deletionTime.toISOString(),
+            status: 'pending'
+          })
+          .select()
+          .single();
 
-      if (pendingError) {
-        console.error('Error creating pending deletion record:', pendingError);
-        toast({
-          title: "Error",
-          description: "Failed to initiate account deletion",
-          variant: "destructive",
-        });
-        return;
+        if (pendingError) {
+          console.error('Error creating pending deletion record:', pendingError);
+          // Check if it's a table not found error
+          if (pendingError.code === '42P01' || pendingError.message.includes('does not exist')) {
+            console.log('Pending deletions table does not exist, using fallback method');
+            useFallbackMethod = true;
+          } else {
+            toast({
+              title: "Error",
+              description: "Failed to initiate account deletion",
+              variant: "destructive",
+            });
+            return;
+          }
+        } else {
+          pendingDeletion = data;
+        }
+      } catch (error) {
+        console.error('Exception creating pending deletion record:', error);
+        console.log('Using fallback method');
+        useFallbackMethod = true;
       }
       
       // Send pending deletion notification to the user
       console.log('Sending pending deletion notification to user...');
+      const notificationData = {
+        deletion_pending: true,
+        deletion_time: deletionTime.toISOString(),
+        initiated_at: new Date().toISOString(),
+        fallback_method: useFallbackMethod
+      };
+      
+      // Add deletion_id if we have it
+      if (pendingDeletion) {
+        notificationData.deletion_id = pendingDeletion.id;
+      }
+      
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
@@ -510,27 +539,55 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           type: 'admin_message',
           title: 'Account Deletion Initiated',
           message: 'Your account has been marked for deletion by an administrator. Your account will be permanently deleted in 30 seconds.',
-          data: { 
-            deletion_pending: true,
-            deletion_time: deletionTime.toISOString(),
-            deletion_id: pendingDeletion.id,
-            initiated_at: new Date().toISOString()
-          }
+          data: notificationData
         });
 
       if (notificationError) {
         console.error('Error sending pending deletion notification:', notificationError);
-        // Don't return here, deletion record is already created
+        // Don't return here, deletion record is already created (if using new method)
       } else {
         console.log('Pending deletion notification sent successfully');
       }
       
       // Success message
+      const methodText = useFallbackMethod ? ' (using fallback method)' : '';
       toast({
         title: "Deletion Scheduled",
-        description: `User account deletion has been scheduled. The account will be automatically deleted in 30 seconds (${deletionTime.toLocaleTimeString()}).`,
+        description: `User account deletion has been scheduled. The account will be automatically deleted in 30 seconds (${deletionTime.toLocaleTimeString()})${methodText}.`,
       });
       
+      // If using fallback method, start a client-side timer for deletion
+      if (useFallbackMethod) {
+        console.log('Starting fallback deletion timer...');
+        setTimeout(async () => {
+          try {
+            console.log('Executing fallback deletion after 30 seconds...');
+            
+            // Call the existing Edge Function directly
+            const response = await fetch(`${supabase.supabaseUrl}/functions/v1/delete-user-account`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${supabase.supabaseKey}`,
+              },
+              body: JSON.stringify({
+                user_id: userId,
+                deletion_time: deletionTime.toISOString()
+              })
+            });
+
+            if (!response.ok) {
+              console.error('Fallback deletion failed:', response.status, response.statusText);
+            } else {
+              const result = await response.json();
+              console.log('Fallback deletion completed:', result);
+            }
+          } catch (error) {
+            console.error('Error in fallback deletion:', error);
+          }
+        }, 30000); // 30 seconds
+      }
+
       setShowDeleteConfirm(false);
       setSelectedUser(null);
       setDeleteVerificationText('');
