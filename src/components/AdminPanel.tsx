@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send, TrendingUp } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -111,27 +111,63 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  // Check total user count
+  const checkTotalUserCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true });
+
+      if (error) {
+        console.error('❌ Error checking user count:', error);
+      } else {
+        console.log(`📊 Total users in database: ${count}`);
+        return count;
+      }
+    } catch (err) {
+      console.error('❌ Error checking user count:', err);
+    }
+    return null;
+  };
+
   // Load all users
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      const { data, error } = await supabase
+      console.log('🔍 Loading all users...');
+      
+      // First check total count
+      const totalCount = await checkTotalUserCount();
+      
+      const { data, error, count } = await supabase
         .from('profiles')
-        .select('*')
+        .select('*', { count: 'exact' })
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading users:', error);
+        console.error('❌ Error loading users:', error);
         toast({
           title: "Error",
           description: "Failed to load users",
           variant: "destructive",
         });
       } else {
+        console.log(`✅ Loaded ${data?.length || 0} users`);
+        console.log('📊 Users data:', data);
         setUsers(data || []);
+        
+        // Show success message with count
+        const message = totalCount && totalCount !== data?.length 
+          ? `Loaded ${data?.length || 0} users (${totalCount} total in database)`
+          : `Loaded ${data?.length || 0} users`;
+          
+        toast({
+          title: "Success",
+          description: message,
+        });
       }
     } catch (err) {
-      console.error('Error loading users:', err);
+      console.error('❌ Error loading users:', err);
       toast({
         title: "Error",
         description: "Failed to load users",
@@ -496,15 +532,25 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Check system status when admin panel opens
   useEffect(() => {
-    if (isOpen && isAdmin) {
+    if (isOpen) {
+      checkAdminStatus();
       checkSystemStatus();
       
-      // Set up periodic health checks
-      const interval = setInterval(checkSystemStatus, 20000); // Check every 20 seconds
+      // Set up periodic system status checks
+      const interval = setInterval(() => {
+        checkSystemStatus();
+      }, 20000); // Check every 20 seconds
       
       return () => clearInterval(interval);
     }
-  }, [isOpen, isAdmin]);
+  }, [isOpen]);
+
+  // Load users when user management modal opens
+  useEffect(() => {
+    if (showUserManagement) {
+      loadUsers();
+    }
+  }, [showUserManagement]);
 
   if (loading) {
     return (
@@ -883,22 +929,56 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <div className="text-sm text-slate-400 font-mono">
-                Total Users: {users.length}
+              <div className="space-y-1">
+                <div className="text-sm text-slate-400 font-mono">
+                  Loaded Users: <span className="text-primary font-bold">{users.length}</span>
+                </div>
+                <div className="text-xs text-slate-500 font-mono">
+                  Last updated: {new Date().toLocaleTimeString()}
+                </div>
               </div>
-              <Button
-                onClick={loadUsers}
-                disabled={loadingUsers}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
-              >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={loadUsers}
+                  disabled={loadingUsers}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loadingUsers ? 'animate-spin' : ''}`} />
+                  {loadingUsers ? 'Loading...' : 'Refresh Users'}
+                </Button>
+                <Button
+                  onClick={checkTotalUserCount}
+                  variant="outline"
+                  className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 font-mono"
+                >
+                  Check Total
+                </Button>
+              </div>
             </div>
 
             {loadingUsers ? (
               <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <div className="text-center space-y-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                  <p className="text-slate-400 font-mono">Loading users...</p>
+                </div>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="text-center p-8 space-y-4">
+                <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-br from-slate-800/50 to-slate-900/50 border border-slate-700/50 flex items-center justify-center">
+                  <Users className="w-8 h-8 text-slate-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">No Users Found</h3>
+                  <p className="text-slate-400 text-sm">Try refreshing the user list</p>
+                </div>
+                <Button
+                  onClick={loadUsers}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Load Users
+                </Button>
               </div>
             ) : (
               <div className="space-y-2 max-h-96 overflow-y-auto">
@@ -913,6 +993,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <div>
                           <div className="text-white font-mono">{user.username}</div>
                           <div className="text-xs text-slate-400 font-mono">{user.email}</div>
+                          <div className="text-xs text-slate-500 font-mono">ID: {user.id}</div>
                         </div>
                       </div>
                       
@@ -928,6 +1009,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <div className="flex items-center space-x-1">
                           <Coins className="h-3 w-3 text-purple-400" />
                           <span className="text-purple-400 font-mono">${user.balance}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <TrendingUp className="h-3 w-3 text-orange-400" />
+                          <span className="text-orange-400 font-mono">${user.total_wagered}</span>
                         </div>
                       </div>
                     </div>
