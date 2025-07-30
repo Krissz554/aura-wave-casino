@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 
@@ -55,18 +55,33 @@ interface User {
   last_seen: string;
 }
 
+type NotificationLevel = 'low' | 'normal' | 'urgent';
+
+interface NotificationForm {
+  title: string;
+  message: string;
+  level: NotificationLevel;
+}
+
 export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPushNotification, setShowPushNotification] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showPrivateNotification, setShowPrivateNotification] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resettingUser, setResettingUser] = useState(false);
   const [verificationText, setVerificationText] = useState('');
+  const [sendingNotification, setSendingNotification] = useState(false);
+  const [notificationForm, setNotificationForm] = useState<NotificationForm>({
+    title: '',
+    message: '',
+    level: 'normal'
+  });
   const [systemStatus, setSystemStatus] = useState<SystemStatus>({
     database: { status: 'checking' },
     authentication: { status: 'checking' },
@@ -120,6 +135,55 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       });
     } finally {
       setLoadingUsers(false);
+    }
+  };
+
+  // Send private notification
+  const sendPrivateNotification = async (userId: string, notification: NotificationForm) => {
+    setSendingNotification(true);
+    try {
+      const { error } = await supabase
+        .from('user_notifications')
+        .insert({
+          user_id: userId,
+          title: notification.title,
+          message: notification.message,
+          level: notification.level,
+          is_read: false,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error sending notification:', error);
+        toast({
+          title: "Error",
+          description: "Failed to send notification",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Private notification sent successfully",
+        });
+
+        // Reset form
+        setNotificationForm({
+          title: '',
+          message: '',
+          level: 'normal'
+        });
+        setSelectedUser(null);
+        setShowPrivateNotification(false);
+      }
+    } catch (err) {
+      console.error('Error sending notification:', err);
+      toast({
+        title: "Error",
+        description: "Failed to send notification",
+        variant: "destructive",
+      });
+    } finally {
+      setSendingNotification(false);
     }
   };
 
@@ -178,14 +242,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         // Refresh users list
         await loadUsers();
 
-                 toast({
-           title: "Success",
-           description: "User statistics have been reset successfully",
-         });
+        toast({
+          title: "Success",
+          description: "User statistics have been reset successfully",
+        });
 
-         setSelectedUser(null);
-         setShowResetConfirm(false);
-         setVerificationText('');
+        setSelectedUser(null);
+        setShowResetConfirm(false);
+        setVerificationText('');
       }
     } catch (err) {
       console.error('Error resetting user stats:', err);
@@ -453,6 +517,32 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     return Object.keys(systemStatus.realtime.channels).length;
   };
 
+  const getLevelColor = (level: NotificationLevel) => {
+    switch (level) {
+      case 'low':
+        return 'green';
+      case 'normal':
+        return 'yellow';
+      case 'urgent':
+        return 'red';
+      default:
+        return 'yellow';
+    }
+  };
+
+  const getLevelText = (level: NotificationLevel) => {
+    switch (level) {
+      case 'low':
+        return 'LOW';
+      case 'normal':
+        return 'NORMAL';
+      case 'urgent':
+        return 'URGENT';
+      default:
+        return 'NORMAL';
+    }
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -668,6 +758,21 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     <span className="text-xs text-slate-500">MANAGE USERS</span>
                   </Button>
                   
+                  <Button 
+                    onClick={() => {
+                      setShowPrivateNotification(true);
+                      loadUsers();
+                    }}
+                    variant="outline" 
+                    className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <MessageSquare className="h-4 w-4 text-green-400" />
+                      <span>PRIVATE NOTIFICATIONS</span>
+                    </div>
+                    <span className="text-xs text-slate-500">SEND MESSAGES</span>
+                  </Button>
+                  
                   <Button variant="outline" className="h-auto p-4 flex items-center justify-between bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono">
                     <div className="flex items-center space-x-2">
                       <Activity className="h-4 w-4 text-green-400" />
@@ -751,17 +856,30 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </div>
                     </div>
                     
-                    <Button
-                      onClick={() => {
-                        setSelectedUser(user);
-                        setShowResetConfirm(true);
-                      }}
-                      variant="outline"
-                      className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Reset Stats
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowPrivateNotification(true);
+                        }}
+                        variant="outline"
+                        className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono"
+                      >
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Send Message
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          setSelectedUser(user);
+                          setShowResetConfirm(true);
+                        }}
+                        variant="outline"
+                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Reset Stats
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -770,87 +888,226 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         </DialogContent>
       </Dialog>
 
-             {/* Reset Confirmation Modal */}
-       <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
-         <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
-           <DialogHeader>
-             <DialogTitle className="flex items-center space-x-2 text-white">
-               <AlertTriangle className="h-5 w-5 text-red-500" />
-               <span className="font-mono">CONFIRM RESET</span>
-             </DialogTitle>
-           </DialogHeader>
-           
-           <div className="space-y-4">
-             <div className="text-center">
-               <div className="text-white font-mono mb-2">
-                 Reset statistics for user:
-               </div>
-               <div className="text-lg font-bold text-blue-400 font-mono mb-4">
-                 {selectedUser?.username}
-               </div>
-               <div className="text-sm text-slate-400 font-mono">
-                 This will reset ALL statistics including:
-               </div>
-               <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
-                 • Level and XP
-                 • Game statistics
-                 • Achievement progress
-                 • Case history
-                 • Daily cases
-                 • All achievements
-               </div>
-               <div className="text-sm text-green-400 font-mono mt-2">
-                 Balance will remain unchanged
-               </div>
-             </div>
-             
-             <div className="space-y-3">
-               <div className="text-center">
-                 <div className="text-sm text-slate-400 font-mono mb-2">
-                   Type the username to confirm:
-                 </div>
-                 <input
-                   type="text"
-                   value={verificationText}
-                   onChange={(e) => setVerificationText(e.target.value)}
-                   placeholder="Enter username"
-                   className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
-                 />
-               </div>
-             </div>
-             
-             <div className="flex space-x-3">
-               <Button
-                 onClick={() => {
-                   setShowResetConfirm(false);
-                   setVerificationText('');
-                 }}
-                 variant="outline"
-                 className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
-               >
-                 Cancel
-               </Button>
-               <Button
-                 onClick={() => selectedUser && resetUserStats(selectedUser.id)}
-                 disabled={resettingUser || verificationText !== selectedUser?.username}
-                 className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
-               >
-                 {resettingUser ? (
-                   <>
-                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                     Resetting...
-                   </>
-                 ) : (
-                   <>
-                     <Trash2 className="h-4 w-4 mr-2" />
-                     Reset Statistics
-                   </>
-                 )}
-               </Button>
-             </div>
-           </div>
-         </DialogContent>
-       </Dialog>
+      {/* Private Notification Modal */}
+      <Dialog open={showPrivateNotification} onOpenChange={setShowPrivateNotification}>
+        <DialogContent className="max-w-2xl bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <MessageSquare className="h-5 w-5 text-green-400" />
+              <span className="font-mono">PRIVATE NOTIFICATION</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {selectedUser ? (
+              <>
+                <div className="text-center p-4 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-lg border border-blue-500/30">
+                  <div className="text-white font-mono mb-2">
+                    Sending to user:
+                  </div>
+                  <div className="text-lg font-bold text-blue-400 font-mono">
+                    {selectedUser.username}
+                  </div>
+                  <div className="text-xs text-slate-400 font-mono">
+                    {selectedUser.email}
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm text-slate-400 font-mono mb-2 block">
+                      Priority Level:
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {(['low', 'normal', 'urgent'] as NotificationLevel[]).map((level) => (
+                        <Button
+                          key={level}
+                          onClick={() => setNotificationForm({ ...notificationForm, level })}
+                          variant={notificationForm.level === level ? 'default' : 'outline'}
+                          className={`font-mono ${
+                            notificationForm.level === level
+                              ? `bg-gradient-to-r from-${getLevelColor(level)}-600 to-${getLevelColor(level)}-700 text-white border-0`
+                              : 'bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white'
+                          }`}
+                        >
+                          {getLevelText(level)}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-slate-400 font-mono mb-2 block">
+                      Title:
+                    </label>
+                    <input
+                      type="text"
+                      value={notificationForm.title}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, title: e.target.value })}
+                      placeholder="Enter notification title"
+                      className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-green-500/50"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm text-slate-400 font-mono mb-2 block">
+                      Message:
+                    </label>
+                    <textarea
+                      value={notificationForm.message}
+                      onChange={(e) => setNotificationForm({ ...notificationForm, message: e.target.value })}
+                      placeholder="Enter notification message"
+                      rows={4}
+                      className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-green-500/50 resize-none"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => {
+                      setShowPrivateNotification(false);
+                      setSelectedUser(null);
+                      setNotificationForm({ title: '', message: '', level: 'normal' });
+                    }}
+                    variant="outline"
+                    className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => selectedUser && sendPrivateNotification(selectedUser.id, notificationForm)}
+                    disabled={sendingNotification || !notificationForm.title || !notificationForm.message}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {sendingNotification ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4 mr-2" />
+                        Send Notification
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center p-8">
+                <div className="text-slate-400 font-mono mb-4">
+                  Select a user to send a private notification
+                </div>
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  {users.map((user) => (
+                    <div
+                      key={user.id}
+                      onClick={() => setSelectedUser(user)}
+                      className="flex items-center justify-between p-3 bg-slate-800/50 border border-slate-700/50 rounded-lg hover:bg-slate-700/50 transition-colors cursor-pointer"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <User className="h-4 w-4 text-blue-400" />
+                        <div>
+                          <div className="text-white font-mono">{user.username}</div>
+                          <div className="text-xs text-slate-400 font-mono">{user.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2 text-sm">
+                        <span className="text-yellow-400 font-mono">Lv.{user.level}</span>
+                        <span className="text-green-400 font-mono">{user.xp} XP</span>
+                        <span className="text-purple-400 font-mono">${user.balance}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Reset Confirmation Modal */}
+      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              <span className="font-mono">CONFIRM RESET</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-white font-mono mb-2">
+                Reset statistics for user:
+              </div>
+              <div className="text-lg font-bold text-blue-400 font-mono mb-4">
+                {selectedUser?.username}
+              </div>
+              <div className="text-sm text-slate-400 font-mono">
+                This will reset ALL statistics including:
+              </div>
+              <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
+                • Level and XP
+                • Game statistics
+                • Achievement progress
+                • Case history
+                • Daily cases
+                • All achievements
+              </div>
+              <div className="text-sm text-green-400 font-mono mt-2">
+                Balance will remain unchanged
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-sm text-slate-400 font-mono mb-2">
+                  Type the username to confirm:
+                </div>
+                <input
+                  type="text"
+                  value={verificationText}
+                  onChange={(e) => setVerificationText(e.target.value)}
+                  placeholder="Enter username"
+                  className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => {
+                  setShowResetConfirm(false);
+                  setVerificationText('');
+                }}
+                variant="outline"
+                className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => selectedUser && resetUserStats(selectedUser.id)}
+                disabled={resettingUser || verificationText !== selectedUser?.username}
+                className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {resettingUser ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Resetting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Reset Statistics
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
