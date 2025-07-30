@@ -2,6 +2,8 @@
 
 -- 1. First, let's check what RLS policies exist
 DO $$
+DECLARE
+  policy RECORD;
 BEGIN
   RAISE NOTICE 'Checking existing RLS policies...';
   
