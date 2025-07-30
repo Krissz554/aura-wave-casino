@@ -2,6 +2,8 @@
 
 -- 1. First, let's check what columns actually exist in the profiles table
 DO $$
+DECLARE
+  col RECORD;
 BEGIN
   RAISE NOTICE 'Checking profiles table structure...';
   
