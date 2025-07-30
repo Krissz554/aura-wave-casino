@@ -14,11 +14,99 @@ interface AdminPanelProps {
   onClose: () => void;
 }
 
+interface SystemStatus {
+  database: {
+    status: 'online' | 'offline' | 'checking';
+    latency?: number;
+  };
+  authentication: {
+    status: 'active' | 'inactive' | 'checking';
+  };
+  realtime: {
+    status: 'connected' | 'disconnected' | 'checking';
+  };
+}
+
 export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPushNotification, setShowPushNotification] = useState(false);
+  const [systemStatus, setSystemStatus] = useState<SystemStatus>({
+    database: { status: 'checking' },
+    authentication: { status: 'checking' },
+    realtime: { status: 'checking' }
+  });
+
+  // Check system status
+  const checkSystemStatus = async () => {
+    // Check database connectivity
+    try {
+      const startTime = Date.now();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .limit(1);
+      
+      const latency = Date.now() - startTime;
+      
+      if (error) {
+        setSystemStatus(prev => ({
+          ...prev,
+          database: { status: 'offline' }
+        }));
+      } else {
+        setSystemStatus(prev => ({
+          ...prev,
+          database: { status: 'online', latency }
+        }));
+      }
+    } catch (err) {
+      setSystemStatus(prev => ({
+        ...prev,
+        database: { status: 'offline' }
+      }));
+    }
+
+    // Check authentication status
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSystemStatus(prev => ({
+        ...prev,
+        authentication: { 
+          status: session ? 'active' : 'inactive' 
+        }
+      }));
+    } catch (err) {
+      setSystemStatus(prev => ({
+        ...prev,
+        authentication: { status: 'inactive' }
+      }));
+    }
+
+    // Check realtime connection
+    try {
+      const channel = supabase.channel('system-health-check');
+      const status = channel.subscribe((status) => {
+        setSystemStatus(prev => ({
+          ...prev,
+          realtime: { 
+            status: status === 'SUBSCRIBED' ? 'connected' : 'disconnected' 
+          }
+        }));
+      });
+      
+      // Cleanup subscription after check
+      setTimeout(() => {
+        supabase.removeChannel(channel);
+      }, 1000);
+    } catch (err) {
+      setSystemStatus(prev => ({
+        ...prev,
+        realtime: { status: 'disconnected' }
+      }));
+    }
+  };
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -50,6 +138,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
     checkAdminStatus();
   }, [user]);
+
+  // Check system status when admin panel opens
+  useEffect(() => {
+    if (isOpen && isAdmin) {
+      checkSystemStatus();
+      
+      // Set up periodic health checks
+      const interval = setInterval(checkSystemStatus, 30000); // Check every 30 seconds
+      
+      return () => clearInterval(interval);
+    }
+  }, [isOpen, isAdmin]);
 
   if (loading) {
     return (
@@ -98,6 +198,36 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       </Dialog>
     );
   }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'online':
+      case 'active':
+      case 'connected':
+        return 'green';
+      case 'offline':
+      case 'inactive':
+      case 'disconnected':
+        return 'red';
+      default:
+        return 'yellow';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'online':
+      case 'active':
+      case 'connected':
+        return status.toUpperCase();
+      case 'offline':
+      case 'inactive':
+      case 'disconnected':
+        return status.toUpperCase();
+      default:
+        return 'CHECKING...';
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -213,28 +343,41 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-500/10 to-green-600/10 rounded-lg border border-green-500/30">
+                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.database.status)}-500/10 to-${getStatusColor(systemStatus.database.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.database.status)}-500/30`}>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-400 font-mono">DATABASE</span>
+                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.database.status)}-400 rounded-full ${systemStatus.database.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                    <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>DATABASE</span>
                   </div>
-                  <span className="text-sm text-green-400 font-mono">ONLINE</span>
+                  <div className="flex items-center space-x-2">
+                    <span className={`text-sm text-${getStatusColor(systemStatus.database.status)}-400 font-mono`}>
+                      {getStatusText(systemStatus.database.status)}
+                    </span>
+                    {systemStatus.database.latency && (
+                      <span className="text-xs text-slate-500 font-mono">
+                        ({systemStatus.database.latency}ms)
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-500/10 to-blue-600/10 rounded-lg border border-blue-500/30">
+                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.authentication.status)}-500/10 to-${getStatusColor(systemStatus.authentication.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.authentication.status)}-500/30`}>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-blue-400 font-mono">AUTHENTICATION</span>
+                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.authentication.status)}-400 rounded-full ${systemStatus.authentication.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                    <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>AUTHENTICATION</span>
                   </div>
-                  <span className="text-sm text-blue-400 font-mono">ACTIVE</span>
+                  <span className={`text-sm text-${getStatusColor(systemStatus.authentication.status)}-400 font-mono`}>
+                    {getStatusText(systemStatus.authentication.status)}
+                  </span>
                 </div>
                 
-                <div className="flex items-center justify-between p-3 bg-gradient-to-r from-purple-500/10 to-purple-600/10 rounded-lg border border-purple-500/30">
+                <div className={`flex items-center justify-between p-3 bg-gradient-to-r from-${getStatusColor(systemStatus.realtime.status)}-500/10 to-${getStatusColor(systemStatus.realtime.status)}-600/10 rounded-lg border border-${getStatusColor(systemStatus.realtime.status)}-500/30`}>
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-purple-400 font-mono">REALTIME</span>
+                    <div className={`w-2 h-2 bg-${getStatusColor(systemStatus.realtime.status)}-400 rounded-full ${systemStatus.realtime.status === 'checking' ? 'animate-pulse' : ''}`}></div>
+                    <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>REALTIME</span>
                   </div>
-                  <span className="text-sm text-purple-400 font-mono">CONNECTED</span>
+                  <span className={`text-sm text-${getStatusColor(systemStatus.realtime.status)}-400 font-mono`}>
+                    {getStatusText(systemStatus.realtime.status)}
+                  </span>
                 </div>
               </div>
             </CardContent>
