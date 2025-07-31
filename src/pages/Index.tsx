@@ -79,11 +79,7 @@ export default function Index({ initialGame }: IndexProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminLoading, setAdminLoading] = useState(true);
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
-  const [notificationLoading, setNotificationLoading] = useState(false);
-  const [logoutLoading, setLogoutLoading] = useState(false);
-  const [adminPanelLoading, setAdminPanelLoading] = useState(false);
-  const [rewardsLoading, setRewardsLoading] = useState(false);
-  const [profileModalLoading, setProfileModalLoading] = useState(false);
+  // Removed loading states for instant button responses
   const [gameSelectionLoading, setGameSelectionLoading] = useState<string | null>(null);
   const [showAccountDeletionNotification, setShowAccountDeletionNotification] = useState(false);
   const [showAccountDeletionHandler, setShowAccountDeletionHandler] = useState(false);
@@ -489,10 +485,7 @@ export default function Index({ initialGame }: IndexProps) {
 
 
 
-  const handleLogout = async () => {
-    setLogoutLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 200)); // Brief loading indication
-    setLogoutLoading(false);
+  const handleLogout = () => {
     setShowLogoutConfirmation(true);
   };
 
@@ -503,8 +496,7 @@ export default function Index({ initialGame }: IndexProps) {
       // Call the signOut function from AuthContext
       await signOut();
       
-      // Give a small delay to ensure state updates propagate
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Remove artificial delay for faster response
       
       // Close the confirmation dialog
       setShowLogoutConfirmation(false);
@@ -840,38 +832,18 @@ export default function Index({ initialGame }: IndexProps) {
                   )}>
                     <Button
                       variant="ghost"
-                      disabled={notificationLoading}
+                      
                       data-notification-button="true"
-                      onClick={async () => {
-                        // Show loading state immediately for instant feedback
-                        setNotificationLoading(true);
-                        
-                        // Add button press animation class temporarily
-                        const button = document.activeElement as HTMLElement;
-                        if (button) {
-                          button.classList.add('animate-cyber-button-press');
-                          setTimeout(() => button.classList.remove('animate-cyber-button-press'), 200);
-                        }
-                        
-                        // Brief delay to show loading animation
-                        await new Promise(resolve => setTimeout(resolve, 300));
-                        
-                        // Open the modal
+                      onClick={() => {
                         setNotificationModalOpen(true);
-                        setNotificationLoading(false);
                       }}
                         className={cn(
-                          "relative overflow-hidden backdrop-blur-sm transition-all duration-300 disabled:opacity-60 p-2 aspect-square",
-                          // Loading state styling - maintains appropriate background
-                          notificationLoading && unreadCount === 0 && "border border-primary/60 bg-slate-900/50",
-                          notificationLoading && unreadCount > 0 && unreadCount <= 5 && "border border-orange-500/60 bg-orange-950/50",
-                          notificationLoading && unreadCount > 5 && unreadCount <= 10 && "border border-red-500/60 bg-red-950/50",
-                          notificationLoading && unreadCount > 10 && "border border-red-500/80 bg-red-950/60",
-                          // Normal state styling based on unread count
-                          !notificationLoading && unreadCount === 0 && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
-                          !notificationLoading && unreadCount > 0 && unreadCount <= 5 && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
-                          !notificationLoading && unreadCount > 5 && unreadCount <= 10 && "border border-red-500/40 bg-red-950/30 hover:bg-red-900/50",
-                          !notificationLoading && unreadCount > 10 && "border border-red-500/60 bg-red-950/40 hover:bg-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                          "relative overflow-hidden backdrop-blur-sm transition-all duration-300 p-2 aspect-square",
+                          // Styling based on unread count
+                          unreadCount === 0 && "border border-primary/40 bg-slate-900/30 hover:bg-slate-800/50",
+                          unreadCount > 0 && unreadCount <= 5 && "border border-orange-500/40 bg-orange-950/30 hover:bg-orange-900/50",
+                          unreadCount > 5 && unreadCount <= 10 && "border border-red-500/40 bg-red-950/30 hover:bg-red-900/50",
+                          unreadCount > 10 && "border border-red-500/60 bg-red-950/40 hover:bg-red-900/60 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
                         )}
                       >
                         {/* Cyberpunk scan line effect */}
@@ -1373,12 +1345,9 @@ export default function Index({ initialGame }: IndexProps) {
                     <div className="relative group/rewards">
                       <Button
                         variant="ghost"
-                        disabled={rewardsLoading}
-                        onClick={async () => {
-                          setRewardsLoading(true);
-                          await new Promise(resolve => setTimeout(resolve, 200));
+
+                        onClick={() => {
                           navigate('/rewards');
-                          setRewardsLoading(false);
                         }}
                         className="relative overflow-hidden border border-purple-500/40 bg-purple-950/30 hover:bg-purple-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
                       >
@@ -1391,13 +1360,7 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-purple-400/0 group-hover/rewards:border-purple-400/30 rounded-md transition-all duration-300" />
                         
-                        {rewardsLoading ? (
-                          <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
-                            <div className="w-3 h-3 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)] relative z-10" />
-                        )}
+                        <Gift className="w-4 h-4 mr-2 text-purple-400 drop-shadow-[0_0_6px_rgba(168,85,247,0.6)] relative z-10" />
                         <span className="relative z-10 font-semibold bg-gradient-to-r from-purple-200 to-purple-400 bg-clip-text text-transparent">
                           Rewards
                         </span>
@@ -1414,11 +1377,8 @@ export default function Index({ initialGame }: IndexProps) {
                     <div className="relative group/admin">
                       <Button
                         variant="ghost"
-                        disabled={adminPanelLoading}
-                        onClick={async () => {
-                          setAdminPanelLoading(true);
-                          await new Promise(resolve => setTimeout(resolve, 200));
-                          setAdminPanelLoading(false);
+
+                        onClick={() => {
                           setShowAdminPanel(true);
                         }}
                         className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
@@ -1432,13 +1392,7 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-red-400/0 group-hover/admin:border-red-400/30 rounded-md transition-all duration-300" />
                         
-                        {adminPanelLoading ? (
-                          <div className="w-4 h-4 mr-2 flex items-center justify-center relative z-10">
-                            <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
-                        )}
+                        <Shield className="w-4 h-4 mr-2 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
                         <span className="relative font-semibold bg-gradient-to-r from-red-200 to-red-400 bg-clip-text text-transparent">
                           Admin
                         </span>
@@ -1454,10 +1408,7 @@ export default function Index({ initialGame }: IndexProps) {
                   {user && userData && (
                     <>
                       {/* Desktop Version */}
-                      <div className="hidden md:block relative group/profile overflow-hidden cursor-pointer" onClick={async () => {
-                        setProfileModalLoading(true);
-                        await new Promise(resolve => setTimeout(resolve, 200));
-                        setProfileModalLoading(false);
+                      <div className="hidden md:block relative group/profile overflow-hidden cursor-pointer" onClick={() => {
                         setShowProfile(true);
                       }}>
                         <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 to-slate-800/60 backdrop-blur-md rounded-xl" />
@@ -1575,7 +1526,7 @@ export default function Index({ initialGame }: IndexProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        disabled={logoutLoading}
+
                         onClick={handleLogout}
                         className="relative overflow-hidden border border-red-500/40 bg-red-950/30 hover:bg-red-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60"
                       >
@@ -1588,13 +1539,7 @@ export default function Index({ initialGame }: IndexProps) {
                         {/* Edge pulse effect */}
                         <div className="absolute inset-0 border border-red-400/0 group-hover/logout:border-red-400/30 rounded-md transition-all duration-300" />
                         
-                        {logoutLoading ? (
-                          <div className="w-4 h-4 flex items-center justify-center relative z-10">
-                            <div className="w-3 h-3 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin" />
-                          </div>
-                        ) : (
-                          <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
-                        )}
+                        <LogOut className="w-4 h-4 text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] relative z-10" />
                         
                         {/* Tech corner indicators */}
                         <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-red-400/60 group-hover/logout:border-red-300" />
