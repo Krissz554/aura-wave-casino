@@ -14,16 +14,16 @@ export function XPSyncProvider({ children }: { children: React.ReactNode }) {
   const { forceRefresh: levelSyncRefresh } = useLevelSync();
   const { refetch: userLevelStatsRefresh } = useUserLevelStats();
 
-  // Force refresh both data sources - PRIORITIZE profiles (levelSync) for decimal precision
+  // Force refresh both level/XP data sources (both now use user_level_stats)
   const forceFullRefresh = useCallback(async () => {
     if (!user) return;
     
     try {
-      // Refresh profiles table first (has decimal precision), then user_level_stats
-      await levelSyncRefresh(); // profiles table with decimal XP
+      // Refresh both contexts that use user_level_stats table
+      await levelSyncRefresh(); // LevelSyncContext using user_level_stats
       
-      // Then refresh user_level_stats as backup
-      await userLevelStatsRefresh(); // user_level_stats table with integer XP
+      // Also refresh the direct user_level_stats hook
+      await userLevelStatsRefresh(); // Direct user_level_stats table access
     } catch (error) {
       console.error('❌ XP SYNC: Error refreshing data sources:', error);
     }

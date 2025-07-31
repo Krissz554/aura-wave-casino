@@ -104,23 +104,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 id: data.user.id,
                 username: username,
                 registration_date: new Date().toISOString(),
-                balance: 0,  // Changed from 1000 to 0 - new users start with $0
-                level: 1,
-                xp: 0,
+                balance: 0,  // New users start with $0
                 total_wagered: 0,
                 total_profit: 0,
                 last_claim_time: '1970-01-01T00:00:00Z',
                 badges: ['welcome'],
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
-                current_level: 1,
-                current_xp: 0,
-                xp_to_next_level: 100,
-                lifetime_xp: 0,
-                border_tier: 1,
                 available_cases: 0,
-                total_cases_opened: 0,
-                total_xp: 0
+                total_cases_opened: 0
               })
               .select()
               .single()

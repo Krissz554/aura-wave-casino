@@ -32,25 +32,25 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      // Get stats from profiles table with decimal precision support
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('current_level, lifetime_xp, current_xp, xp_to_next_level, border_tier')
-        .eq('id', user.id)
+      // Get stats from user_level_stats table (single source of truth)
+      const { data: levelStatsData, error: levelStatsError } = await supabase
+        .from('user_level_stats')
+        .select('current_level, lifetime_xp, current_level_xp, xp_to_next_level, border_tier')
+        .eq('user_id', user.id)
         .single();
 
-      if (profileError && profileError.code !== 'PGRST116') {
+      if (levelStatsError && levelStatsError.code !== 'PGRST116') {
         // PGRST116 is "not found" which is expected for new users
-        throw profileError;
+        throw levelStatsError;
       }
 
-      if (profileData) {
+      if (levelStatsData) {
         setLevelStats({
-          current_level: profileData.current_level || 1,
-          lifetime_xp: Number(profileData.lifetime_xp || 0), // Ensure it's a number with decimal precision
-          current_level_xp: Number(profileData.current_xp || 0), // Map current_xp to current_level_xp with decimals
-          xp_to_next_level: profileData.xp_to_next_level || 100,
-          border_tier: profileData.border_tier || 1
+          current_level: levelStatsData.current_level || 1,
+          lifetime_xp: Number(levelStatsData.lifetime_xp || 0),
+          current_level_xp: Number(levelStatsData.current_level_xp || 0),
+          xp_to_next_level: levelStatsData.xp_to_next_level || 100,
+          border_tier: levelStatsData.border_tier || 1
         });
       } else {
         // Fallback to default stats for new users

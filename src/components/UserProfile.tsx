@@ -231,10 +231,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
         requestAnimationFrame(animate);
       };
 
-      // Use the correct XP source (prioritize stats for own profile, userData for others)
-      const currentLevel = stats?.current_level || userData.current_level;
-      const currentXP = stats?.current_level_xp || userData.current_xp;
-      const lifetimeXP = stats?.lifetime_xp || userData.lifetime_xp || 0; // Move declaration inside useEffect
+      // Use the correct XP source (prioritize stats for own profile, userData levelStats for others)
+      const currentLevel = stats?.current_level || userData.levelStats?.current_level || 1;
+      const currentXP = stats?.current_level_xp || userData.levelStats?.current_level_xp || 0;
+      const lifetimeXP = stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0;
 
       animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
@@ -269,10 +269,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   if (!userData) return null;
 
   // Move variable declarations here to fix initialization order
-  const currentLevel = stats?.current_level || userData.current_level;
-  const lifetimeXP = stats?.lifetime_xp || userData.lifetime_xp || 0; // Main XP display (decimal precision from LevelSync)
-  const currentXP = stats?.current_level_xp || userData.current_xp; // XP within current level
-  const xpToNext = stats?.xp_to_next_level || userData.xp_to_next_level;
+  const currentLevel = stats?.current_level || userData.levelStats?.current_level || 1;
+  const lifetimeXP = stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0; // Main XP display from user_level_stats
+  const currentXP = stats?.current_level_xp || userData.levelStats?.current_level_xp || 0; // XP within current level
+  const xpToNext = stats?.xp_to_next_level || userData.levelStats?.xp_to_next_level || 100;
   const totalXP = currentXP + xpToNext;
   const xpProgress = calculateXPProgress(currentXP, xpToNext);
 

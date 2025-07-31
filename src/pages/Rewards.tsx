@@ -223,7 +223,7 @@ export default function Rewards() {
               { icon: Package, value: stats.totalCasesOpened, label: "Total Cases", color: "primary" },
               { icon: Coins, value: `$${stats.totalRewards.toFixed(2)}`, label: "Total Rewards", color: "success" },
               { icon: Trophy, value: levelDailyCases.filter(c => canOpenCase(c)).length, label: "Available Cases", color: "accent" },
-              { icon: Star, value: userData?.level || 0, label: "Your Level", color: "warning" }
+              { icon: Star, value: userData?.levelStats?.current_level || 0, label: "Your Level", color: "warning" }
             ].map((stat, index) => (
               <div key={index} className="relative overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-slate-900/95 via-slate-800/90 to-slate-900/95 backdrop-blur-xl rounded-xl animate-cyber-header-pulse" />

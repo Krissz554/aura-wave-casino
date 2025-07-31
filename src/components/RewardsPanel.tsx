@@ -61,7 +61,7 @@ export default function RewardsPanel({ userData, onUpdateUser }: RewardsPanelPro
       await onUpdateUser({
         balance: userData.balance + CLAIM_AMOUNT,
         last_claim_time: new Date().toISOString(),
-        xp: userData.xp + 10 // Small XP bonus for claiming
+        // XP bonus is now handled by user_level_stats table automatically
       });
 
       toast({

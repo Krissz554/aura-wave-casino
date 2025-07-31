@@ -125,7 +125,7 @@ export const RealtimeChat = () => {
           user_id: user.id,
           username: userData.username,
           message: validation.sanitized,
-          user_level: userData.current_level
+          user_level: userData.levelStats?.current_level || 1
         });
 
       if (error) throw error;
