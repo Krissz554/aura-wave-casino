@@ -176,6 +176,13 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
       
     } catch (error: any) {
       console.error('Error starting game:', error);
+      console.error('Error details:', {
+        message: error.message,
+        details: error.details,
+        status: error.status,
+        code: error.code,
+        context: error.context
+      });
       toast({
         title: "Error",
         description: error.message || "Failed to start game",

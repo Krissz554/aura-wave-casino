@@ -91,7 +91,7 @@ serve(async (req) => {
     }
 
     const { action, game_id, difficulty, bet_amount, tile_index } = await req.json();
-    console.log(\`🎯 Tower action: \${action} for user: \${user.id}\`);
+    console.log(`🎯 Tower action: ${action} for user: ${user.id}`);
 
     switch (action) {
       case 'start': {
@@ -158,7 +158,7 @@ serve(async (req) => {
           });
         }
 
-        console.log(\`🎮 New Tower game started: \${game.id} for user: \${user.id}\`);
+        console.log(`🎮 New Tower game started: ${game.id} for user: ${user.id}`);
         return new Response(JSON.stringify(game), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
@@ -199,7 +199,7 @@ serve(async (req) => {
         const isMine = currentLevelMines.includes(tile_index);
         const config = DIFFICULTY_CONFIGS[game.difficulty];
         
-        console.log(\`🎯 Tile selected: \${tile_index}, Level: \${game.current_level}, Is Mine: \${isMine}\`);
+        console.log(`🎯 Tile selected: ${tile_index}, Level: ${game.current_level}, Is Mine: ${isMine}`);
 
         if (isMine) {
           // Hit a mine - game over
@@ -227,7 +227,7 @@ serve(async (req) => {
               }
             });
 
-          console.log(\`💥 Player hit mine at level \${game.current_level + 1}\`);
+          console.log(`💥 Player hit mine at level ${game.current_level + 1}`);
 
           // Return updated game state
           const { data: updatedGame } = await supabase
@@ -296,9 +296,9 @@ serve(async (req) => {
                 }
               });
 
-            console.log(\`🏆 Player completed tower: \${finalPayout} at level \${nextLevel}\`);
+            console.log(`🏆 Player completed tower: ${finalPayout} at level ${nextLevel}`);
           } else {
-            console.log(\`✅ Player advanced to level \${nextLevel}, multiplier: \${multiplier}\`);
+            console.log(`✅ Player advanced to level ${nextLevel}, multiplier: ${multiplier}`);
           }
 
           // Return updated game state
@@ -388,7 +388,7 @@ serve(async (req) => {
             }
           });
 
-        console.log(\`💰 Player cashed out: \${payout} at level \${game.current_level}\`);
+        console.log(`💰 Player cashed out: ${payout} at level ${game.current_level}`);
 
         // Return updated game state
         const { data: updatedGame } = await supabase
