@@ -2059,6 +2059,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       </div>
 
       {/* Cyberpunk Claimable Achievements */}
+      {console.log('🔍 Claimable achievements check:', { isOwnProfile, claimableCount: claimableAchievements.length, achievements: claimableAchievements.map(a => a.name) })}
       {isOwnProfile && claimableAchievements.length > 0 && (
         <div className="relative group/claimable">
           {/* Multi-layered Background */}
@@ -2085,6 +2086,14 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
               <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent font-mono tracking-wider">
                 READY TO CLAIM ({claimableAchievements.length})
               </h3>
+              
+              {/* Debug button to test clicking */}
+              <button 
+                onClick={() => console.log('🧪 Debug button clicked!')}
+                className="bg-red-500 text-white px-2 py-1 text-xs"
+              >
+                DEBUG TEST
+              </button>
               <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/50 via-green-400/30 to-transparent" />
             </div>
             
@@ -2143,10 +2152,11 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                                }}>
                             
                             {/* Scan Line Effect */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent translate-x-[-100%] group-hover/claimBtn:translate-x-[100%] transition-transform duration-700 ease-out" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/30 to-transparent translate-x-[-100%] group-hover/claimBtn:translate-x-[100%] transition-transform duration-700 ease-out pointer-events-none" />
                             
                             <button
                               onClick={async () => {
+                                console.log('🖱️ Claim button clicked!', achievement.name);
                                 try {
                                   await claimAchievement(achievement);
                                 } catch (error) {
@@ -2166,7 +2176,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                                 }
                               }}
                               disabled={claiming === achievement.id}
-                              className="w-full relative bg-gradient-to-br from-emerald-600/80 to-green-600/80 hover:from-emerald-500/90 hover:to-green-500/90 text-white border border-emerald-500/60 py-2 px-3 transition-all duration-300 font-mono font-bold tracking-wider text-xs hover:scale-105 active:scale-95 disabled:opacity-60"
+                              className="w-full relative z-10 bg-gradient-to-br from-emerald-600/80 to-green-600/80 hover:from-emerald-500/90 hover:to-green-500/90 text-white border border-emerald-500/60 py-2 px-3 transition-all duration-300 font-mono font-bold tracking-wider text-xs hover:scale-105 active:scale-95 disabled:opacity-60"
                             >
                               {claiming === achievement.id ? (
                                 <Loader2 className="w-3 h-3 animate-spin mx-auto" />
@@ -2176,7 +2186,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                             </button>
                             
                             {/* Inner Glow */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/claimBtn:opacity-100 transition-opacity duration-300" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/claimBtn:opacity-100 transition-opacity duration-300 pointer-events-none" />
                           </div>
                         </div>
                       </div>
