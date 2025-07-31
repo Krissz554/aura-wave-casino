@@ -17,7 +17,7 @@ import CoinflipGame from '@/components/CoinflipGame';
 import { RealtimeChat } from '@/components/RealtimeChat';
 import { RouletteGame } from '@/components/RouletteGame';
 import { Footer } from '@/components/Footer';
-import { TowerGame } from '@/components/TowerGame';
+import TowerGame from '@/components/TowerGame';
 import { UserLevelDisplay } from '@/components/UserLevelDisplay';
 import { LiveLevelUpNotification } from '@/components/LiveLevelUpNotification';
 import { ProfileBorder } from '@/components/ProfileBorder';
@@ -1899,35 +1899,51 @@ export default function Index({ initialGame }: IndexProps) {
                   </Button>
                 </div>
               
-                {/* Tower Game Button - Under Maintenance */}
-                <div className="relative group/tower opacity-60">
+                {/* Tower Game Button - Now Active */}
+                <div className="relative group/tower">
                   <Button
-                    disabled
+                    disabled={gameSelectionLoading === 'tower'}
+                    onClick={async () => await handleGameChange('tower')}
                     variant="ghost"
-                    className="relative w-full justify-start px-4 py-3 h-12 cursor-not-allowed overflow-hidden border border-slate-600/40 bg-slate-900/20 backdrop-blur-sm"
+                    className={`relative w-full justify-start px-4 py-3 h-12 overflow-hidden border border-emerald-500/40 bg-emerald-950/30 hover:bg-emerald-900/50 backdrop-blur-sm transition-all duration-300 disabled:opacity-60 ${
+                      currentGame === 'tower' ? 'border-emerald-400 bg-emerald-900/40 shadow-lg shadow-emerald-500/20' : ''
+                    } ${gameSelectionLoading === 'tower' ? 'opacity-60' : ''}`}
                   >
-                    {/* Subtle disabled glow */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/5 via-emerald-500/10 to-emerald-500/5 opacity-50" />
+                    {/* Cyberpunk scan line effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent translate-x-[-100%] group-hover/tower:translate-x-[100%] transition-transform duration-700 ease-out" />
+                    
+                    {/* Subtle inner glow on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400/5 via-emerald-400/10 to-emerald-400/5 opacity-0 group-hover/tower:opacity-100 transition-opacity duration-300" />
                     
                     <div className="flex items-center gap-3 relative z-10 w-full">
-                      <div className="p-2 rounded-md border bg-slate-800/30 border-slate-600/30 text-slate-500">
-                        <Building className="w-4 h-4" />
+                      <div className={`p-2 rounded-md border transition-colors ${
+                        currentGame === 'tower' 
+                          ? 'bg-emerald-500/20 border-emerald-400/50 text-emerald-300' 
+                          : 'bg-emerald-950/30 border-emerald-500/30 text-emerald-400'
+                      }`}>
+                        {gameSelectionLoading === 'tower' ? (
+                          <div className="w-4 h-4 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" />
+                        ) : (
+                          <Building className="w-4 h-4" />
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <span className="font-bold text-sm font-mono text-slate-300 block">
+                        <span className={`font-bold text-sm font-mono block transition-colors ${
+                          currentGame === 'tower' ? 'text-emerald-200' : 'text-emerald-300'
+                        }`}>
                           TOWER
                         </span>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse" />
-                          <span className="text-[10px] text-slate-400 font-mono">UNDER MAINTENANCE</span>
+                          <span className="text-[10px] text-emerald-400/80 font-mono">DATA TOWER PROTOCOL</span>
                           <div className="w-1 h-1 bg-emerald-400 rounded-full animate-pulse delay-500" />
                         </div>
                       </div>
                     </div>
                     
-                    {/* Tech corner indicators - dimmed */}
-                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-slate-600/30" />
-                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-slate-600/30" />
+                    {/* Tech corner indicators */}
+                    <div className="absolute top-1 left-1 w-1.5 h-1.5 border-l border-t border-emerald-400/60 group-hover/tower:border-emerald-300" />
+                    <div className="absolute bottom-1 right-1 w-1.5 h-1.5 border-r border-b border-emerald-400/60 group-hover/tower:border-emerald-300" />
                   </Button>
                 </div>
               
@@ -1997,20 +2013,13 @@ export default function Index({ initialGame }: IndexProps) {
             </div>
 
             <div style={{ display: currentGame === 'tower' ? 'block' : 'none' }}>
-              <div className="flex items-center justify-center h-64 bg-slate-900/50 rounded-lg border border-slate-700/50">
-                <div className="text-center">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-slate-800/50 rounded-full flex items-center justify-center border border-slate-600/50">
-                    <Building className="w-8 h-8 text-slate-400" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-200 mb-2">Tower Under Maintenance</h3>
-                  <p className="text-slate-400 text-sm">This game is currently being updated. Please try Roulette in the meantime!</p>
-                  <div className="flex items-center justify-center gap-2 mt-4">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-                    <span className="text-xs text-slate-500 font-mono">MAINTENANCE IN PROGRESS</span>
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse delay-500" />
-                  </div>
-                </div>
-              </div>
+              <MaintenanceAwareGame gameName="Tower">
+                {user && userData ? (
+                  <TowerGame userData={userData} onUpdateUser={updateUserProfile} />
+                ) : (
+                  <TowerGame userData={null} onUpdateUser={() => Promise.resolve()} />
+                )}
+              </MaintenanceAwareGame>
             </div>
 
             <div style={{ display: currentGame === 'crash' ? 'block' : 'none' }}>
