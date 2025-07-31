@@ -23,6 +23,20 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
   const { signOut, user } = useAuth();
   const { toast } = useToast();
 
+  // Format time remaining into hours:minutes:seconds
+  const formatTimeRemaining = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+    
+    return {
+      hours: hours.toString().padStart(2, '0'),
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: remainingSeconds.toString().padStart(2, '0'),
+      total: seconds
+    };
+  };
+
   // Listen for deletion cancellation
   useEffect(() => {
     if (!isOpen || !user) return;
@@ -110,6 +124,55 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
 
     return () => clearInterval(timer);
   }, [isOpen, deletionTime, deletionCancelled]);
+
+  // Complete lockdown effect - disable all page interactions
+  useEffect(() => {
+    if (isOpen && !deletionCancelled) {
+      // Disable scrolling and interactions on body
+      const originalStyle = window.getComputedStyle(document.body);
+      const originalOverflow = originalStyle.overflow;
+      const originalPosition = originalStyle.position;
+      const originalTouchAction = originalStyle.touchAction;
+      
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.bottom = '0';
+      document.body.style.touchAction = 'none';
+      document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'none';
+      
+      // Disable all form inputs and buttons except in our modal
+      const allInteractables = document.querySelectorAll('input, button, select, textarea, a[href]');
+      allInteractables.forEach((element) => {
+        if (!element.closest('[data-deletion-handler]')) {
+          (element as HTMLElement).style.pointerEvents = 'none';
+          (element as HTMLElement).setAttribute('tabindex', '-1');
+        }
+      });
+
+      return () => {
+        // Restore original styles
+        document.body.style.overflow = originalOverflow;
+        document.body.style.position = originalPosition;
+        document.body.style.top = '';
+        document.body.style.left = '';
+        document.body.style.right = '';
+        document.body.style.bottom = '';
+        document.body.style.touchAction = originalTouchAction;
+        document.body.style.userSelect = '';
+        document.body.style.pointerEvents = '';
+        
+        // Restore interactables
+        allInteractables.forEach((element) => {
+          (element as HTMLElement).style.pointerEvents = '';
+          (element as HTMLElement).removeAttribute('tabindex');
+        });
+      };
+    }
+  }, [isOpen, deletionCancelled]);
 
   const performAccountDeletion = async () => {
     try {
@@ -274,8 +337,24 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
 
   return (
     <>
-      {/* Full Screen Overlay */}
-      <div className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-lg">
+      {/* Full Screen Overlay with Complete Lockdown */}
+      <div 
+        className="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-lg"
+        style={{
+          overflow: 'hidden',
+          touchAction: 'none',
+          userSelect: 'none'
+        }}
+        onWheel={(e) => e.preventDefault()}
+        onScroll={(e) => e.preventDefault()}
+        onTouchMove={(e) => e.preventDefault()}
+        onKeyDown={(e) => {
+          // Only allow Tab and Enter for accessibility, block everything else
+          if (!['Tab', 'Enter', 'Escape'].includes(e.key)) {
+            e.preventDefault();
+          }
+        }}
+      >
         {/* Animated Background Effects */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl animate-pulse" />
@@ -289,7 +368,7 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
+        <div className="relative z-10 flex items-center justify-center min-h-screen p-4" data-deletion-handler>
           <div className="max-w-lg w-full">
             {/* Lock Icon and Alert */}
             <div className="text-center mb-8">
@@ -332,22 +411,32 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
                   </>
                 ) : !isDeleting ? (
                   <>
-                    <div className="flex items-center justify-center space-x-3">
-                      <Clock className="h-6 w-6 text-orange-400 animate-pulse" />
-                      <span className="text-2xl font-bold text-orange-400 font-mono">
-                        {timeLeft}
-                      </span>
-                      <span className="text-orange-400 font-mono">
-                        {timeLeft === 1 ? 'SECOND' : 'SECONDS'}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <p className="text-white font-mono">Deletion will commence in:</p>
+                    <div className="space-y-4">
+                      <p className="text-white font-mono text-lg font-semibold">Deletion will commence in:</p>
+                      
+                      <div className="flex items-center justify-center space-x-2">
+                        <Clock className="h-6 w-6 text-orange-400 animate-pulse" />
+                        <div className="flex items-center space-x-1 text-3xl font-bold text-orange-400 font-mono">
+                          <span>{formatTimeRemaining(timeLeft).hours}</span>
+                          <span className="animate-pulse">:</span>
+                          <span>{formatTimeRemaining(timeLeft).minutes}</span>
+                          <span className="animate-pulse">:</span>
+                          <span>{formatTimeRemaining(timeLeft).seconds}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="text-center space-y-1">
+                        <div className="flex justify-center space-x-4 text-xs text-orange-300 font-mono">
+                          <span>HOURS</span>
+                          <span>MINUTES</span>
+                          <span>SECONDS</span>
+                        </div>
+                      </div>
+                      
                       <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
                         <div 
                           className="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full transition-all duration-1000 animate-pulse"
-                          style={{ width: `${((30 - timeLeft) / 30) * 100}%` }}
+                          style={{ width: `${((86400 - timeLeft) / 86400) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -405,17 +494,22 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
                   </div>
                 </div>
 
-                {/* Logout Button */}
+                {/* Logout Button - Only Functional Element */}
                 {!deletionCompleted && !deletionCancelled && (
                   <div className="pt-4">
                     <button
                       onClick={handleLogoutNow}
                       disabled={isDeleting}
-                      className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      tabIndex={0}
+                      className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500/50"
+                      style={{ pointerEvents: 'auto' }}
                     >
                       <LogOut className="h-4 w-4 mr-2 inline" />
                       {isDeleting ? 'Processing...' : 'Logout Immediately'}
                     </button>
+                    <p className="text-slate-500 font-mono text-xs mt-2 text-center">
+                      This is the only available action during deletion countdown
+                    </p>
                   </div>
                 )}
               </div>
