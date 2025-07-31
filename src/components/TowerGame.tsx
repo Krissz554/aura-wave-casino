@@ -30,6 +30,7 @@ interface TowerGameState {
   current_multiplier: number;
   final_payout?: number;
   mine_positions: number[][];
+  selected_tiles?: number[]; // Track which tile was selected at each level
 }
 
 interface DifficultyConfig {
@@ -112,6 +113,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
   const [betAmount, setBetAmount] = useState('10');
   const [difficulty, setDifficulty] = useState('easy');
   const [animatingTiles, setAnimatingTiles] = useState<Set<string>>(new Set());
+  const [selectedTiles, setSelectedTiles] = useState<number[]>([]); // Track selected tile at each level
   const { toast } = useToast();
   const { isMaintenanceMode } = useMaintenance();
   const { refreshLevelStats } = useLevelSync();
@@ -124,6 +126,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
   const resetGame = () => {
     setGame(null);
     setAnimatingTiles(new Set());
+    setSelectedTiles([]);
   };
 
   // Start new game
@@ -224,6 +227,13 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
       const updatedGame = response.data;
       setGame(updatedGame);
       
+      // Track the selected tile for this level
+      setSelectedTiles(prev => {
+        const newSelected = [...prev];
+        newSelected[game.current_level] = tileIndex;
+        return newSelected;
+      });
+      
       // Handle game end
       if (updatedGame.status === 'lost') {
         toast({
@@ -311,12 +321,22 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     const isCurrentLevel = game?.current_level === levelIndex;
     const isPastLevel = game && game.current_level > levelIndex;
     const isFutureLevel = game && game.current_level < levelIndex;
+    const isGameEnded = game && (game.status === 'lost' || game.status === 'cashed_out');
     
-    // Only show revealed tiles for COMPLETED levels (past levels)
     // The mine_positions array contains arrays of mine indices per level
     const levelMines = game?.mine_positions?.[levelIndex] || [];
     const isMine = levelMines.includes(tileIndex);
-    const revealed = isPastLevel ? { safe: !isMine } : null;
+    const wasSelected = selectedTiles[levelIndex] === tileIndex;
+    
+    // Show revealed tiles for:
+    // 1. Completed levels (past levels) - only the selected tile
+    // 2. All tiles when game has ended (to show what would've happened)
+    let revealed = null;
+    if (isPastLevel && wasSelected) {
+      revealed = { safe: !isMine };
+    } else if (isGameEnded) {
+      revealed = { safe: !isMine };
+    }
     
     // Debug logging for development (uncomment if needed)
     // if (game && levelIndex <= 2) {
@@ -339,6 +359,10 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     } else if (revealed && !revealed.safe) {
       tileClass += "bg-gradient-to-br from-red-900/40 via-red-800/30 to-red-900/40 ";
       tileClass += "border-red-500/60 shadow-lg shadow-red-500/20 ";
+    } else if (wasSelected && !revealed) {
+      // Highlight selected tiles that aren't revealed yet (for visual feedback)
+      tileClass += "bg-gradient-to-br from-amber-900/30 via-amber-800/20 to-amber-900/30 ";
+      tileClass += "border-amber-400/50 shadow-md shadow-amber-400/20 ";
     } else if (isCurrentLevel && game?.status === 'active') {
       tileClass += "cursor-pointer hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 ";
       tileClass += "hover:border-primary hover:shadow-primary/30 ";
@@ -384,6 +408,11 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
             )
           ) : hasCharacter && game ? (
             <div className="text-2xl animate-bounce">{DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.character || '🤖'}</div>
+          ) : wasSelected && !revealed ? (
+            <div className="flex items-center gap-2 text-amber-400">
+              <Crown className="w-4 h-4" />
+              <span className="text-xs animate-pulse">SELECTED</span>
+            </div>
           ) : isCurrentLevel && game?.status === 'active' ? (
             <div className="flex items-center gap-2 text-primary opacity-70">
               <Cpu className="w-4 h-4" />
@@ -419,7 +448,6 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
   const renderLevel = (levelIndex: number) => {
     const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.tilesPerRow || 3;
     const multiplier = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS]?.[levelIndex];
-    const levelNum = levelIndex + 1;
     const isCurrentLevel = game?.current_level === levelIndex;
     const isPastLevel = game && game.current_level > levelIndex;
     const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
@@ -427,7 +455,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     return (
       <div 
         key={levelIndex} 
-        className={`flex items-center gap-4 p-4 rounded-xl border backdrop-blur-sm transition-all duration-500 ${
+        className={`p-4 rounded-xl border backdrop-blur-sm transition-all duration-500 ${
           isPastLevel 
             ? `bg-gradient-to-r from-${glowColor}-900/30 via-${glowColor}-800/20 to-${glowColor}-900/30 border-${glowColor}-500/40 shadow-lg shadow-${glowColor}-500/20` 
             : isCurrentLevel 
@@ -435,33 +463,21 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               : 'bg-gradient-to-r from-slate-900/40 via-slate-800/30 to-slate-900/40 border-slate-700/30'
         }`}
       >
-        {/* Level info */}
-        <div className="flex flex-col items-center gap-2 min-w-[80px]">
-          <Badge 
-            variant="outline" 
-            className={`text-sm font-bold px-3 py-1 font-mono ${
-              isPastLevel 
-                ? `bg-${glowColor}-500/20 text-${glowColor}-300 border-${glowColor}-400` 
-                : isCurrentLevel 
-                  ? 'bg-primary/20 text-primary border-primary' 
-                  : 'bg-slate-800/30 text-slate-400 border-slate-600'
-            }`}
-          >
-            L{levelNum}
-          </Badge>
-          <div className={`text-sm font-bold font-mono ${
+        {/* Multiplier at top center */}
+        <div className="flex justify-center mb-3">
+          <div className={`text-lg font-bold font-mono px-4 py-1 rounded-lg border ${
             isPastLevel 
-              ? `text-${glowColor}-300` 
+              ? `bg-${glowColor}-500/20 text-${glowColor}-300 border-${glowColor}-400/50` 
               : isCurrentLevel 
-                ? 'text-primary' 
-                : 'text-slate-400'
+                ? 'bg-primary/20 text-primary border-primary/50' 
+                : 'bg-slate-800/30 text-slate-400 border-slate-600/50'
           }`}>
             {multiplier ? multiplier.toFixed(2) : '1.00'}x
           </div>
         </div>
         
         {/* Tiles - Rectangular tower formation */}
-        <div className={`grid gap-2 flex-1 ${
+        <div className={`grid gap-2 ${
           tilesPerRow === 2 ? 'grid-cols-2' :
           tilesPerRow === 3 ? 'grid-cols-3' :
           tilesPerRow === 4 ? 'grid-cols-4' : 'grid-cols-3'
@@ -469,17 +485,13 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
           {Array.from({ length: tilesPerRow }, (_, i) => renderTile(levelIndex, i))}
         </div>
 
-        {/* Status indicator */}
-        {isPastLevel && (
-          <div className={`flex items-center gap-2 text-${glowColor}-300 font-bold text-sm`}>
-            <Crown className="w-4 h-4" />
-            <span className="font-mono">CLEARED</span>
-          </div>
-        )}
+        {/* Status indicator (optional - can be removed if not needed) */}
         {isCurrentLevel && game?.status === 'active' && (
-          <div className="flex items-center gap-2 text-primary font-bold text-sm animate-pulse">
-            <Target className="w-4 h-4" />
-            <span className="font-mono">ACTIVE</span>
+          <div className="flex justify-center mt-2">
+            <div className="flex items-center gap-2 text-primary font-bold text-xs animate-pulse">
+              <Target className="w-3 h-3" />
+              <span className="font-mono">ACTIVE</span>
+            </div>
           </div>
         )}
       </div>
