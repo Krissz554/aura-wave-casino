@@ -458,14 +458,6 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
                         </div>
                       </div>
                       
-                      <div className="text-center space-y-1">
-                        <div className="flex justify-center space-x-4 text-xs text-orange-300 font-mono">
-                          <span>HOURS</span>
-                          <span>MINUTES</span>
-                          <span>SECONDS</span>
-                        </div>
-                      </div>
-                      
                       <div className="w-full bg-slate-700/50 rounded-full h-3 overflow-hidden">
                         <div 
                           className="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full transition-all duration-1000 animate-pulse"
@@ -540,9 +532,6 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
                       <LogOut className="h-4 w-4 mr-2 inline" />
                       {isDeleting ? 'Processing...' : 'Logout Immediately'}
                     </button>
-                    <p className="text-slate-500 font-mono text-xs mt-2 text-center">
-                      This is the only available action during deletion countdown
-                    </p>
                   </div>
                 )}
               </div>
