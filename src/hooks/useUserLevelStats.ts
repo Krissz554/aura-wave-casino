@@ -139,14 +139,14 @@ export function useUserLevelStats() {
     // DISABLED:         if (err) {
     // DISABLED:           console.error('📊 USER_LEVEL_STATS: Subscription error:', err);
     // DISABLED:           console.error('📊 USER_LEVEL_STATS: Status:', status);
-        } else {
-          console.log('📊 USER_LEVEL_STATS: Subscription status:', status);
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
+    // DISABLED:         } else {
+    // DISABLED:           console.log('📊 USER_LEVEL_STATS: Subscription status:', status);
+    // DISABLED:         }
+    // DISABLED:       });
+    // DISABLED: 
+    // DISABLED:     return () => {
+    // DISABLED:       supabase.removeChannel(subscription);
+    // DISABLED:     };
   }, [user]);
 
   const fetchStats = async () => {
