@@ -81,6 +81,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   // Get admin status for all users in the list
   const userIds = users.map(user => user.id);
   const { adminStatuses } = useMultipleAdminStatus(userIds);
+  const [pendingDeletions, setPendingDeletions] = useState<Record<string, any>>({});
+  const [showInstantDeleteConfirm, setShowInstantDeleteConfirm] = useState(false);
+  const [instantDeletingUser, setInstantDeletingUser] = useState(false);
+  const [instantDeleteVerificationText, setInstantDeleteVerificationText] = useState('');
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [resettingUser, setResettingUser] = useState(false);
   const [verificationText, setVerificationText] = useState('');
@@ -140,6 +144,26 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.error('❌ Error checking user count:', err);
     }
     return null;
+  };
+
+  // Load pending deletions
+  const loadPendingDeletions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('pending_account_deletions')
+        .select('*')
+        .eq('status', 'pending');
+
+      if (!error && data) {
+        const pendingMap: Record<string, any> = {};
+        data.forEach(deletion => {
+          pendingMap[deletion.user_id] = deletion;
+        });
+        setPendingDeletions(pendingMap);
+      }
+    } catch (error) {
+      console.log('Pending deletions table may not exist:', error);
+    }
   };
 
   // Load all users
@@ -474,6 +498,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setSelectedUser(null);
       setVerificationText('');
       loadUsers(); // Refresh the user list
+      loadPendingDeletions(); // Refresh pending deletions
 
       console.log('Reset completed successfully');
     } catch (error) {
@@ -505,7 +530,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== INITIATE USER ACCOUNT DELETION ===');
       console.log('User ID:', userId);
       
-      const deletionTime = new Date(Date.now() + 30000); // 30 seconds from now
+      const deletionTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
       
       // Try to create pending deletion record (fallback if table doesn't exist)
       console.log('Creating pending deletion record...');
@@ -567,7 +592,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           user_id: userId,
           type: 'admin_message',
           title: 'Account Deletion Initiated',
-          message: 'Your account has been marked for deletion by an administrator. Your account will be permanently deleted in 30 seconds.',
+          message: 'Your account has been marked for deletion by an administrator. Your account will be permanently deleted in 24 hours.',
           data: notificationData
         });
 
@@ -582,7 +607,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       const methodText = useFallbackMethod ? ' (using fallback method)' : '';
       toast({
         title: "Deletion Scheduled",
-        description: `User account deletion has been scheduled. The account will be automatically deleted in 30 seconds (${deletionTime.toLocaleTimeString()})${methodText}.`,
+        description: `User account deletion has been scheduled. The account will be automatically deleted in 24 hours (${deletionTime.toLocaleString()})${methodText}.`,
       });
       
       // If using fallback method, start a client-side timer for deletion
@@ -590,7 +615,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         console.log('Starting fallback deletion timer...');
         setTimeout(async () => {
           try {
-            console.log('Executing fallback deletion after 30 seconds...');
+            console.log('Executing fallback deletion after 24 hours...');
             
             // Call the existing Edge Function directly
             const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
@@ -614,7 +639,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           } catch (error) {
             console.error('Error in fallback deletion:', error);
           }
-        }, 30000); // 30 seconds
+        }, 24 * 60 * 60 * 1000); // 24 hours
       }
 
       setShowDeleteConfirm(false);
@@ -633,6 +658,82 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       });
     } finally {
       setDeletingUser(false);
+    }
+  };
+
+  // Instant delete user account (skips the 24-hour delay)
+  const instantDeleteUserAccount = async (userId: string) => {
+    // Prevent deletion of admin accounts
+    if (adminStatuses[userId]) {
+      toast({
+        title: "Access Denied",
+        description: "Admin accounts cannot be deleted for security reasons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setInstantDeletingUser(true);
+    try {
+      console.log('=== INSTANT USER ACCOUNT DELETION ===');
+      console.log('User ID:', userId);
+      
+      // Call the existing Edge Function directly for immediate deletion
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          user_id: userId,
+          instant_deletion: true
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Instant deletion failed:', response.status, response.statusText);
+        toast({
+          title: "Error",
+          description: "Failed to delete user account",
+          variant: "destructive",
+        });
+      } else {
+        const result = await response.json();
+        console.log('Instant deletion completed:', result);
+        
+        // Remove from pending deletions if it was there
+        if (pendingDeletions[userId]) {
+          try {
+            await supabase
+              .from('pending_account_deletions')
+              .delete()
+              .eq('user_id', userId);
+          } catch (error) {
+            console.log('Note: Could not remove from pending deletions table:', error);
+          }
+        }
+        
+        toast({
+          title: "User Deleted",
+          description: "User account has been permanently deleted.",
+        });
+        
+        setShowInstantDeleteConfirm(false);
+        setSelectedUser(null);
+        setInstantDeleteVerificationText('');
+        loadUsers(); // Refresh the user list
+        loadPendingDeletions(); // Refresh pending deletions
+      }
+    } catch (error) {
+      console.error('Error in instant deletion:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete user account",
+        variant: "destructive",
+      });
+    } finally {
+      setInstantDeletingUser(false);
     }
   };
 
@@ -897,6 +998,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   useEffect(() => {
     if (showUserManagement) {
       loadUsers();
+      loadPendingDeletions();
     }
   }, [showUserManagement]);
 
