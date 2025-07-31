@@ -236,7 +236,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
         
         toast({
           title: "DATA EXTRACTION SUCCESSFUL",
-          description: `Secured ${updatedGame.final_payout?.toFixed(2)} credits from floor ${updatedGame.current_level}!`,
+          description: `Secured ${(updatedGame.final_payout || 0).toFixed(2)} credits from floor ${updatedGame.current_level}!`,
         });
       }
       
@@ -285,7 +285,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
       
       toast({
         title: "SECURE EXTRACTION",
-        description: `Successfully extracted ${updatedGame.final_payout?.toFixed(2)} credits!`,
+        description: `Successfully extracted ${(updatedGame.final_payout || 0).toFixed(2)} credits!`,
       });
       
       refreshHistory();
@@ -437,7 +437,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                 ? 'text-primary' 
                 : 'text-slate-400'
           }`}>
-            {multiplier.toFixed(2)}x
+            {multiplier ? multiplier.toFixed(2) : '1.00'}x
           </div>
         </div>
         
@@ -638,7 +638,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                       <div className="text-slate-300">
                         NEXT: <span className="text-amber-400">
                           {game.current_level < PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS].length - 1 
-                            ? `${PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS][game.current_level + 1].toFixed(2)}x`
+                            ? `${(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS][game.current_level + 1] || 1).toFixed(2)}x`
                             : 'MAX'
                           }
                         </span>
@@ -712,7 +712,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                     </div>
                     <h3 className="text-2xl font-mono font-bold text-emerald-400">DATA EXTRACTION SUCCESSFUL</h3>
                     <p className="text-slate-300 font-mono">
-                      Successfully extracted ${game.final_payout?.toFixed(2)} from floor {game.current_level}
+                      Successfully extracted ${(game.final_payout || 0).toFixed(2)} from floor {game.current_level}
                     </p>
                     <div className="text-emerald-400 font-mono text-sm">
                       {game.current_multiplier.toFixed(2)}x multiplier achieved
