@@ -643,23 +643,17 @@ export default function Index({ initialGame }: IndexProps) {
 
 
 
-  // Use levelStats (profiles table with decimals) as primary source for XP display
-  // userLevelStats (user_level_stats table) has integers, levelStats has precise decimals
+  // Use user_level_stats as the single source of truth for level and XP data
   const effectiveStats = {
-    current_level: levelStats?.current_level || userLevelStats?.current_level || 1,
-    lifetime_xp: levelStats?.lifetime_xp || userLevelStats?.lifetime_xp || 0, // Prioritize decimal XP from profiles
-    current_level_xp: levelStats?.current_level_xp || userLevelStats?.current_level_xp || 0, // Prioritize decimal XP
-    xp_to_next_level: levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
+    current_level: userData?.levelStats?.current_level || userLevelStats?.current_level || 1,
+    lifetime_xp: userData?.levelStats?.lifetime_xp || userLevelStats?.lifetime_xp || 0,
+    current_level_xp: userData?.levelStats?.current_level_xp || userLevelStats?.current_level_xp || 0,
+    xp_to_next_level: userData?.levelStats?.xp_to_next_level || userLevelStats?.xp_to_next_level || 100
   };
 
-  // For consistent decimal display, use the database-calculated current_level_xp with decimal precision
-  // The database functions should calculate this correctly when leveling up
+  // Get current level XP from user_level_stats table
   const displayCurrentLevelXP = useMemo(() => {
-    // Use current_level_xp from database (calculated by level functions)
-    // This should reset to 0 (or remainder) when leveling up and show decimal precision
     const currentLevelXP = effectiveStats.current_level_xp;
-    
-    // Ensure it's treated as a decimal number for consistent precision
     return Number(currentLevelXP);
   }, [effectiveStats.current_level_xp]);
 

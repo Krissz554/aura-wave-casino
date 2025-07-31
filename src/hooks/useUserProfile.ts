@@ -8,16 +8,18 @@ export interface UserProfile {
   username: string
   registration_date: string
   balance: number
-  level: number
-  xp: number
-  current_level: number
-  current_xp: number
-  xp_to_next_level: number
-  lifetime_xp: number
   total_wagered: number
   total_profit: number
   last_claim_time: string
   badges: string[]
+  // Level and XP data comes from user_level_stats
+  levelStats?: {
+    current_level: number
+    current_level_xp: number
+    lifetime_xp: number
+    xp_to_next_level: number
+    border_tier: number
+  }
   gameStats: {
     coinflip: { wins: number; losses: number; profit: number }
     crash: { wins: number; losses: number; profit: number }
@@ -188,10 +190,21 @@ export function useUserProfile() {
     try {
       console.log('[useUserProfile] Fetching profile for user:', user.id);
       
-      // Fetch profile
+      // Fetch profile (without level/XP data)
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          id,
+          username,
+          registration_date,
+          balance,
+          total_wagered,
+          total_profit,
+          last_claim_time,
+          badges,
+          created_at,
+          updated_at
+        `)
         .eq('id', user.id)
         .single();
 
@@ -218,7 +231,18 @@ export function useUserProfile() {
         // Try fetching profile again
         const { data: retryProfile, error: retryError } = await supabase
           .from('profiles')
-          .select('*')
+          .select(`
+            id,
+            username,
+            registration_date,
+            balance,
+            total_wagered,
+            total_profit,
+            last_claim_time,
+            badges,
+            created_at,
+            updated_at
+          `)
           .eq('id', user.id)
           .single();
         
@@ -259,11 +283,14 @@ export function useUserProfile() {
         console.error('[useUserProfile] Error fetching level stats:', levelStatsError);
         // Create a default profile with game stats
         const profileWithGameStats = {
-          ...profile,
-          current_level: 1,
-          current_xp: 0,
-          xp_to_next_level: 100,
-          lifetime_xp: 0,
+          ...finalProfile,
+          levelStats: {
+            current_level: 1,
+            current_level_xp: 0,
+            xp_to_next_level: 100,
+            lifetime_xp: 0,
+            border_tier: 1
+          },
           gameStats: {
             coinflip: { wins: 0, losses: 0, profit: 0 },
             crash: { wins: 0, losses: 0, profit: 0 },
@@ -279,8 +306,14 @@ export function useUserProfile() {
       console.log('[useUserProfile] Level stats fetched successfully');
 
       const combinedData = {
-        ...profile,
-        ...levelStats,
+        ...finalProfile,
+        levelStats: {
+          current_level: levelStats?.current_level || 1,
+          current_level_xp: levelStats?.current_level_xp || 0,
+          lifetime_xp: levelStats?.lifetime_xp || 0,
+          xp_to_next_level: levelStats?.xp_to_next_level || 100,
+          border_tier: levelStats?.border_tier || 1
+        },
         gameStats: {
           coinflip: {
             wins: levelStats?.coinflip_wins || 0,

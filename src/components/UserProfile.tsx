@@ -171,15 +171,19 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
             tower: { wins: levelStats?.tower_wins || 0, losses: Math.max(0, (levelStats?.tower_games || 0) - (levelStats?.tower_wins || 0)), profit: levelStats?.tower_profit || 0 }
           };
 
-          // Build user data object (use profile XP data which has 3-decimal precision)
+          // Build user data object using level stats from user_level_stats
           const fetchedUser: UserProfileType = {
             id: profile.id,
             username: profile.username,
             balance: profile.balance,
-            current_level: profile.current_level || 1,
-            current_xp: profile.current_xp || 0, // Use profiles.current_xp (3 decimals)
-            xp_to_next_level: profile.xp_to_next_level || 100,
             registration_date: profile.created_at,
+            levelStats: {
+              current_level: levelStats?.current_level || 1,
+              current_level_xp: levelStats?.current_level_xp || 0,
+              lifetime_xp: levelStats?.lifetime_xp || 0,
+              xp_to_next_level: levelStats?.xp_to_next_level || 100,
+              border_tier: levelStats?.border_tier || 1
+            },
             gameStats,
             badges: [] // You might want to fetch this from a badges table
           };

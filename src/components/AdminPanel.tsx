@@ -193,8 +193,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         setUsers((data || []).map(user => ({
           id: user.id,
           username: user.username || '',
-          level: user.level || 1,
-          xp: user.xp || 0,
+                      level: user.levelStats?.current_level || 1,
+            xp: user.levelStats?.current_level_xp || 0,
           balance: user.balance || 0,
           total_wagered: user.total_wagered || 0,
           created_at: user.created_at || ''
@@ -1653,7 +1653,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </div>
                       <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
                         <Target className="h-2.5 w-2.5 text-green-400" />
-                        <span className="text-green-400 font-mono">{user.xp}</span>
+                        <span className="text-green-400 font-mono">{user.xp} XP</span>
                       </div>
                       <div className="flex items-center space-x-1 p-1 bg-slate-700/30 rounded text-xs">
                         <Coins className="h-2.5 w-2.5 text-purple-400" />
