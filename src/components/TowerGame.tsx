@@ -315,7 +315,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     
     // Debug logging for first few renders
     if (game && levelIndex <= 2) {
-      console.log(`🏗️ Tower Tile Debug - Level ${levelIndex}: current=${game.current_level}, isCurrentLevel=${isCurrentLevel}, isPastLevel=${isPastLevel}, revealed=${revealed?.safe}`);
+      console.log(`🏗️ Tower Level ${levelIndex}: current=${game.current_level}, isCurrentLevel=${isCurrentLevel}, isPastLevel=${isPastLevel}, revealed=${revealed?.safe}, status=${game.status}`);
     }
     
     const hasCharacter = isPastLevel && tileIndex === Math.floor(tilesPerRow / 2);
@@ -380,7 +380,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
           ) : isCurrentLevel && game?.status === 'active' ? (
             <div className="flex items-center gap-2 text-primary opacity-70">
               <Cpu className="w-4 h-4" />
-              <span className="text-xs">SCAN</span>
+              <span className="text-xs">CLICK</span>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-slate-500 opacity-40">
