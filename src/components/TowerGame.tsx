@@ -151,13 +151,20 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
 
     setLoading(true);
     try {
+      const requestBody = { 
+        action: 'start',
+        bet_amount: amount,
+        difficulty: difficulty,
+        user_id: userData.id
+      };
+      
+      console.log('🎯 TOWER: Sending request:', requestBody);
+      console.log('🎯 TOWER: User data:', userData);
+      console.log('🎯 TOWER: Amount:', amount, 'Type:', typeof amount);
+      console.log('🎯 TOWER: Difficulty:', difficulty, 'Type:', typeof difficulty);
+      
       const response = await supabase.functions.invoke('tower-engine', {
-        body: { 
-          action: 'start',
-          bet_amount: amount,
-          difficulty: difficulty,
-          user_id: userData.id
-        }
+        body: requestBody
       });
 
       if (response.error) throw response.error;

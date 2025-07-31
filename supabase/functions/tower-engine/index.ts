@@ -76,6 +76,17 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Health check endpoint
+  if (req.method === 'GET') {
+    return new Response(JSON.stringify({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      message: 'Tower Engine is running'
+    }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -83,7 +94,10 @@ serve(async (req) => {
     );
 
     const authHeader = req.headers.get('Authorization');
+    console.log(`🔐 Auth header present: ${!!authHeader}`);
+    
     if (!authHeader) {
+      console.error('❌ Missing Authorization header');
       return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -93,16 +107,31 @@ serve(async (req) => {
     const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
     
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      console.error('❌ Auth error:', userError);
+      console.error('❌ User:', user);
+      return new Response(JSON.stringify({ error: 'Unauthorized', details: userError?.message }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    console.log(`✅ Authenticated user: ${user.id}`);
 
-    const requestBody = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log(`📝 Raw request body:`, requestBody);
+    } catch (error) {
+      console.error('❌ Failed to parse request body:', error);
+      return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const { action, game_id, difficulty, bet_amount, tile_index } = requestBody;
     console.log(`🎯 Tower action: ${action} for user: ${user.id}`);
-    console.log(`📝 Request body:`, requestBody);
+    console.log(`📊 Parsed values: action=${action}, difficulty=${difficulty}, bet_amount=${bet_amount}, user=${user.id}`);
 
     switch (action) {
       case 'start': {
