@@ -40,6 +40,7 @@ export function useUserProfile() {
       return
     }
 
+    // TEMPORARILY DISABLED: Realtime subscriptions causing schema mismatch errors    console.log("[useUserProfile] Realtime disabled, using manual refresh only");    return;
     fetchUserProfile()
     
     // Set up real-time subscription for user_level_stats (primary data source)

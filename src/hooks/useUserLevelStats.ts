@@ -87,7 +87,17 @@ export function useUserLevelStats() {
 
     fetchStats();
     
+    // Temporarily disable realtime subscription to prevent schema mismatch errors
+    // This will be re-enabled once the schema issues are resolved
+    const ENABLE_REALTIME = false;
+    
+    if (!ENABLE_REALTIME) {
+      console.log('📊 USER_LEVEL_STATS: Realtime disabled, using polling fallback');
+      return;
+    }
+    
     // Set up real-time subscription with stable channel name
+    // TEMPORARILY DISABLED: Realtime subscription causing schema mismatch errors    return;
     const channelName = `user_level_stats_${user.id}`;
     
     // Remove any existing channel first to prevent duplicates
@@ -97,22 +107,41 @@ export function useUserLevelStats() {
       supabase.removeChannel(existingChannel);
     }
     
-    const subscription = supabase
-      .channel(channelName)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'user_level_stats',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          fetchStats();
+    // DISABLED:     const subscription = supabase
+    // DISABLED:       .channel(channelName)
+    // DISABLED:       .on(
+    // DISABLED:         'postgres_changes',
+    // DISABLED:         {
+    // DISABLED:           event: 'UPDATE',
+    // DISABLED:           schema: 'public',
+    // DISABLED:           table: 'user_level_stats',
+    // DISABLED:           filter: `user_id=eq.${user.id}`
+    // DISABLED:         },
+    // DISABLED:         (payload) => {
+    // DISABLED:           console.log('📊 USER_LEVEL_STATS: Received update:', payload);
+    // DISABLED:           fetchStats();
+    // DISABLED:         }
+    // DISABLED:       )
+    // DISABLED:       .on(
+    // DISABLED:         'postgres_changes',
+    // DISABLED:         {
+    // DISABLED:           event: 'INSERT',
+    // DISABLED:           schema: 'public',
+    // DISABLED:           table: 'user_level_stats',
+    // DISABLED:           filter: `user_id=eq.${user.id}`
+    // DISABLED:         },
+    // DISABLED:         (payload) => {
+    // DISABLED:           console.log('📊 USER_LEVEL_STATS: Received insert:', payload);
+    // DISABLED:           fetchStats();
+    // DISABLED:         }
+    // DISABLED:       )
+    // DISABLED:       .subscribe((status, err) => {
+    // DISABLED:         if (err) {
+    // DISABLED:           console.error('📊 USER_LEVEL_STATS: Subscription error:', err);
+    // DISABLED:           console.error('📊 USER_LEVEL_STATS: Status:', status);
+        } else {
+          console.log('📊 USER_LEVEL_STATS: Subscription status:', status);
         }
-      )
-      .subscribe((status, err) => {
-        if (err) console.error('📊 USER_LEVEL_STATS: Subscription error:', err);
       });
 
     return () => {
