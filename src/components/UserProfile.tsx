@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAchievementNotifications } from '@/hooks/useAchievementNotifications';
 import { formatXP, formatXPProgress, calculateXPProgress } from '@/lib/xpUtils';
 import { useAdminStatus } from '@/hooks/useAdminStatus';
+import { useToast } from '@/hooks/use-toast';
 
 interface UserProfileProps {
   isOpen: boolean;
@@ -1552,6 +1553,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
   const [claimableAchievements, setClaimableAchievements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [claiming, setClaiming] = useState<string | null>(null);
+  const { toast } = useToast();
   const [newlyClaimed, setNewlyClaimed] = useState<string[]>([]);
   const [userStats, setUserStats] = useState<any>(null);
 
@@ -1843,12 +1845,24 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
 
   const claimAchievement = async (achievement: any) => {
     if (!isOwnProfile) {
+      console.error('❌ Cannot claim achievement: not own profile');
       return;
     }
     
     if (!userId) {
+      console.error('❌ Cannot claim achievement: userId is undefined');
+      console.log('Current userId:', userId);
+      console.log('Current isOwnProfile:', isOwnProfile);
       return;
     }
+    
+    console.log('🎯 Claiming achievement:', {
+      achievementId: achievement.id,
+      achievementName: achievement.name,
+      userId: userId,
+      rewardType: achievement.reward_type,
+      rewardAmount: achievement.reward_amount
+    });
     
     setClaiming(achievement.id);
     
@@ -1858,6 +1872,9 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         p_achievement_id: achievement.id
       });
 
+      console.log('📊 Claim result:', claimResult);
+      console.log('❗ Claim error:', claimError);
+
       if (claimError) {
         console.error('❌ Error claiming achievement:', claimError);
         throw claimError;
@@ -1865,12 +1882,18 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       
       // Check if the claim was successful
       if (claimResult && claimResult.success) {
+        console.log('✅ Achievement claim successful!');
         // Success - continue with UI updates
-      } else if (claimResult && claimResult.error === 'Achievement already unlocked') {
+      } else if (claimResult && claimResult.error === 'Achievement already claimed') {
+        console.log('⚠️ Achievement already claimed, refreshing data');
         // Just refresh the data to update the UI
         await fetchData();
         return; // Don't throw error, just return
+      } else if (claimResult && claimResult.error) {
+        console.error('❌ Claim failed with error:', claimResult.error);
+        throw new Error(claimResult.error);
       } else {
+        console.error('❌ Unexpected claim result:', claimResult);
         throw new Error('Claim was not successful: ' + JSON.stringify(claimResult));
       }
 
@@ -1880,6 +1903,13 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         : achievement.reward_type === 'cases' 
         ? `${achievement.reward_amount} cases` 
         : `${achievement.reward_amount} XP`;
+
+      // Show success toast
+      toast({
+        title: "🎉 Achievement Claimed!",
+        description: `You've claimed "${achievement.name}" and received ${rewardText}!`,
+        duration: 5000,
+      });
 
       // Track newly claimed achievement for smooth transition
       setNewlyClaimed(prev => [...prev, achievement.id]);
@@ -2121,7 +2151,18 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                                   await claimAchievement(achievement);
                                 } catch (error) {
                                   console.error('❌ Failed to claim achievement:', error);
-                                  alert('Failed to claim achievement. Please try again.');
+                                  
+                                  // Provide specific error message
+                                  let errorMessage = 'Failed to claim achievement. Please try again.';
+                                  if (error?.message?.includes('Achievement already claimed')) {
+                                    errorMessage = 'This achievement has already been claimed.';
+                                  } else if (error?.message?.includes('Achievement not unlocked')) {
+                                    errorMessage = 'This achievement is not ready to claim yet.';
+                                  } else if (error?.message?.includes('not found')) {
+                                    errorMessage = 'Achievement not found. Please refresh the page.';
+                                  }
+                                  
+                                  alert(errorMessage);
                                 }
                               }}
                               disabled={claiming === achievement.id}
