@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send, TrendingUp, Clock } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send, TrendingUp, Clock, X } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -734,6 +734,66 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       });
     } finally {
       setInstantDeletingUser(false);
+    }
+  };
+
+  // Stop pending deletion (cancel the deletion process)
+  const stopPendingDeletion = async (userId: string) => {
+    try {
+      console.log('=== STOPPING PENDING DELETION ===');
+      console.log('User ID:', userId);
+      
+      // Remove from pending deletions table
+      const { error } = await supabase
+        .from('pending_account_deletions')
+        .delete()
+        .eq('user_id', userId)
+        .eq('status', 'pending');
+
+      if (error) {
+        console.error('Error stopping pending deletion:', error);
+        toast({
+          title: "Error",
+          description: "Failed to stop pending deletion",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Send notification to user about cancellation
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          type: 'admin_message',
+          title: 'Account Deletion Cancelled',
+          message: 'Your pending account deletion has been cancelled by an administrator. Your account is now safe.',
+          data: {
+            deletion_cancelled: true,
+            cancelled_at: new Date().toISOString()
+          }
+        });
+
+      if (notificationError) {
+        console.error('Error sending cancellation notification:', notificationError);
+      }
+
+      toast({
+        title: "Deletion Stopped",
+        description: "Pending account deletion has been cancelled. User account is now safe.",
+      });
+
+      // Refresh the data
+      loadUsers();
+      loadPendingDeletions();
+      
+    } catch (error) {
+      console.error('Error stopping pending deletion:', error);
+      toast({
+        title: "Error",
+        description: "Failed to stop pending deletion",
+        variant: "destructive",
+      });
     }
   };
 
@@ -1498,7 +1558,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                     )}
                     
                     {/* Compact Action Buttons */}
-                    <div className="grid grid-cols-3 gap-1">
+                    <div className={`grid gap-1 ${pendingDeletions[user.id] ? 'grid-cols-4' : 'grid-cols-3'}`}>
                       <Button
                         onClick={() => {
                           setSelectedUser(user);
@@ -1591,7 +1651,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Reset
                         </Button>
                       )}
-                      {/* Delete and Instant Delete buttons */}
+                      {/* Delete, Instant Delete, and Stop Deletion buttons */}
                       {adminStatuses[user.id] ? (
                         <Button
                           disabled
@@ -1604,19 +1664,30 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Protected
                         </Button>
                       ) : pendingDeletions[user.id] ? (
-                        // If user has pending deletion, show instant delete button
-                        <Button
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setShowInstantDeleteConfirm(true);
-                          }}
-                          size="sm"
-                          variant="outline"
-                          className="bg-gradient-to-r from-red-900 to-red-950 hover:from-red-800 hover:to-red-900 text-red-300 border border-red-500/50 font-mono text-xs h-7 col-span-2"
-                        >
-                          <Zap className="h-2.5 w-2.5 mr-1" />
-                          Instant Delete
-                        </Button>
+                        // If user has pending deletion, show both instant delete and stop deletion buttons
+                        <>
+                          <Button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setShowInstantDeleteConfirm(true);
+                            }}
+                            size="sm"
+                            variant="outline"
+                            className="bg-gradient-to-r from-red-900 to-red-950 hover:from-red-800 hover:to-red-900 text-red-300 border border-red-500/50 font-mono text-xs h-7"
+                          >
+                            <Zap className="h-2.5 w-2.5 mr-1" />
+                            Instant
+                          </Button>
+                          <Button
+                            onClick={() => stopPendingDeletion(user.id)}
+                            size="sm"
+                            variant="outline"
+                            className="bg-gradient-to-r from-green-700 to-green-800 hover:from-green-600 hover:to-green-700 text-green-300 border border-green-500/50 font-mono text-xs h-7"
+                          >
+                            <X className="h-2.5 w-2.5 mr-1" />
+                            Stop
+                          </Button>
+                        </>
                       ) : (
                         <Button
                           onClick={() => {
