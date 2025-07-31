@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -253,6 +253,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-md border-0 bg-transparent">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Loading Profile</DialogTitle>
+            <DialogDescription>Fetching user data, please wait...</DialogDescription>
+          </DialogHeader>
           <div className="relative h-full">
             <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-background/95 backdrop-blur-xl rounded-2xl border border-white/10" />
             <div className="relative p-8 text-center">
@@ -303,6 +307,10 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[95vh] flex flex-col p-0 border-0 bg-transparent overflow-hidden user-profile-scrollbar cyberpunk-scrollbar">
+        <DialogHeader className="sr-only">
+          <DialogTitle>User Profile</DialogTitle>
+          <DialogDescription>View detailed user statistics, achievements, and game history</DialogDescription>
+        </DialogHeader>
         <div className="relative h-full">
           {/* Multi-layered Cyberpunk Background */}
           <div className="absolute inset-0 bg-gradient-to-br from-slate-950/95 via-slate-900/90 to-slate-950/95 backdrop-blur-xl rounded-2xl" />
