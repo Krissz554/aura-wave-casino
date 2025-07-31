@@ -306,14 +306,14 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
   const renderTile = (levelIndex: number, tileIndex: number) => {
     const tileKey = `${levelIndex}-${tileIndex}`;
     const isAnimating = animatingTiles.has(tileKey);
-    const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO].tilesPerRow;
+    const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.tilesPerRow || 3;
     const isCurrentLevel = game?.current_level === levelIndex;
     const isPastLevel = game && game.current_level > levelIndex;
-    const revealed = game?.mine_positions[levelIndex]?.[tileIndex] !== undefined ? 
-      { safe: game.mine_positions[levelIndex][tileIndex] === 1 } : null;
+    const revealed = game?.mine_positions?.[levelIndex]?.[tileIndex] !== undefined ? 
+      { safe: game.mine_positions?.[levelIndex]?.[tileIndex] === 1 } : null;
     
     const hasCharacter = isPastLevel && tileIndex === Math.floor(tilesPerRow / 2);
-    const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO].glowColor;
+    const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
 
     // Base cyberpunk tile styling
     let tileClass = "group relative w-full h-14 rounded-lg border-2 transition-all duration-300 font-mono text-sm ";
@@ -370,7 +370,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               </div>
             )
           ) : hasCharacter && game ? (
-            <div className="text-2xl animate-bounce">{DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO].character}</div>
+            <div className="text-2xl animate-bounce">{DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.character || '🤖'}</div>
           ) : isCurrentLevel && game?.status === 'active' ? (
             <div className="flex items-center gap-2 text-primary opacity-70">
               <Cpu className="w-4 h-4" />
@@ -398,12 +398,12 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
 
   // Render tower level with cyberpunk design
   const renderLevel = (levelIndex: number) => {
-    const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO].tilesPerRow;
-    const multiplier = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS][levelIndex];
+    const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.tilesPerRow || 3;
+    const multiplier = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS]?.[levelIndex];
     const levelNum = levelIndex + 1;
     const isCurrentLevel = game?.current_level === levelIndex;
     const isPastLevel = game && game.current_level > levelIndex;
-    const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO].glowColor;
+    const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
 
     return (
       <div 
@@ -653,11 +653,12 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                 <div className="space-y-3">
                   {/* Tower levels - displayed top to bottom (reverse order) */}
                   <div className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
-                    {PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS]
+                    {(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [])
                       .slice()
                       .reverse()
                       .map((_, index) => {
-                        const actualLevel = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS].length - 1 - index;
+                        const multipliers = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [];
+                        const actualLevel = multipliers.length - 1 - index;
                         return renderLevel(actualLevel);
                       })}
                   </div>
