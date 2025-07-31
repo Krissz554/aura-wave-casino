@@ -426,6 +426,28 @@ export default function Index({ initialGame }: IndexProps) {
                 setTimeout(() => {
                   fetchNotifications();
                 }, 1000);
+              } else if (newNotification.type === 'admin_message' && 
+                        newNotification.title === 'Account Deletion - Immediate' &&
+                        newNotification.data?.instant_deletion) {
+                console.log('Instant deletion notification received, forcing logout');
+                
+                // Show immediate notification
+                toast({
+                  title: "⚡ Immediate Deletion",
+                  description: "Your account deletion has been expedited. Logging you out now...",
+                  variant: "destructive",
+                  duration: 3000,
+                });
+                
+                // Force logout after brief delay
+                setTimeout(async () => {
+                  try {
+                    await signOut();
+                  } catch (error) {
+                    console.error('Error during forced logout:', error);
+                    window.location.href = '/';
+                  }
+                }, 2000);
               } else {
                 // Enhanced toast notification with type-specific styling
                 toast({
@@ -504,13 +526,34 @@ export default function Index({ initialGame }: IndexProps) {
             fetchNotifications();
           }, 1000);
         })
-        .on('broadcast', { event: 'notifications_updated' }, (payload) => {
-          console.log('Notifications update broadcast received:', payload);
-          if (payload.payload?.action === 'deletion_cancelled') {
-            // Force refresh notifications
-            fetchNotifications();
-          }
-        })
+                 .on('broadcast', { event: 'notifications_updated' }, (payload) => {
+           console.log('Notifications update broadcast received:', payload);
+           if (payload.payload?.action === 'deletion_cancelled') {
+             // Force refresh notifications
+             fetchNotifications();
+           }
+         })
+         .on('broadcast', { event: 'instant_deletion_initiated' }, (payload) => {
+           console.log('Instant deletion broadcast received:', payload);
+           
+           // Show immediate notification
+           toast({
+             title: "⚡ Immediate Deletion",
+             description: "Your account deletion has been expedited. Logging you out now...",
+             variant: "destructive",
+             duration: 3000,
+           });
+           
+           // Force logout after brief delay
+           setTimeout(async () => {
+             try {
+               await signOut();
+             } catch (error) {
+               console.error('Error during forced logout:', error);
+               window.location.href = '/';
+             }
+           }, 2000);
+         })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') {
             // Only show error if not unmounting

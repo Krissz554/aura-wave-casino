@@ -678,7 +678,43 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== INSTANT USER ACCOUNT DELETION ===');
       console.log('User ID:', userId);
       
-      // Call the existing Edge Function directly for immediate deletion
+      // 1. Send immediate notification to user about instant deletion
+      console.log('Sending instant deletion notification to user...');
+      const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          user_id: userId,
+          type: 'admin_message',
+          title: 'Account Deletion - Immediate',
+          message: 'Your account deletion has been expedited by an administrator. You will be logged out and your account will be deleted immediately.',
+          data: {
+            instant_deletion: true,
+            initiated_at: new Date().toISOString(),
+            force_logout: true
+          }
+        });
+
+      if (notificationError) {
+        console.error('Error sending instant deletion notification:', notificationError);
+      }
+
+      // 2. Send real-time broadcast to user's client for immediate action
+      const userChannel = supabase.channel(`user-${userId}`);
+      userChannel.send({
+        type: 'broadcast',
+        event: 'instant_deletion_initiated',
+        payload: {
+          message: 'Your account deletion has been expedited. You will be logged out immediately.',
+          timestamp: new Date().toISOString(),
+          force_logout: true,
+          instant_deletion: true
+        }
+      });
+
+      // 3. Give user a moment to see the notification before deletion
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // 4. Call the existing Edge Function directly for immediate deletion
       const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
         method: 'POST',
         headers: {

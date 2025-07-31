@@ -44,19 +44,44 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
     // Set up real-time listener for cancellation events
     const channel = supabase.channel(`user-${user.id}`);
     
-    channel.on('broadcast', { event: 'deletion_cancelled' }, (payload) => {
-      console.log('Deletion cancellation received:', payload);
-      setDeletionCancelled(true);
-      toast({
-        title: "Deletion Cancelled",
-        description: "Your account deletion has been cancelled by an administrator.",
-      });
-      
-      // Close the deletion handler after a short delay
-      setTimeout(() => {
-        onClose();
-      }, 3000);
-    });
+         channel.on('broadcast', { event: 'deletion_cancelled' }, (payload) => {
+       console.log('Deletion cancellation received:', payload);
+       setDeletionCancelled(true);
+       toast({
+         title: "Deletion Cancelled",
+         description: "Your account deletion has been cancelled by an administrator.",
+       });
+       
+       // Close the deletion handler after a short delay
+       setTimeout(() => {
+         onClose();
+       }, 3000);
+     })
+     .on('broadcast', { event: 'instant_deletion_initiated' }, (payload) => {
+       console.log('Instant deletion initiated:', payload);
+       
+       // Show immediate notification
+       toast({
+         title: "⚡ Immediate Deletion",
+         description: "Your account deletion has been expedited. Logging you out now...",
+         variant: "destructive",
+         duration: 3000,
+       });
+       
+       // Update UI to show immediate deletion state
+       setIsDeleting(true);
+       
+       // Force logout after showing the message
+       setTimeout(async () => {
+         try {
+           await signOut();
+         } catch (error) {
+           console.error('Error during forced logout:', error);
+           // Force page redirect as fallback
+           window.location.href = '/';
+         }
+       }, 2000);
+     });
 
     channel.subscribe();
 
@@ -72,31 +97,73 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
           .order('created_at', { ascending: false })
           .limit(1);
 
-        if (notifications && notifications.length > 0) {
-          console.log('Found cancellation notification:', notifications[0]);
-          setDeletionCancelled(true);
-          toast({
-            title: "Deletion Cancelled",
-            description: "Your account deletion has been cancelled by an administrator.",
-          });
-          
-          setTimeout(() => {
-            onClose();
-          }, 3000);
-        }
+                 if (notifications && notifications.length > 0) {
+           console.log('Found cancellation notification:', notifications[0]);
+           setDeletionCancelled(true);
+           toast({
+             title: "Deletion Cancelled",
+             description: "Your account deletion has been cancelled by an administrator.",
+           });
+           
+           setTimeout(() => {
+             onClose();
+           }, 3000);
+         }
+       } catch (error) {
+         console.error('Error checking cancellation status:', error);
+       }
+     };
+
+     // Also check for instant deletion notifications
+     const checkInstantDeletionStatus = async () => {
+       try {
+         const { data: notifications } = await supabase
+           .from('notifications')
+           .select('*')
+           .eq('user_id', user.id)
+           .eq('type', 'admin_message')
+           .eq('title', 'Account Deletion - Immediate')
+           .order('created_at', { ascending: false })
+           .limit(1);
+
+         if (notifications && notifications.length > 0) {
+           console.log('Found instant deletion notification:', notifications[0]);
+           
+           toast({
+             title: "⚡ Immediate Deletion",
+             description: "Your account deletion has been expedited. Logging you out now...",
+             variant: "destructive",
+             duration: 3000,
+           });
+           
+           setIsDeleting(true);
+           
+           // Force logout after showing the message
+           setTimeout(async () => {
+             try {
+               await signOut();
+             } catch (error) {
+               console.error('Error during forced logout:', error);
+               window.location.href = '/';
+             }
+           }, 2000);
+         }
       } catch (error) {
         console.error('Error checking cancellation status:', error);
       }
     };
 
-    // Check immediately and then periodically
-    checkCancellationStatus();
-    const cancellationCheckInterval = setInterval(checkCancellationStatus, 5000);
+         // Check immediately and then periodically
+     checkCancellationStatus();
+     checkInstantDeletionStatus();
+     const cancellationCheckInterval = setInterval(checkCancellationStatus, 5000);
+     const instantDeletionCheckInterval = setInterval(checkInstantDeletionStatus, 3000);
 
-    return () => {
-      channel.unsubscribe();
-      clearInterval(cancellationCheckInterval);
-    };
+         return () => {
+       channel.unsubscribe();
+       clearInterval(cancellationCheckInterval);
+       clearInterval(instantDeletionCheckInterval);
+     };
   }, [isOpen, user, onClose, toast]);
 
   useEffect(() => {
