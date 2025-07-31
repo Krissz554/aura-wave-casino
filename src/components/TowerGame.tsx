@@ -565,12 +565,12 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-mono text-slate-300">MULTIPLIER</span>
-                      <span className="text-lg font-mono font-bold text-emerald-400">{game.current_multiplier.toFixed(2)}x</span>
+                      <span className="text-lg font-mono font-bold text-emerald-400">{(game.current_multiplier || 1).toFixed(2)}x</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-mono text-slate-300">POTENTIAL</span>
                       <span className="text-lg font-mono font-bold text-amber-400">
-                        ${(parseFloat(betAmount) * game.current_multiplier).toFixed(2)}
+                        ${(parseFloat(betAmount) * (game.current_multiplier || 1)).toFixed(2)}
                       </span>
                     </div>
                   </div>
@@ -591,7 +591,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                         ) : (
                           <div className="flex items-center gap-2">
                             <TrendingUp className="w-4 h-4" />
-                            EXTRACT ${(parseFloat(betAmount) * game.current_multiplier).toFixed(2)}
+                            EXTRACT ${(parseFloat(betAmount) * (game.current_multiplier || 1)).toFixed(2)}
                           </div>
                         )}
                       </Button>
@@ -715,7 +715,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                       Successfully extracted ${(game.final_payout || 0).toFixed(2)} from floor {game.current_level}
                     </p>
                     <div className="text-emerald-400 font-mono text-sm">
-                      {game.current_multiplier.toFixed(2)}x multiplier achieved
+                      {(game.current_multiplier || 1).toFixed(2)}x multiplier achieved
                     </div>
                     <Button onClick={resetGame} variant="outline" className="mt-4 font-mono border-emerald-500 text-emerald-400 hover:bg-emerald-500/20">
                       NEW PROTOCOL
