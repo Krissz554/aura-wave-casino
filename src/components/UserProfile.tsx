@@ -1917,28 +1917,73 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       // Refresh achievements data to update the UI
       await fetchData();
       
-      // Verify the achievement was removed from unlocked achievements
-      const { data: remainingUnlocked } = await supabase
+      // Verify database tables are properly updated
+      console.log('🔍 Verifying database table updates...');
+      
+      // 1. Verify achievement was removed from unlocked_achievements table
+      const { data: remainingUnlocked, error: unlockedError } = await supabase
         .from('unlocked_achievements')
         .select('achievement_id')
         .eq('user_id', userId)
         .eq('achievement_id', achievement.id);
       
-      if (remainingUnlocked && remainingUnlocked.length > 0) {
-        console.error('❌ Achievement still in unlocked achievements after claiming!');
+      if (unlockedError) {
+        console.error('❌ Error checking unlocked_achievements:', unlockedError);
+      } else if (remainingUnlocked && remainingUnlocked.length > 0) {
+        console.error('❌ CRITICAL: Achievement still in unlocked_achievements after claiming!', remainingUnlocked);
+      } else {
+        console.log('✅ Achievement properly removed from unlocked_achievements table');
       }
       
-      // Verify the achievement was added to unlocked
-      const { data: unlockedAchievement } = await supabase
+      // 2. Verify achievement was added to user_achievements table
+      const { data: claimedAchievement, error: claimedError } = await supabase
         .from('user_achievements')
-        .select('achievement_id, unlocked_at')
+        .select('achievement_id, unlocked_at, claimed_at')
         .eq('user_id', userId)
         .eq('achievement_id', achievement.id);
       
-      if (unlockedAchievement && unlockedAchievement.length > 0) {
-        // Achievement successfully added
+      if (claimedError) {
+        console.error('❌ Error checking user_achievements:', claimedError);
+      } else if (claimedAchievement && claimedAchievement.length > 0) {
+        const claimed = claimedAchievement[0];
+        console.log('✅ Achievement properly added to user_achievements table:', {
+          achievementId: claimed.achievement_id,
+          unlockedAt: claimed.unlocked_at,
+          claimedAt: claimed.claimed_at
+        });
       } else {
-        console.error('❌ Achievement not found in unlocked achievements!');
+        console.error('❌ CRITICAL: Achievement not found in user_achievements table after claiming!');
+      }
+      
+      // 3. Verify reward was properly awarded
+      if (achievement.reward_type === 'money') {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('balance')
+          .eq('id', userId)
+          .single();
+          
+        if (profileError) {
+          console.error('❌ Error checking profile balance:', profileError);
+        } else {
+          console.log('✅ Profile balance verified:', profileData.balance);
+        }
+      } else if (achievement.reward_type === 'xp' || achievement.reward_type === 'cases') {
+        const { data: statsData, error: statsError } = await supabase
+          .from('user_level_stats')
+          .select('lifetime_xp, current_level_xp, available_cases')
+          .eq('user_id', userId)
+          .single();
+          
+        if (statsError) {
+          console.error('❌ Error checking user stats:', statsError);
+        } else {
+          console.log('✅ User stats verified:', {
+            lifetimeXp: statsData.lifetime_xp,
+            currentLevelXp: statsData.current_level_xp,
+            availableCases: statsData.available_cases
+          });
+        }
       }
       
       // Also refresh user profile data to update balance display
@@ -1960,9 +2005,18 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         }
       }
       
-      // Clear the newly claimed status after a delay
-      setTimeout(() => {
+      // Final verification: Ensure UI state matches database state
+      setTimeout(async () => {
         setNewlyClaimed(prev => prev.filter(id => id !== achievement.id));
+        
+        // Double-check that the achievement is no longer in claimable list
+        const stillClaimable = claimableAchievements.find(a => a.id === achievement.id);
+        if (stillClaimable) {
+          console.warn('⚠️ Achievement still showing as claimable in UI, triggering refresh...');
+          await fetchData(); // Force another refresh if needed
+        } else {
+          console.log('✅ UI state verified: Achievement no longer claimable');
+        }
       }, 2000);
       
     } catch (error) {
