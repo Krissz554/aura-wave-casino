@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import MaintenanceToggle from './MaintenanceToggle';
-import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send, TrendingUp } from 'lucide-react';
+import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, Server, Terminal, Zap, Lock, Eye, EyeOff, RefreshCw, Trash2, User, Crown, Coins, Target, MessageSquare, Send, TrendingUp, Clock } from 'lucide-react';
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -1481,6 +1481,22 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       </div>
                     </div>
                     
+                    {/* Pending Deletion Warning */}
+                    {pendingDeletions[user.id] && (
+                      <div className="mb-3 p-2 bg-red-900/30 border border-red-500/50 rounded-lg">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Clock className="h-3 w-3 text-red-400" />
+                          <span className="text-red-400 font-mono text-xs font-semibold">DELETION PENDING</span>
+                        </div>
+                        <div className="text-xs text-red-300 font-mono">
+                          Scheduled: {new Date(pendingDeletions[user.id].scheduled_deletion_time).toLocaleString()}
+                        </div>
+                        <div className="text-xs text-red-300 font-mono">
+                          Time remaining: {Math.max(0, Math.ceil((new Date(pendingDeletions[user.id].scheduled_deletion_time).getTime() - Date.now()) / (1000 * 60 * 60)))}h
+                        </div>
+                      </div>
+                    )}
+                    
                     {/* Compact Action Buttons */}
                     <div className="grid grid-cols-3 gap-1">
                       <Button
@@ -1575,7 +1591,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Reset
                         </Button>
                       )}
-                      {/* Hide Delete button for admin users */}
+                      {/* Delete and Instant Delete buttons */}
                       {adminStatuses[user.id] ? (
                         <Button
                           disabled
@@ -1586,6 +1602,20 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         >
                           <Shield className="h-2.5 w-2.5 mr-1" />
                           Protected
+                        </Button>
+                      ) : pendingDeletions[user.id] ? (
+                        // If user has pending deletion, show instant delete button
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowInstantDeleteConfirm(true);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-red-900 to-red-950 hover:from-red-800 hover:to-red-900 text-red-300 border border-red-500/50 font-mono text-xs h-7 col-span-2"
+                        >
+                          <Zap className="h-2.5 w-2.5 mr-1" />
+                          Instant Delete
                         </Button>
                       ) : (
                         <Button
@@ -1919,6 +1949,96 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                   <>
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete Account
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Instant Delete Confirmation Modal */}
+      <Dialog open={showInstantDeleteConfirm} onOpenChange={setShowInstantDeleteConfirm}>
+        <DialogContent className="max-w-md bg-slate-900/95 backdrop-blur-xl border border-red-500/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center space-x-2 text-white">
+              <Zap className="h-5 w-5 text-red-600" />
+              <span className="font-mono">INSTANT DELETION</span>
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="text-center">
+              <div className="text-white font-mono mb-2">
+                Instantly delete account for user:
+              </div>
+              <div className="text-lg font-bold text-red-400 font-mono mb-4">
+                {selectedUser?.username}
+              </div>
+              <div className="bg-red-900/30 border border-red-500/50 rounded-lg p-3 mb-4">
+                <div className="text-sm text-red-300 font-mono">
+                  ⚡ This will SKIP the 24-hour waiting period
+                </div>
+                <div className="text-xs text-red-400 font-mono mt-1">
+                  User will be deleted IMMEDIATELY
+                </div>
+              </div>
+              <div className="text-sm text-slate-400 font-mono">
+                This will PERMANENTLY DELETE:
+              </div>
+              <div className="text-xs text-slate-500 font-mono mt-2 space-y-1">
+                • Complete user account
+                • All game history and statistics
+                • All achievements and progress
+                • All notifications and data
+                • Authentication credentials
+                • Email can be reused for new registration
+              </div>
+              <div className="text-sm text-red-400 font-mono mt-2">
+                ⚠️ This action is IRREVERSIBLE
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="text-center">
+                <div className="text-sm text-slate-400 font-mono mb-2">
+                  Type the username to confirm:
+                </div>
+                <input
+                  type="text"
+                  value={instantDeleteVerificationText}
+                  onChange={(e) => setInstantDeleteVerificationText(e.target.value)}
+                  placeholder="Enter username"
+                  className="w-full px-3 py-2 bg-slate-800/50 border border-slate-600/50 rounded-lg text-white font-mono placeholder-slate-500 focus:outline-none focus:border-red-500/50"
+                />
+              </div>
+            </div>
+            
+            <div className="flex space-x-3">
+              <Button
+                onClick={() => {
+                  setShowInstantDeleteConfirm(false);
+                  setInstantDeleteVerificationText('');
+                }}
+                variant="outline"
+                className="flex-1 bg-slate-700/50 border-slate-600/50 hover:bg-slate-600/50 text-white font-mono"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => selectedUser && instantDeleteUserAccount(selectedUser.id)}
+                disabled={instantDeletingUser || instantDeleteVerificationText !== selectedUser?.username}
+                className="flex-1 bg-gradient-to-r from-red-900 to-red-950 hover:from-red-800 hover:to-red-900 text-white border-0 font-mono disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {instantDeletingUser ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 mr-2" />
+                    Instant Delete
                   </>
                 )}
               </Button>
