@@ -453,7 +453,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     return (
       <div 
         key={levelIndex} 
-        className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-500 ${
+        className={`p-2 rounded-lg border backdrop-blur-sm transition-all duration-500 ${
           isPastLevel 
             ? `bg-gradient-to-r from-${glowColor}-900/30 via-${glowColor}-800/20 to-${glowColor}-900/30 border-${glowColor}-500/40 shadow-lg shadow-${glowColor}-500/20` 
             : isCurrentLevel 
@@ -461,9 +461,9 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               : 'bg-gradient-to-r from-slate-900/40 via-slate-800/30 to-slate-900/40 border-slate-700/30'
         }`}
       >
-        {/* Multiplier at top center */}
-        <div className="flex justify-center mb-2">
-          <div className={`text-sm font-bold font-mono px-3 py-1 rounded-md border ${
+        {/* Multiplier at very top - minimal spacing */}
+        <div className="text-center mb-1">
+          <span className={`text-xs font-bold font-mono px-2 py-0.5 rounded border ${
             isPastLevel 
               ? `bg-${glowColor}-500/20 text-${glowColor}-300 border-${glowColor}-400/50` 
               : isCurrentLevel 
@@ -471,7 +471,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
                 : 'bg-slate-800/30 text-slate-400 border-slate-600/50'
           }`}>
             {multiplier ? multiplier.toFixed(2) : '1.00'}x
-          </div>
+          </span>
         </div>
         
         {/* Tiles - Rectangular tower formation */}
@@ -483,12 +483,12 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
           {Array.from({ length: tilesPerRow }, (_, i) => renderTile(levelIndex, i))}
         </div>
 
-        {/* Status indicator (optional - can be removed if not needed) */}
+        {/* Status indicator - minimal */}
         {isCurrentLevel && game?.status === 'active' && (
-          <div className="flex justify-center mt-2">
-            <div className="flex items-center gap-2 text-primary font-bold text-xs animate-pulse">
-              <Target className="w-3 h-3" />
-              <span className="font-mono">ACTIVE</span>
+          <div className="flex justify-center mt-1">
+            <div className="flex items-center gap-1 text-primary font-bold text-xs animate-pulse">
+              <Target className="w-2 h-2" />
+              <span className="font-mono text-xs">ACTIVE</span>
             </div>
           </div>
         )}
@@ -678,9 +678,9 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {/* Tower levels - always visible, updates based on difficulty */}
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [])
                     .slice()
                     .reverse()
