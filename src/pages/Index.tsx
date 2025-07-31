@@ -491,12 +491,8 @@ export default function Index({ initialGame }: IndexProps) {
 
   const confirmLogout = async () => {
     try {
-      setLogoutLoading(true);
-      
       // Call the signOut function from AuthContext
       await signOut();
-      
-      // Remove artificial delay for faster response
       
       // Close the confirmation dialog
       setShowLogoutConfirmation(false);
@@ -520,8 +516,6 @@ export default function Index({ initialGame }: IndexProps) {
         description: "Session ended but cleanup may be incomplete",
         variant: "warning",
       });
-    } finally {
-      setLogoutLoading(false);
     }
   };
 
@@ -870,13 +864,9 @@ export default function Index({ initialGame }: IndexProps) {
                           unreadCount > 5 && "group-hover/notifications:border-red-400/30"
                         )} />
                         
-                        {/* Icon with loading state matching game buttons */}
+                        {/* Notification icon */}
                         <div className="relative">
-                          {notificationLoading ? (
-                            <div className="w-5 h-5 flex items-center justify-center relative z-10">
-                              <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                            </div>
-                          ) : unreadCount > 0 ? (
+                          {unreadCount > 0 ? (
                             <BellDot className={cn(
                               "w-5 h-5 transition-all duration-300 relative z-10",
                               unreadCount <= 5 && "text-orange-400 drop-shadow-[0_0_6px_rgba(251,146,60,0.6)]",
@@ -887,7 +877,7 @@ export default function Index({ initialGame }: IndexProps) {
                           )}
                           
                           {/* Notification counter badge */}
-                          {unreadCount > 0 && !notificationLoading && (
+                          {unreadCount > 0 && (
                             <div className={cn(
                               "absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full text-xs font-bold flex items-center justify-center relative z-20",
                               unreadCount <= 5 && "bg-gradient-to-r from-orange-500 to-orange-600 text-white",
@@ -1432,12 +1422,7 @@ export default function Index({ initialGame }: IndexProps) {
                                   className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-accent/20" />
-                                {/* Loading overlay */}
-                                {profileModalLoading && (
-                                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
-                                    <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                  </div>
-                                )}
+                                {/* Removed loading overlay for instant response */}
                               </div>
                             </ProfileBorder>
                           </div>
@@ -1486,10 +1471,7 @@ export default function Index({ initialGame }: IndexProps) {
                       {/* Mobile Version */}
                       <div 
                         className="flex md:hidden items-center gap-2 cursor-pointer hover:bg-primary/10 rounded-lg p-2 -m-2 transition-all duration-200 hover:scale-[1.02]"
-                        onClick={async () => {
-                          setProfileModalLoading(true);
-                          await new Promise(resolve => setTimeout(resolve, 200));
-                          setProfileModalLoading(false);
+                        onClick={() => {
                           setShowProfile(true);
                         }}
                       >
@@ -2077,8 +2059,7 @@ export default function Index({ initialGame }: IndexProps) {
                 <div className="relative group/confirm flex-1">
                   <Button
                     onClick={confirmLogout}
-                    disabled={logoutLoading}
-                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed z-20"
+                    className="w-full relative overflow-hidden border border-red-500/50 bg-red-900/50 hover:bg-red-800/70 transition-all duration-300 z-20"
                     style={{
                       clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
                     }}
@@ -2086,19 +2067,8 @@ export default function Index({ initialGame }: IndexProps) {
                     {/* Scan line effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-400/20 to-transparent translate-x-[-100%] group-hover/confirm:translate-x-[100%] transition-transform duration-500 pointer-events-none" />
                     <div className="relative z-30 flex items-center justify-center">
-                      {logoutLoading ? (
-                        <>
-                          <div className="w-4 h-4 mr-2 flex items-center justify-center">
-                            <div className="w-3 h-3 border-2 border-red-300/30 border-t-red-300 rounded-full animate-spin" />
-                          </div>
-                          <span className="font-semibold text-red-200">Signing Out...</span>
-                        </>
-                      ) : (
-                        <>
-                          <LogOut className="w-4 h-4 mr-2 text-red-300" />
-                          <span className="font-semibold text-red-200">Sign Out</span>
-                        </>
-                      )}
+                      <LogOut className="w-4 h-4 mr-2 text-red-300" />
+                      <span className="font-semibold text-red-200">Sign Out</span>
                     </div>
                   </Button>
                 </div>
