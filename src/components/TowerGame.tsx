@@ -117,7 +117,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
   const { refreshLevelStats } = useLevelSync();
   const { triggerXPRefresh } = useXPSync();
   
-  const { gameHistory, refreshHistory } = useGameHistory(userData?.id || '', 'tower');
+  const { history: gameHistory, refetch: refreshHistory } = useGameHistory('tower');
   const { recentBets } = useRealtimeFeeds();
 
   // Reset game state
@@ -310,13 +310,18 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     const tilesPerRow = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.tilesPerRow || 3;
     const isCurrentLevel = game?.current_level === levelIndex;
     const isPastLevel = game && game.current_level > levelIndex;
-    const revealed = game?.mine_positions?.[levelIndex]?.[tileIndex] !== undefined ? 
-      { safe: game.mine_positions?.[levelIndex]?.[tileIndex] === 1 } : null;
+    const isFutureLevel = game && game.current_level < levelIndex;
     
-    // Debug logging for first few renders
-    if (game && levelIndex <= 2) {
-      console.log(`🏗️ Tower Level ${levelIndex}: current=${game.current_level}, isCurrentLevel=${isCurrentLevel}, isPastLevel=${isPastLevel}, revealed=${revealed?.safe}, status=${game.status}`);
-    }
+    // Only show revealed tiles for COMPLETED levels (past levels)
+    // The mine_positions array contains arrays of mine indices per level
+    const levelMines = game?.mine_positions?.[levelIndex] || [];
+    const isMine = levelMines.includes(tileIndex);
+    const revealed = isPastLevel ? { safe: !isMine } : null;
+    
+    // Debug logging for development (uncomment if needed)
+    // if (game && levelIndex <= 2) {
+    //   console.log(`🏗️ Tower Level ${levelIndex}: current=${game.current_level}, isCurrentLevel=${isCurrentLevel}, isPastLevel=${isPastLevel}, revealed=${revealed?.safe}, status=${game.status}`);
+    // }
     
     const hasCharacter = isPastLevel && tileIndex === Math.floor(tilesPerRow / 2);
     const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
@@ -337,6 +342,8 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     } else if (isCurrentLevel && game?.status === 'active') {
       tileClass += "cursor-pointer hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 ";
       tileClass += "hover:border-primary hover:shadow-primary/30 ";
+    } else if (isFutureLevel) {
+      tileClass += "cursor-not-allowed opacity-20 ";
     } else {
       tileClass += "cursor-not-allowed opacity-40 ";
     }
@@ -381,6 +388,12 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
             <div className="flex items-center gap-2 text-primary opacity-70">
               <Cpu className="w-4 h-4" />
               <span className="text-xs">CLICK</span>
+            </div>
+          ) : isFutureLevel ? (
+            <div className="flex items-center gap-2 text-slate-600 opacity-30">
+              <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+              <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+              <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
             </div>
           ) : (
             <div className="flex items-center gap-2 text-slate-500 opacity-40">
