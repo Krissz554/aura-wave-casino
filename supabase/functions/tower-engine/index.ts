@@ -177,17 +177,6 @@ serve(async (req) => {
         
         console.log('✅ TOWER ENGINE: Input validation passed');
         
-        // TEMPORARY: Just return a success response for testing
-        console.log('🧪 TOWER ENGINE: Returning test success response');
-        return new Response(JSON.stringify({ 
-          success: true, 
-          message: 'Tower engine is working',
-          test_mode: true,
-          received_data: { action, difficulty, bet_amount, user_id: user.id }
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-
         // Check user balance
         const { data: profile } = await supabase
           .from('profiles')

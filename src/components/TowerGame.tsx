@@ -170,6 +170,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
       if (response.error) throw response.error;
       
       const newGame = response.data;
+      console.log('🎯 TOWER: Game started, received data:', newGame);
       setGame(newGame);
       
       // Update user balance
@@ -311,6 +312,11 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     const isPastLevel = game && game.current_level > levelIndex;
     const revealed = game?.mine_positions?.[levelIndex]?.[tileIndex] !== undefined ? 
       { safe: game.mine_positions?.[levelIndex]?.[tileIndex] === 1 } : null;
+    
+    // Debug logging for first few renders
+    if (game && levelIndex <= 2) {
+      console.log(`🏗️ Tower Tile Debug - Level ${levelIndex}: current=${game.current_level}, isCurrentLevel=${isCurrentLevel}, isPastLevel=${isPastLevel}, revealed=${revealed?.safe}`);
+    }
     
     const hasCharacter = isPastLevel && tileIndex === Math.floor(tilesPerRow / 2);
     const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
@@ -652,7 +658,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               {game ? (
                 <div className="space-y-3">
                   {/* Tower levels - displayed top to bottom (reverse order) */}
-                  <div className="space-y-3 max-h-[600px] overflow-y-auto custom-scrollbar">
+                  <div className="space-y-3">
                     {(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [])
                       .slice()
                       .reverse()
