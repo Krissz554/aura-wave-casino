@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Building2, Zap, AlertTriangle, Coins, Cpu, Shield, Crown, TrendingUp, Target, Gamepad2 } from 'lucide-react';
+import { Building2, Zap, AlertTriangle, Coins, Cpu, Shield, Crown, TrendingUp, Target, Gamepad2, User, Bot } from 'lucide-react';
 import { useRealtimeFeeds } from '@/hooks/useRealtimeFeeds';
 import { useGameHistory } from '@/hooks/useGameHistory';
 import { UserProfile } from '@/hooks/useUserProfile';
@@ -44,7 +44,6 @@ const DIFFICULTY_INFO = {
     color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
     glowColor: 'emerald',
     icon: <Shield className="w-4 h-4" />,
-    character: '🤖',
     description: '4 DATA NODES | 3 SAFE | 75% SUCCESS RATE',
     maxMultiplier: '11.95x',
     tilesPerRow: 4,
@@ -58,7 +57,6 @@ const DIFFICULTY_INFO = {
     color: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
     glowColor: 'amber',
     icon: <Cpu className="w-4 h-4" />,
-    character: '🔷',
     description: '3 DATA NODES | 2 SAFE | 66.6% SUCCESS RATE',
     maxMultiplier: '33.99x',
     tilesPerRow: 3,
@@ -72,7 +70,6 @@ const DIFFICULTY_INFO = {
     color: 'bg-rose-500/20 text-rose-400 border-rose-500/30',
     glowColor: 'rose',
     icon: <Zap className="w-4 h-4" />,
-    character: '⚡',
     description: '2 DATA NODES | 1 SAFE | 50% SUCCESS RATE',
     maxMultiplier: '475.40x',
     tilesPerRow: 2,
@@ -86,7 +83,6 @@ const DIFFICULTY_INFO = {
     color: 'bg-violet-500/20 text-violet-400 border-violet-500/30',
     glowColor: 'violet',
     icon: <Target className="w-4 h-4" />,
-    character: '🔥',
     description: '3 DATA NODES | 1 SAFE | 33.3% SUCCESS RATE',
     maxMultiplier: '643.10x',
     tilesPerRow: 3,
@@ -347,7 +343,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     const glowColor = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.glowColor || 'emerald';
 
     // Base cyberpunk tile styling
-    let tileClass = "group relative w-full h-14 rounded-lg border-2 transition-all duration-300 font-mono text-sm ";
+    let tileClass = "group relative w-full h-10 rounded-lg border-2 transition-all duration-300 font-mono text-xs ";
     tileClass += "bg-gradient-to-br from-slate-900/80 via-slate-800/60 to-slate-900/80 ";
     tileClass += "border-slate-700/50 backdrop-blur-sm ";
     tileClass += "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20 ";
@@ -366,7 +362,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     } else if (isCurrentLevel && game?.status === 'active') {
       tileClass += "cursor-pointer hover:bg-gradient-to-br hover:from-primary/20 hover:to-primary/10 ";
       tileClass += "hover:border-primary hover:shadow-primary/30 ";
-    } else if (isFutureLevel) {
+    } else if (isFutureLevel || !game) {
       tileClass += "cursor-not-allowed opacity-20 ";
     } else {
       tileClass += "cursor-not-allowed opacity-40 ";
@@ -407,7 +403,9 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               </div>
             )
           ) : hasCharacter && game ? (
-            <div className="text-2xl animate-bounce">{DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO]?.character || '🤖'}</div>
+            <div className="flex items-center justify-center">
+              <Bot className="w-5 h-5 text-primary animate-pulse" />
+            </div>
           ) : wasSelected && !revealed ? (
             <div className="flex items-center gap-2 text-amber-400">
               <Crown className="w-4 h-4" />
@@ -455,7 +453,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     return (
       <div 
         key={levelIndex} 
-        className={`p-4 rounded-xl border backdrop-blur-sm transition-all duration-500 ${
+        className={`p-3 rounded-lg border backdrop-blur-sm transition-all duration-500 ${
           isPastLevel 
             ? `bg-gradient-to-r from-${glowColor}-900/30 via-${glowColor}-800/20 to-${glowColor}-900/30 border-${glowColor}-500/40 shadow-lg shadow-${glowColor}-500/20` 
             : isCurrentLevel 
@@ -464,8 +462,8 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
         }`}
       >
         {/* Multiplier at top center */}
-        <div className="flex justify-center mb-3">
-          <div className={`text-lg font-bold font-mono px-4 py-1 rounded-lg border ${
+        <div className="flex justify-center mb-2">
+          <div className={`text-sm font-bold font-mono px-3 py-1 rounded-md border ${
             isPastLevel 
               ? `bg-${glowColor}-500/20 text-${glowColor}-300 border-${glowColor}-400/50` 
               : isCurrentLevel 
@@ -477,7 +475,7 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
         </div>
         
         {/* Tiles - Rectangular tower formation */}
-        <div className={`grid gap-2 ${
+        <div className={`grid gap-1.5 ${
           tilesPerRow === 2 ? 'grid-cols-2' :
           tilesPerRow === 3 ? 'grid-cols-3' :
           tilesPerRow === 4 ? 'grid-cols-4' : 'grid-cols-3'
@@ -680,40 +678,19 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              {game ? (
-                <div className="space-y-3">
-                  {/* Tower levels - displayed top to bottom (reverse order) */}
-                  <div className="space-y-3">
-                    {(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [])
-                      .slice()
-                      .reverse()
-                      .map((_, index) => {
-                        const multipliers = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [];
-                        const actualLevel = multipliers.length - 1 - index;
-                        return renderLevel(actualLevel);
-                      })}
-                  </div>
+              <div className="space-y-2">
+                {/* Tower levels - always visible, updates based on difficulty */}
+                <div className="space-y-2">
+                  {(PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [])
+                    .slice()
+                    .reverse()
+                    .map((_, index) => {
+                      const multipliers = PAYOUT_MULTIPLIERS[difficulty as keyof typeof PAYOUT_MULTIPLIERS] || [];
+                      const actualLevel = multipliers.length - 1 - index;
+                      return renderLevel(actualLevel);
+                    })}
                 </div>
-              ) : (
-                <div className="text-center py-12 space-y-4">
-                  <div className="text-6xl text-slate-600 mb-4">
-                    <Building2 className="w-24 h-24 mx-auto" />
-                  </div>
-                  <h3 className="text-xl font-mono font-bold text-slate-400">TOWER PROTOCOL STANDBY</h3>
-                  <p className="text-slate-500 font-mono max-w-md mx-auto">
-                    Initialize climbing protocol to access the data tower. Navigate through security layers to extract maximum value.
-                  </p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 max-w-2xl mx-auto">
-                    {Object.entries(DIFFICULTY_INFO).map(([key, info]) => (
-                      <div key={key} className={`p-4 rounded-lg border ${info.color} text-center`}>
-                        <div className="flex justify-center mb-2">{info.icon}</div>
-                        <div className="font-mono text-xs font-bold">{info.name}</div>
-                        <div className="font-mono text-xs opacity-70 mt-1">MAX: {info.maxMultiplier}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              </div>
             </CardContent>
           </Card>
 
