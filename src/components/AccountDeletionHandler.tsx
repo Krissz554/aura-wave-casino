@@ -19,11 +19,74 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
   const [timeLeft, setTimeLeft] = useState(30);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deletionCompleted, setDeletionCompleted] = useState(false);
-  const { signOut } = useAuth();
+  const [deletionCancelled, setDeletionCancelled] = useState(false);
+  const { signOut, user } = useAuth();
   const { toast } = useToast();
 
+  // Listen for deletion cancellation
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || !user) return;
+
+    // Set up real-time listener for cancellation events
+    const channel = supabase.channel(`user-${user.id}`);
+    
+    channel.on('broadcast', { event: 'deletion_cancelled' }, (payload) => {
+      console.log('Deletion cancellation received:', payload);
+      setDeletionCancelled(true);
+      toast({
+        title: "Deletion Cancelled",
+        description: "Your account deletion has been cancelled by an administrator.",
+      });
+      
+      // Close the deletion handler after a short delay
+      setTimeout(() => {
+        onClose();
+      }, 3000);
+    });
+
+    channel.subscribe();
+
+    // Also check for cancellation notifications
+    const checkCancellationStatus = async () => {
+      try {
+        const { data: notifications } = await supabase
+          .from('notifications')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('type', 'admin_message')
+          .like('title', '%Deletion Cancelled%')
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (notifications && notifications.length > 0) {
+          console.log('Found cancellation notification:', notifications[0]);
+          setDeletionCancelled(true);
+          toast({
+            title: "Deletion Cancelled",
+            description: "Your account deletion has been cancelled by an administrator.",
+          });
+          
+          setTimeout(() => {
+            onClose();
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('Error checking cancellation status:', error);
+      }
+    };
+
+    // Check immediately and then periodically
+    checkCancellationStatus();
+    const cancellationCheckInterval = setInterval(checkCancellationStatus, 5000);
+
+    return () => {
+      channel.unsubscribe();
+      clearInterval(cancellationCheckInterval);
+    };
+  }, [isOpen, user, onClose, toast]);
+
+  useEffect(() => {
+    if (!isOpen || deletionCancelled) return;
 
     const targetTime = new Date(deletionTime).getTime();
     const now = Date.now();
@@ -37,7 +100,7 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
       
       setTimeLeft(remaining);
       
-      if (remaining <= 0) {
+      if (remaining <= 0 && !deletionCancelled) {
         clearInterval(timer);
         setIsDeleting(true);
         // Trigger the deletion immediately when countdown reaches zero
@@ -46,7 +109,7 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isOpen, deletionTime]);
+  }, [isOpen, deletionTime, deletionCancelled]);
 
   const performAccountDeletion = async () => {
     try {
@@ -244,9 +307,30 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
             </div>
 
             {/* Countdown Display */}
-            <div className="bg-slate-900/80 border border-red-500/30 rounded-2xl p-8 backdrop-blur-xl">
+            <div className={`bg-slate-900/80 border rounded-2xl p-8 backdrop-blur-xl ${
+              deletionCancelled ? 'border-green-500/30' : 'border-red-500/30'
+            }`}>
               <div className="text-center space-y-6">
-                {!isDeleting ? (
+                {deletionCancelled ? (
+                  <>
+                    <div className="flex items-center justify-center space-x-3">
+                      <Shield className="h-6 w-6 text-green-400" />
+                      <span className="text-xl font-bold text-green-400 font-mono">
+                        DELETION CANCELLED
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-green-400 font-mono">Your account is now safe!</p>
+                      <p className="text-slate-400 font-mono text-sm">
+                        An administrator has cancelled your account deletion.
+                      </p>
+                      <p className="text-slate-500 font-mono text-xs">
+                        This window will close automatically.
+                      </p>
+                    </div>
+                  </>
+                ) : !isDeleting ? (
                   <>
                     <div className="flex items-center justify-center space-x-3">
                       <Clock className="h-6 w-6 text-orange-400 animate-pulse" />
@@ -322,7 +406,7 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
                 </div>
 
                 {/* Logout Button */}
-                {!deletionCompleted && (
+                {!deletionCompleted && !deletionCancelled && (
                   <div className="pt-4">
                     <button
                       onClick={handleLogoutNow}

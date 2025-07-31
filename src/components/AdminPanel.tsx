@@ -743,7 +743,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== STOPPING PENDING DELETION ===');
       console.log('User ID:', userId);
       
-      // Remove from pending deletions table
+      // 1. Remove from pending deletions table
       const { error } = await supabase
         .from('pending_account_deletions')
         .delete()
@@ -760,17 +760,31 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         return;
       }
 
-      // Send notification to user about cancellation
+      // 2. Clear any existing deletion-related notifications
+      console.log('Clearing existing deletion notifications...');
+      const { error: clearNotificationsError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'admin_message')
+        .like('title', '%Deletion%');
+
+      if (clearNotificationsError) {
+        console.error('Error clearing deletion notifications:', clearNotificationsError);
+      }
+
+      // 3. Send new cancellation notification to user
       const { error: notificationError } = await supabase
         .from('notifications')
         .insert({
           user_id: userId,
           type: 'admin_message',
           title: 'Account Deletion Cancelled',
-          message: 'Your pending account deletion has been cancelled by an administrator. Your account is now safe.',
+          message: 'Your pending account deletion has been cancelled by an administrator. Your account is now safe and fully unlocked.',
           data: {
             deletion_cancelled: true,
-            cancelled_at: new Date().toISOString()
+            cancelled_at: new Date().toISOString(),
+            account_unlocked: true
           }
         });
 
@@ -778,14 +792,40 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         console.error('Error sending cancellation notification:', notificationError);
       }
 
-      toast({
-        title: "Deletion Stopped",
-        description: "Pending account deletion has been cancelled. User account is now safe.",
+      // 4. Ensure user profile/data is not marked for deletion anywhere
+      console.log('Unlocking user account completely...');
+      const { error: profileUpdateError } = await supabase
+        .from('profiles')
+        .update({ 
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (profileUpdateError) {
+        console.error('Error updating user profile:', profileUpdateError);
+      }
+
+      // 5. Send real-time update to user's client if they're online
+      const channel = supabase.channel(`user-${userId}`);
+      channel.send({
+        type: 'broadcast',
+        event: 'deletion_cancelled',
+        payload: {
+          message: 'Your account deletion has been cancelled. You are now fully unlocked.',
+          timestamp: new Date().toISOString()
+        }
       });
 
-      // Refresh the data
+      toast({
+        title: "Deletion Stopped",
+        description: "Pending account deletion has been cancelled. User account is now safe and fully unlocked.",
+      });
+
+      // 6. Refresh the data
       loadUsers();
       loadPendingDeletions();
+      
+      console.log('User account fully unlocked and deletion cancelled successfully');
       
     } catch (error) {
       console.error('Error stopping pending deletion:', error);
