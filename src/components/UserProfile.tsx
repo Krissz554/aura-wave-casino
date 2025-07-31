@@ -229,6 +229,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
       // Use the correct XP source (prioritize stats for own profile, userData for others)
       const currentLevel = stats?.current_level || userData.current_level;
       const currentXP = stats?.current_level_xp || userData.current_xp;
+      const lifetimeXP = stats?.lifetime_xp || userData.lifetime_xp || 0; // Move declaration inside useEffect
 
       animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
@@ -262,6 +263,7 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
 
   if (!userData) return null;
 
+  // Move variable declarations here to fix initialization order
   const currentLevel = stats?.current_level || userData.current_level;
   const lifetimeXP = stats?.lifetime_xp || userData.lifetime_xp || 0; // Main XP display (decimal precision from LevelSync)
   const currentXP = stats?.current_level_xp || userData.current_xp; // XP within current level
