@@ -87,8 +87,16 @@ export function useUserLevelStats() {
 
     fetchStats();
     
-    // Set up real-time subscription with unique channel name
-    const channelName = `user_level_stats_${user.id}_${Math.random().toString(36).substr(2, 9)}`;
+    // Set up real-time subscription with stable channel name
+    const channelName = `user_level_stats_${user.id}`;
+    
+    // Remove any existing channel first to prevent duplicates
+    const existingChannels = supabase.getChannels();
+    const existingChannel = existingChannels.find(ch => ch.topic === channelName);
+    if (existingChannel) {
+      supabase.removeChannel(existingChannel);
+    }
+    
     const subscription = supabase
       .channel(channelName)
       .on(

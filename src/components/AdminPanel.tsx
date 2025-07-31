@@ -177,7 +177,17 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       
       const { data, error, count } = await supabase
         .from('profiles')
-        .select('id, username, level, xp, balance, total_wagered, created_at', { count: 'exact' })
+        .select(`
+          id, 
+          username, 
+          balance, 
+          total_wagered, 
+          created_at,
+          user_level_stats (
+            current_level,
+            lifetime_xp
+          )
+        `, { count: 'exact' })
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -193,8 +203,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         setUsers((data || []).map(user => ({
           id: user.id,
           username: user.username || '',
-                      level: user.levelStats?.current_level || 1,
-            xp: user.levelStats?.current_level_xp || 0,
+          level: user.user_level_stats?.current_level || 1,
+          xp: user.user_level_stats?.lifetime_xp || 0,
           balance: user.balance || 0,
           total_wagered: user.total_wagered || 0,
           created_at: user.created_at || ''

@@ -4,6 +4,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.0';
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, PUT, DELETE',
+  'Access-Control-Max-Age': '86400',
 };
 
 interface DifficultyConfig {
@@ -80,7 +82,14 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const authHeader = req.headers.get('Authorization')!;
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Missing Authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
     const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
     
     if (userError || !user) {
@@ -90,8 +99,10 @@ serve(async (req) => {
       });
     }
 
-    const { action, game_id, difficulty, bet_amount, tile_index } = await req.json();
+    const requestBody = await req.json();
+    const { action, game_id, difficulty, bet_amount, tile_index } = requestBody;
     console.log(`🎯 Tower action: ${action} for user: ${user.id}`);
+    console.log(`📝 Request body:`, requestBody);
 
     switch (action) {
       case 'start': {
