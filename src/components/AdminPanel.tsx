@@ -253,6 +253,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Reset user statistics - COMPLETE VERSION
   const resetUserStatsFinal = async (userId: string) => {
+    // Prevent resetting admin accounts
+    if (adminStatuses[userId]) {
+      toast({
+        title: "Access Denied",
+        description: "Admin accounts cannot be reset for security reasons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setResettingUser(true);
     try {
       console.log('=== RESET USER STATS FUNCTION v7.0 - COMPLETE ===');
@@ -1383,19 +1393,33 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         <MessageSquare className="h-2.5 w-2.5 mr-1" />
                         Msg
                       </Button>
-                      <Button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setAdminRoleAction('add');
-                          setShowAdminRoleModal(true);
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono text-xs h-7"
-                      >
-                        <Shield className="h-2.5 w-2.5 mr-1" />
-                        Admin
-                      </Button>
+                      {/* Hide Make Admin button for users who are already admins */}
+                      {adminStatuses[user.id] ? (
+                        <Button
+                          disabled
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-green-600 to-green-700 text-green-300 border-0 font-mono text-xs h-7 cursor-not-allowed"
+                          title="User is already an admin"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Admin ✓
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setAdminRoleAction('add');
+                            setShowAdminRoleModal(true);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-0 font-mono text-xs h-7"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Admin
+                        </Button>
+                      )}
                       {/* Hide Remove Admin button if user is admin and trying to remove themselves or if target is admin */}
                       {!(adminStatuses[user.id] && user.id === user?.id) && adminStatuses[user.id] ? (
                         <Button
@@ -1423,18 +1447,32 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Remove
                         </Button>
                       )}
-                      <Button
-                        onClick={() => {
-                          setSelectedUser(user);
-                          setShowResetConfirm(true);
-                        }}
-                        size="sm"
-                        variant="outline"
-                        className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono text-xs h-7"
-                      >
-                        <Trash2 className="h-2.5 w-2.5 mr-1" />
-                        Reset
-                      </Button>
+                      {/* Hide Reset button for admin users */}
+                      {adminStatuses[user.id] ? (
+                        <Button
+                          disabled
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 border-0 font-mono text-xs h-7 cursor-not-allowed"
+                          title="Admin accounts cannot be reset"
+                        >
+                          <Shield className="h-2.5 w-2.5 mr-1" />
+                          Protected
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            setSelectedUser(user);
+                            setShowResetConfirm(true);
+                          }}
+                          size="sm"
+                          variant="outline"
+                          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white border-0 font-mono text-xs h-7"
+                        >
+                          <Trash2 className="h-2.5 w-2.5 mr-1" />
+                          Reset
+                        </Button>
+                      )}
                       {/* Hide Delete button for admin users */}
                       {adminStatuses[user.id] ? (
                         <Button
