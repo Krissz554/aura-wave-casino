@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Shield, Users, FileText, Mail } from 'lucide-react';
+import { Shield, Users, FileText, Mail, Clock } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -48,21 +48,21 @@ export function Footer() {
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Discord <span className="text-xs text-orange-400">🚧</span>
+                Discord <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
               <a 
                 href="#" 
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Telegram <span className="text-xs text-orange-400">🚧</span>
+                Telegram <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
               <a 
                 href="#" 
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Twitter <span className="text-xs text-orange-400">🚧</span>
+                Twitter <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
             </div>
           </div>
@@ -108,21 +108,21 @@ export function Footer() {
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Help Center <span className="text-xs text-orange-400">🚧</span>
+                Help Center <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
               <a 
                 href="#" 
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Contact Us <span className="text-xs text-orange-400">🚧</span>
+                Contact Us <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
               <a 
                 href="#" 
                 className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
                 onClick={(e) => e.preventDefault()}
               >
-                Bug Reports <span className="text-xs text-orange-400">🚧</span>
+                Bug Reports <Clock className="inline w-3 h-3 text-orange-400 ml-1" />
               </a>
             </div>
           </div>
