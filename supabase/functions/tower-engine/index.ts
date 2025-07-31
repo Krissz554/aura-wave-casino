@@ -72,12 +72,18 @@ function generateMinePositions(difficulty: string): number[][] {
 }
 
 serve(async (req) => {
+  console.log(`🚀 TOWER ENGINE: Function called with method: ${req.method}`);
+  console.log(`🚀 TOWER ENGINE: URL: ${req.url}`);
+  console.log(`🚀 TOWER ENGINE: Headers:`, Object.fromEntries(req.headers.entries()));
+  
   if (req.method === 'OPTIONS') {
+    console.log('✅ TOWER ENGINE: OPTIONS request handled');
     return new Response(null, { headers: corsHeaders });
   }
 
   // Health check endpoint
   if (req.method === 'GET') {
+    console.log('✅ TOWER ENGINE: GET health check');
     return new Response(JSON.stringify({ 
       status: 'healthy', 
       timestamp: new Date().toISOString(),
@@ -87,11 +93,26 @@ serve(async (req) => {
     });
   }
 
+  console.log('📨 TOWER ENGINE: Processing POST request');
+  
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    console.log('🔧 TOWER ENGINE: Initializing Supabase client');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    console.log(`🔧 TOWER ENGINE: URL present: ${!!supabaseUrl}`);
+    console.log(`🔧 TOWER ENGINE: Key present: ${!!supabaseKey}`);
+    
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('❌ TOWER ENGINE: Missing environment variables');
+      return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+        status: 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log('✅ TOWER ENGINE: Supabase client initialized');
 
     const authHeader = req.headers.get('Authorization');
     console.log(`🔐 Auth header present: ${!!authHeader}`);
@@ -135,8 +156,11 @@ serve(async (req) => {
 
     switch (action) {
       case 'start': {
+        console.log('🎮 TOWER ENGINE: Starting game validation');
+        
         // Validate inputs
         if (!difficulty || !DIFFICULTY_CONFIGS[difficulty]) {
+          console.error('❌ TOWER ENGINE: Invalid difficulty:', difficulty);
           return new Response(JSON.stringify({ error: 'Invalid difficulty' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -144,11 +168,25 @@ serve(async (req) => {
         }
 
         if (!bet_amount || bet_amount <= 0) {
+          console.error('❌ TOWER ENGINE: Invalid bet amount:', bet_amount);
           return new Response(JSON.stringify({ error: 'Invalid bet amount' }), {
             status: 400,
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           });
         }
+        
+        console.log('✅ TOWER ENGINE: Input validation passed');
+        
+        // TEMPORARY: Just return a success response for testing
+        console.log('🧪 TOWER ENGINE: Returning test success response');
+        return new Response(JSON.stringify({ 
+          success: true, 
+          message: 'Tower engine is working',
+          test_mode: true,
+          received_data: { action, difficulty, bet_amount, user_id: user.id }
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
 
         // Check user balance
         const { data: profile } = await supabase
