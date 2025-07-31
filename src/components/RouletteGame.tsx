@@ -212,12 +212,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         fetchRoundBets(data.id);
       }
     } catch (error: any) {
-      console.error('Failed to fetch current round:', error);
-      toast({
-        title: "CONNECTION LOST",
-        description: "Unable to reach game servers",
-        variant: "destructive",
-      });
+      // Only log the error, don't spam console or show toasts for edge function failures
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to fetch current round:', error.message || error);
+      }
     }
   };
 
@@ -259,7 +257,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         }
       }
     } catch (error: any) {
-      console.error('Failed to fetch round bets:', error);
+      // Only log in development, don't spam console
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to fetch round bets:', error.message || error);
+      }
     }
   };
 
@@ -288,7 +289,10 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       
       setRecentResults(uniqueResults);
     } catch (error: any) {
-      console.error('Failed to fetch recent results:', error);
+      // Only log in development, don't spam console
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to fetch recent results:', error.message || error);
+      }
     }
   };
 

@@ -63,7 +63,10 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch (error) {
-      console.error('Error fetching level stats:', error);
+      // Only log in development to reduce console spam
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Error fetching level stats:', error);
+      }
       // Set default stats on error
       setLevelStats({
         current_level: 1,
@@ -95,16 +98,16 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
         {
           event: '*',
           schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
+          table: 'user_level_stats',
+          filter: `user_id=eq.${user.id}`
         },
         (payload) => {
           if (payload.new) {
             const newData = payload.new as any;
             const newStats = {
               current_level: newData.current_level || 1,
-              lifetime_xp: Number(newData.lifetime_xp || 0), // Ensure decimal precision
-              current_level_xp: Number(newData.current_xp || 0), // Map current_xp with decimals
+              lifetime_xp: Number(newData.lifetime_xp || 0),
+              current_level_xp: Number(newData.current_level_xp || 0),
               xp_to_next_level: newData.xp_to_next_level || 100,
               border_tier: newData.border_tier || 1
             };
@@ -114,7 +117,9 @@ export function LevelSyncProvider({ children }: { children: React.ReactNode }) {
         }
       )
       .subscribe((status, err) => {
-        if (err) console.error('📊 XP tracking subscription error:', err);
+        if (err && process.env.NODE_ENV === 'development') {
+          console.warn('📊 XP tracking subscription error:', err);
+        }
       });
 
     return () => {
