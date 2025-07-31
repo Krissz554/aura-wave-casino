@@ -760,17 +760,31 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         return;
       }
 
-      // 2. Clear any existing deletion-related notifications
+      // 2. Clear any existing deletion-related notifications that trigger the lock screen
       console.log('Clearing existing deletion notifications...');
-      const { error: clearNotificationsError } = await supabase
+      
+      // First, clear the specific "Account Deletion Initiated" notification that causes the lock
+      const { error: clearInitiatedError } = await supabase
         .from('notifications')
         .delete()
         .eq('user_id', userId)
         .eq('type', 'admin_message')
-        .like('title', '%Deletion%');
+        .eq('title', 'Account Deletion Initiated');
 
-      if (clearNotificationsError) {
-        console.error('Error clearing deletion notifications:', clearNotificationsError);
+      if (clearInitiatedError) {
+        console.error('Error clearing initiated deletion notification:', clearInitiatedError);
+      }
+
+      // Also clear any other deletion-related notifications
+      const { error: clearOtherDeletionError } = await supabase
+        .from('notifications')
+        .delete()
+        .eq('user_id', userId)
+        .eq('type', 'admin_message')
+        .in('title', ['Account Deletion Initiated', 'Account Deleted', 'Account Deletion Completed']);
+
+      if (clearOtherDeletionError) {
+        console.error('Error clearing other deletion notifications:', clearOtherDeletionError);
       }
 
       // 3. Send new cancellation notification to user
@@ -812,6 +826,18 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         event: 'deletion_cancelled',
         payload: {
           message: 'Your account deletion has been cancelled. You are now fully unlocked.',
+          timestamp: new Date().toISOString(),
+          force_unlock: true,
+          clear_deletion_state: true
+        }
+      });
+
+      // Also send a general notification update to trigger UI refresh
+      channel.send({
+        type: 'broadcast',
+        event: 'notifications_updated',
+        payload: {
+          action: 'deletion_cancelled',
           timestamp: new Date().toISOString()
         }
       });

@@ -257,8 +257,20 @@ export default function Index({ initialGame }: IndexProps) {
         n.title === 'Account Deleted' &&
         n.data?.deletion_time
       );
+
+      const cancellationNotification = data?.find(n => 
+        n.type === 'admin_message' && 
+        n.title === 'Account Deletion Cancelled' &&
+        n.data?.deletion_cancelled
+      );
       
-      if (pendingDeletionNotification) {
+      if (cancellationNotification) {
+        console.log('Deletion cancellation notification found, ensuring user is unlocked');
+        // Ensure user is completely unlocked
+        setIsUserLocked(false);
+        setShowAccountDeletionHandler(false);
+        setDeletionTime('');
+      } else if (pendingDeletionNotification) {
         console.log('Pending account deletion notification found, showing handler');
         setShowAccountDeletionHandler(true);
         setDeletionTime(pendingDeletionNotification.data.deletion_time);
@@ -266,6 +278,11 @@ export default function Index({ initialGame }: IndexProps) {
       } else if (completedDeletionNotification) {
         console.log('Completed account deletion notification found, showing popup');
         setShowAccountDeletionNotification(true);
+      } else {
+        // No deletion-related notifications found, ensure user is unlocked
+        setIsUserLocked(false);
+        setShowAccountDeletionHandler(false);
+        setDeletionTime('');
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -396,6 +413,19 @@ export default function Index({ initialGame }: IndexProps) {
                         newNotification.data?.deletion_time) {
                 console.log('Completed account deletion notification received, showing popup');
                 setShowAccountDeletionNotification(true);
+              } else if (newNotification.type === 'admin_message' && 
+                        newNotification.title === 'Account Deletion Cancelled' &&
+                        newNotification.data?.deletion_cancelled) {
+                console.log('Account deletion cancellation notification received, unlocking user');
+                // Immediately unlock the user interface
+                setIsUserLocked(false);
+                setShowAccountDeletionHandler(false);
+                setDeletionTime('');
+                
+                // Refresh notifications to ensure clean state
+                setTimeout(() => {
+                  fetchNotifications();
+                }, 1000);
               } else {
                 // Enhanced toast notification with type-specific styling
                 toast({
@@ -455,6 +485,32 @@ export default function Index({ initialGame }: IndexProps) {
             }
           }
         )
+        .on('broadcast', { event: 'deletion_cancelled' }, (payload) => {
+          console.log('Real-time deletion cancellation received:', payload);
+          // Immediately unlock the user interface
+          setIsUserLocked(false);
+          setShowAccountDeletionHandler(false);
+          setDeletionTime('');
+          
+          // Show success toast
+          toast({
+            title: "🛡️ Account Restored",
+            description: "Your account deletion has been cancelled by an administrator.",
+            duration: 5000,
+          });
+          
+          // Refresh notifications to ensure clean state
+          setTimeout(() => {
+            fetchNotifications();
+          }, 1000);
+        })
+        .on('broadcast', { event: 'notifications_updated' }, (payload) => {
+          console.log('Notifications update broadcast received:', payload);
+          if (payload.payload?.action === 'deletion_cancelled') {
+            // Force refresh notifications
+            fetchNotifications();
+          }
+        })
         .subscribe((status) => {
           if (status === 'CHANNEL_ERROR') {
             // Only show error if not unmounting
