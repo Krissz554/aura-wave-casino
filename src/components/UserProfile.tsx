@@ -1845,24 +1845,12 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
 
   const claimAchievement = async (achievement: any) => {
     if (!isOwnProfile) {
-      console.error('❌ Cannot claim achievement: not own profile');
       return;
     }
     
     if (!userId) {
-      console.error('❌ Cannot claim achievement: userId is undefined');
-      console.log('Current userId:', userId);
-      console.log('Current isOwnProfile:', isOwnProfile);
       return;
     }
-    
-    console.log('🎯 Claiming achievement:', {
-      achievementId: achievement.id,
-      achievementName: achievement.name,
-      userId: userId,
-      rewardType: achievement.reward_type,
-      rewardAmount: achievement.reward_amount
-    });
     
     setClaiming(achievement.id);
     
@@ -1872,9 +1860,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         p_achievement_id: achievement.id
       });
 
-      console.log('📊 Claim result:', claimResult);
-      console.log('❗ Claim error:', claimError);
-
       if (claimError) {
         console.error('❌ Error claiming achievement:', claimError);
         throw claimError;
@@ -1882,18 +1867,14 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       
       // Check if the claim was successful
       if (claimResult && claimResult.success) {
-        console.log('✅ Achievement claim successful!');
         // Success - continue with UI updates
       } else if (claimResult && claimResult.error === 'Achievement already claimed') {
-        console.log('⚠️ Achievement already claimed, refreshing data');
         // Just refresh the data to update the UI
         await fetchData();
         return; // Don't throw error, just return
       } else if (claimResult && claimResult.error) {
-        console.error('❌ Claim failed with error:', claimResult.error);
         throw new Error(claimResult.error);
       } else {
-        console.error('❌ Unexpected claim result:', claimResult);
         throw new Error('Claim was not successful: ' + JSON.stringify(claimResult));
       }
 
@@ -1917,75 +1898,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       // Refresh achievements data to update the UI
       await fetchData();
       
-      // Verify database tables are properly updated
-      console.log('🔍 Verifying database table updates...');
-      
-      // 1. Verify achievement was removed from unlocked_achievements table
-      const { data: remainingUnlocked, error: unlockedError } = await supabase
-        .from('unlocked_achievements')
-        .select('achievement_id')
-        .eq('user_id', userId)
-        .eq('achievement_id', achievement.id);
-      
-      if (unlockedError) {
-        console.error('❌ Error checking unlocked_achievements:', unlockedError);
-      } else if (remainingUnlocked && remainingUnlocked.length > 0) {
-        console.error('❌ CRITICAL: Achievement still in unlocked_achievements after claiming!', remainingUnlocked);
-      } else {
-        console.log('✅ Achievement properly removed from unlocked_achievements table');
-      }
-      
-      // 2. Verify achievement was added to user_achievements table
-      const { data: claimedAchievement, error: claimedError } = await supabase
-        .from('user_achievements')
-        .select('achievement_id, unlocked_at, claimed_at')
-        .eq('user_id', userId)
-        .eq('achievement_id', achievement.id);
-      
-      if (claimedError) {
-        console.error('❌ Error checking user_achievements:', claimedError);
-      } else if (claimedAchievement && claimedAchievement.length > 0) {
-        const claimed = claimedAchievement[0];
-        console.log('✅ Achievement properly added to user_achievements table:', {
-          achievementId: claimed.achievement_id,
-          unlockedAt: claimed.unlocked_at,
-          claimedAt: claimed.claimed_at
-        });
-      } else {
-        console.error('❌ CRITICAL: Achievement not found in user_achievements table after claiming!');
-      }
-      
-      // 3. Verify reward was properly awarded
-      if (achievement.reward_type === 'money') {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('balance')
-          .eq('id', userId)
-          .single();
-          
-        if (profileError) {
-          console.error('❌ Error checking profile balance:', profileError);
-        } else {
-          console.log('✅ Profile balance verified:', profileData.balance);
-        }
-      } else if (achievement.reward_type === 'xp' || achievement.reward_type === 'cases') {
-        const { data: statsData, error: statsError } = await supabase
-          .from('user_level_stats')
-          .select('lifetime_xp, current_level_xp, available_cases')
-          .eq('user_id', userId)
-          .single();
-          
-        if (statsError) {
-          console.error('❌ Error checking user stats:', statsError);
-        } else {
-          console.log('✅ User stats verified:', {
-            lifetimeXp: statsData.lifetime_xp,
-            currentLevelXp: statsData.current_level_xp,
-            availableCases: statsData.available_cases
-          });
-        }
-      }
-      
       // Also refresh user profile data to update balance display
       if (achievement.reward_type === 'money') {
         // Trigger a refresh of the user profile data
@@ -2005,18 +1917,9 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         }
       }
       
-      // Final verification: Ensure UI state matches database state
-      setTimeout(async () => {
+      // Clear the newly claimed status after a delay
+      setTimeout(() => {
         setNewlyClaimed(prev => prev.filter(id => id !== achievement.id));
-        
-        // Double-check that the achievement is no longer in claimable list
-        const stillClaimable = claimableAchievements.find(a => a.id === achievement.id);
-        if (stillClaimable) {
-          console.warn('⚠️ Achievement still showing as claimable in UI, triggering refresh...');
-          await fetchData(); // Force another refresh if needed
-        } else {
-          console.log('✅ UI state verified: Achievement no longer claimable');
-        }
       }, 2000);
       
     } catch (error) {
@@ -2113,7 +2016,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
       </div>
 
       {/* Cyberpunk Claimable Achievements */}
-      {console.log('🔍 Claimable achievements check:', { isOwnProfile, claimableCount: claimableAchievements.length, achievements: claimableAchievements.map(a => a.name) })}
       {isOwnProfile && claimableAchievements.length > 0 && (
         <div className="relative group/claimable">
           {/* Multi-layered Background */}
@@ -2140,14 +2042,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
               <h3 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-green-400 bg-clip-text text-transparent font-mono tracking-wider">
                 READY TO CLAIM ({claimableAchievements.length})
               </h3>
-              
-              {/* Debug button to test clicking */}
-              <button 
-                onClick={() => console.log('🧪 Debug button clicked!')}
-                className="bg-red-500 text-white px-2 py-1 text-xs"
-              >
-                DEBUG TEST
-              </button>
               <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/50 via-green-400/30 to-transparent" />
             </div>
             
@@ -2210,7 +2104,6 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
                             
                             <button
                               onClick={async () => {
-                                console.log('🖱️ Claim button clicked!', achievement.name);
                                 try {
                                   await claimAchievement(achievement);
                                 } catch (error) {
