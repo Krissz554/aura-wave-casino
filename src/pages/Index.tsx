@@ -2029,7 +2029,11 @@ export default function Index({ initialGame }: IndexProps) {
       {/* Account Deletion Handler */}
       <AccountDeletionHandler
         isOpen={showAccountDeletionHandler}
-        onClose={() => setShowAccountDeletionHandler(false)}
+        onClose={() => {
+          setShowAccountDeletionHandler(false);
+          setIsUserLocked(false);
+          setDeletionTime('');
+        }}
         deletionTime={deletionTime}
       />
 

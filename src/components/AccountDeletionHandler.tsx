@@ -329,8 +329,41 @@ export default function AccountDeletionHandler({ isOpen, onClose, deletionTime }
     }
   };
 
-  const handleLogoutNow = () => {
-    signOut();
+  const handleLogoutNow = async () => {
+    try {
+      console.log('User initiated immediate logout during deletion countdown');
+      
+      // Show immediate feedback
+      toast({
+        title: "Logging Out",
+        description: "You are being logged out immediately...",
+        duration: 1000,
+      });
+      
+      // Immediately close the deletion handler and release lockdown
+      onClose();
+      
+      // Clear any timers or states
+      setIsDeleting(false);
+      setDeletionCompleted(false);
+      setDeletionCancelled(false);
+      
+      // Small delay to ensure UI updates, then logout
+      setTimeout(async () => {
+        try {
+          await signOut();
+        } catch (error) {
+          console.error('Error during signOut:', error);
+          // Force page reload as fallback
+          window.location.href = '/';
+        }
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error during immediate logout:', error);
+      // Force logout with page reload as fallback
+      window.location.href = '/';
+    }
   };
 
   if (!isOpen) return null;
