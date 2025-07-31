@@ -40,25 +40,29 @@ export function Footer() {
             <h3 className="font-semibold text-lg flex items-center gap-2">
               <Users className="w-5 h-5 text-blue-400" />
               Community
+              <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md font-mono">COMING SOON</span>
             </h3>
             <div className="space-y-2">
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Discord
+                Discord <span className="text-xs text-orange-400">🚧</span>
               </a>
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Telegram
+                Telegram <span className="text-xs text-orange-400">🚧</span>
               </a>
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Twitter
+                Twitter <span className="text-xs text-orange-400">🚧</span>
               </a>
             </div>
           </div>
@@ -96,25 +100,29 @@ export function Footer() {
             <h3 className="font-semibold text-lg flex items-center gap-2">
               <Mail className="w-5 h-5 text-purple-400" />
               Support
+              <span className="text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded-md font-mono">COMING SOON</span>
             </h3>
             <div className="space-y-2">
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Help Center
+                Help Center <span className="text-xs text-orange-400">🚧</span>
               </a>
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Contact Us
+                Contact Us <span className="text-xs text-orange-400">🚧</span>
               </a>
               <a 
                 href="#" 
-                className="block text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="block text-sm text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-not-allowed"
+                onClick={(e) => e.preventDefault()}
               >
-                Bug Reports
+                Bug Reports <span className="text-xs text-orange-400">🚧</span>
               </a>
             </div>
           </div>
