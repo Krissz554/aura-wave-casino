@@ -678,7 +678,24 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log('=== INSTANT USER ACCOUNT DELETION ===');
       console.log('User ID:', userId);
       
-      // 1. Send immediate notification to user about instant deletion
+      // 1. Remove from pending deletions table first (instant deletion bypasses the waiting period)
+      console.log('Removing pending deletion record for instant deletion...');
+      try {
+        const { error: removeError } = await supabase
+          .from('pending_account_deletions')
+          .delete()
+          .eq('user_id', userId);
+        
+        if (removeError) {
+          console.error('Error removing pending deletion record:', removeError);
+        } else {
+          console.log('Pending deletion record removed for instant deletion');
+        }
+      } catch (error) {
+        console.error('Exception removing pending deletion record:', error);
+      }
+      
+      // 2. Send immediate notification to user about instant deletion
       console.log('Sending instant deletion notification to user...');
       const { error: notificationError } = await supabase
         .from('notifications')
@@ -698,23 +715,23 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         console.error('Error sending instant deletion notification:', notificationError);
       }
 
-      // 2. Send real-time broadcast to user's client for immediate action
-      const userChannel = supabase.channel(`user-${userId}`);
-      userChannel.send({
-        type: 'broadcast',
-        event: 'instant_deletion_initiated',
-        payload: {
-          message: 'Your account deletion has been expedited. You will be logged out immediately.',
-          timestamp: new Date().toISOString(),
-          force_logout: true,
-          instant_deletion: true
-        }
-      });
+             // 3. Send real-time broadcast to user's client for immediate action
+       const userChannel = supabase.channel(`user-${userId}`);
+       userChannel.send({
+         type: 'broadcast',
+         event: 'instant_deletion_initiated',
+         payload: {
+           message: 'Your account deletion has been expedited. You will be logged out immediately.',
+           timestamp: new Date().toISOString(),
+           force_logout: true,
+           instant_deletion: true
+         }
+       });
 
-      // 3. Give user a moment to see the notification before deletion
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // 4. Call the existing Edge Function directly for immediate deletion
+       // 4. Give user a moment to see the notification before deletion
+       await new Promise(resolve => setTimeout(resolve, 2000));
+       
+       // 5. Call the existing Edge Function directly for immediate deletion
       const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
         method: 'POST',
         headers: {
@@ -738,16 +755,21 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         const result = await response.json();
         console.log('Instant deletion completed:', result);
         
-        // Remove from pending deletions if it was there
-        if (pendingDeletions[userId]) {
-          try {
-            await supabase
-              .from('pending_account_deletions')
-              .delete()
-              .eq('user_id', userId);
-          } catch (error) {
-            console.log('Note: Could not remove from pending deletions table:', error);
+        // Remove from pending deletions table (cleanup after successful deletion)
+        console.log('Cleaning up pending deletion record...');
+        try {
+          const { error: cleanupError } = await supabase
+            .from('pending_account_deletions')
+            .delete()
+            .eq('user_id', userId);
+          
+          if (cleanupError) {
+            console.error('Error cleaning up pending deletion record:', cleanupError);
+          } else {
+            console.log('Pending deletion record successfully cleaned up');
           }
+        } catch (error) {
+          console.error('Exception during pending deletion cleanup:', error);
         }
         
         toast({
