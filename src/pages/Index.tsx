@@ -1488,12 +1488,7 @@ export default function Index({ initialGame }: IndexProps) {
                                   {effectiveStats.current_level >= 100 ? '👑' : effectiveStats.current_level}
                                 </span>
                               </div>
-                              {/* Loading overlay */}
-                              {profileModalLoading && (
-                                <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-full">
-                                  <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                                </div>
-                              )}
+                              {/* Removed loading overlay for instant response */}
                             </div>
                           </ProfileBorder>
                         </div>
