@@ -163,76 +163,18 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
       console.log('🎯 TOWER: Amount:', amount, 'Type:', typeof amount);
       console.log('🎯 TOWER: Difficulty:', difficulty, 'Type:', typeof difficulty);
       
-      // TEMPORARY: Direct database implementation until tower-engine is deployed
-      console.log('🔧 TOWER: Using direct database implementation (edge function not deployed)');
+      const response = await supabase.functions.invoke('tower-engine', {
+        body: requestBody
+      });
+
+      if (response.error) throw response.error;
       
-      // Check user balance first
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('balance')
-        .eq('id', userData.id)
-        .single();
-
-      if (!profile || profile.balance < amount) {
-        throw new Error('Insufficient balance');
-      }
-
-      // Deduct bet amount
-      await supabase
-        .from('profiles')
-        .update({ balance: profile.balance - amount })
-        .eq('id', userData.id);
-
-      // Generate mine positions (simple client-side generation)
-      const config = DIFFICULTY_INFO[difficulty as keyof typeof DIFFICULTY_INFO];
-      const tilesPerRow = config.tilesPerRow;
-      const mineCount = config.mineCount;
-      const maxLevel = config.maxLevel;
-      
-      const minePositions: number[][] = [];
-      for (let level = 0; level < maxLevel; level++) {
-        const levelMines: number[] = [];
-        const availablePositions = Array.from({ length: tilesPerRow }, (_, i) => i);
-        
-        // Simple shuffle
-        for (let i = availablePositions.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [availablePositions[i], availablePositions[j]] = [availablePositions[j], availablePositions[i]];
-        }
-        
-        for (let i = 0; i < mineCount; i++) {
-          levelMines.push(availablePositions[i]);
-        }
-        
-        minePositions.push(levelMines.sort((a, b) => a - b));
-      }
-
-      // Create game record
-      const { data: newGame, error: gameError } = await supabase
-        .from('tower_games')
-        .insert({
-          user_id: userData.id,
-          difficulty,
-          bet_amount: amount,
-          max_level: maxLevel,
-          mine_positions: minePositions,
-          current_level: 0,
-          status: 'active',
-          current_multiplier: 1.0
-        })
-        .select()
-        .single();
-
-      if (gameError) {
-        console.error('❌ Game creation error:', gameError);
-        throw new Error('Failed to create game: ' + gameError.message);
-      }
-
-      console.log('✅ TOWER: Game created successfully:', newGame);
+      const newGame = response.data;
       setGame(newGame);
       
-      // Update user balance in the UI (already deducted in database)
-      await onUpdateUser({ balance: profile.balance - amount });
+      // Update user balance
+      const newBalance = userData.balance - amount;
+      await onUpdateUser({ balance: newBalance });
       
       toast({
         title: "Game Started",
@@ -267,112 +209,18 @@ export default function TowerGame({ userData, onUpdateUser }: TowerGameProps) {
     setLoading(true);
     
     try {
-      // TEMPORARY: Direct database implementation for tile selection
-      console.log('🔧 TOWER: Processing tile selection directly');
-      
-      // Check if tile is a mine
-      const currentLevelMines = game.mine_positions[game.current_level];
-      const isMine = currentLevelMines.includes(tileIndex);
-      
-      console.log(`🎯 Tile ${tileIndex} at level ${game.current_level}, isMine: ${isMine}`);
-      
-      let updatedGame;
-      
-      if (isMine) {
-        // Hit a mine - game over
-        const { data, error } = await supabase
-          .from('tower_games')
-          .update({
-            status: 'lost',
-            final_payout: 0
-          })
-          .eq('id', game.id)
-          .select()
-          .single();
-          
-        if (error) throw error;
-        updatedGame = data;
-        
-        // Record loss
-        await supabase
-          .from('game_history')
-          .insert({
-            user_id: userData!.id,
-            game_type: 'tower',
-            bet_amount: game.bet_amount,
-            profit: -game.bet_amount,
-            result: 'loss',
-            game_data: {
-              difficulty: game.difficulty,
-              level_reached: game.current_level + 1,
-              hit_mine: true
-            }
-          });
-      } else {
-        // Safe tile - advance to next level
-        const nextLevel = game.current_level + 1;
-        const config = DIFFICULTY_INFO[game.difficulty as keyof typeof DIFFICULTY_INFO];
-        const multiplier = PAYOUT_MULTIPLIERS[game.current_level] || 1.0;
-        
-        let newStatus = 'active';
-        let finalPayout = 0;
-        
-        // Check if this was the last level
-        if (nextLevel >= config.maxLevel) {
-          newStatus = 'cashed_out';
-          finalPayout = game.bet_amount * multiplier;
+      const response = await supabase.functions.invoke('tower-engine', {
+        body: { 
+          action: 'select_tile',
+          game_id: game.id,
+          tile_index: tileIndex,
+          user_id: userData?.id
         }
-        
-        const { data, error } = await supabase
-          .from('tower_games')
-          .update({
-            current_level: nextLevel,
-            current_multiplier: multiplier,
-            status: newStatus,
-            final_payout: finalPayout
-          })
-          .eq('id', game.id)
-          .select()
-          .single();
-          
-        if (error) throw error;
-        updatedGame = data;
-        
-        // If game completed, credit the payout
-        if (newStatus === 'cashed_out') {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('balance')
-            .eq('id', userData!.id)
-            .single();
-            
-          await supabase
-            .from('profiles')
-            .update({ balance: (profile?.balance || 0) + finalPayout })
-            .eq('id', userData!.id);
-            
-          // Update UI balance
-          await onUpdateUser({ balance: (profile?.balance || 0) + finalPayout });
-          
-          // Record win
-          await supabase
-            .from('game_history')
-            .insert({
-              user_id: userData!.id,
-              game_type: 'tower',
-              bet_amount: game.bet_amount,
-              profit: finalPayout - game.bet_amount,
-              result: 'win',
-              game_data: {
-                difficulty: game.difficulty,
-                level_reached: nextLevel,
-                multiplier,
-                completed: true
-              }
-            });
-        }
-      }
+      });
+
+      if (response.error) throw response.error;
       
+      const updatedGame = response.data;
       setGame(updatedGame);
       
       // Handle game end
