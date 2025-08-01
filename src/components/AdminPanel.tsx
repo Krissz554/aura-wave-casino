@@ -306,7 +306,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
   };
 
-  // Reset user statistics - COMPLETE VERSION
+  // Reset user statistics - COMPREHENSIVE VERSION using database function
   const resetUserStatsFinal = async (userId: string) => {
     // Double-check admin status with RPC call for extra security
     try {
@@ -347,209 +347,42 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
     setResettingUser(true);
     try {
-      console.log('=== RESET USER STATS FUNCTION v7.0 - COMPLETE ===');
-      console.log('Cache buster:', Date.now());
+      console.log('=== COMPREHENSIVE USER STATS RESET ===');
       console.log('User ID:', userId);
+      console.log('Using database function: reset_user_stats_comprehensive');
       
-      // 1. Reset profiles table
-      console.log('Updating profiles table...');
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          level: 1,
-          xp: 0,
-          balance: 0,
-          total_wagered: 0,
-          total_profit: 0
-        })
-        .eq('id', userId);
+      // Use the comprehensive database function to reset all user statistics
+      const { data: resetResult, error: resetError } = await supabase
+        .rpc('reset_user_stats_comprehensive', { target_user_id: userId });
 
-      if (profileError) {
-        console.error('Error resetting profile stats:', profileError);
+      if (resetError) {
+        console.error('Error calling reset function:', resetError);
         toast({
           title: "Error",
-          description: `Failed to reset profile statistics: ${profileError.message}`,
+          description: `Failed to reset user statistics: ${resetError.message}`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!resetResult?.success) {
+        console.error('Reset function returned failure:', resetResult);
+        toast({
+          title: "Error",
+          description: `Failed to reset user statistics: ${resetResult?.error || 'Unknown error'}`,
           variant: "destructive",
         });
         return;
       }
       
-      console.log('Profile statistics reset successfully');
+      console.log('✅ Comprehensive stats reset completed:', resetResult);
+      console.log(`📊 Tables affected: ${resetResult.tables_reset}`);
       
-      // 2. Reset user_level_stats table (keep the row, just reset values)
-      console.log('Resetting user_level_stats table...');
-      const { error: levelStatsError } = await supabase
-        .from('user_level_stats')
-        .update({
-          current_level: 1,
-          lifetime_xp: 0,
-          current_level_xp: 0,
-          xp_to_next_level: 100, // Level 1 requires 100 XP
-          border_tier: 1,
-          available_cases: 0,
-          total_cases_opened: 0,
-          total_case_value: 0,
-          coinflip_games: 0,
-          coinflip_wins: 0,
-          coinflip_wagered: 0,
-          coinflip_profit: 0,
-          best_coinflip_streak: 0,
-          current_coinflip_streak: 0,
-          crash_games: 0,
-          crash_wins: 0,
-          crash_wagered: 0,
-          crash_profit: 0,
-          roulette_games: 0,
-          roulette_wins: 0,
-          roulette_wagered: 0,
-          roulette_profit: 0,
-          roulette_highest_win: 0,
-          roulette_highest_loss: 0,
-          roulette_green_wins: 0,
-          roulette_red_wins: 0,
-          roulette_black_wins: 0,
-          roulette_favorite_color: 'none',
-          roulette_best_streak: 0,
-          roulette_current_streak: 0,
-          roulette_biggest_bet: 0,
-          tower_games: 0,
-          tower_wins: 0,
-          tower_wagered: 0,
-          tower_profit: 0,
-          total_games: 0,
-          total_wins: 0,
-          total_wagered: 0,
-          total_profit: 0,
-          biggest_win: 0,
-          biggest_loss: 0,
-          chat_messages_count: 0,
-          login_days_count: 0,
-          biggest_single_bet: 0,
-          current_win_streak: 0,
-          best_win_streak: 0,
-          tower_highest_level: 0,
-          tower_biggest_win: 0,
-          tower_biggest_loss: 0,
-          tower_best_streak: 0,
-          tower_current_streak: 0,
-          tower_perfect_games: 0
-          // Note: account_created is preserved (not reset)
-        })
-        .eq('user_id', userId);
-
-      if (levelStatsError) {
-        console.error('Error resetting level stats:', levelStatsError);
-        toast({
-          title: "Error",
-          description: `Failed to reset level statistics: ${levelStatsError.message}`,
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      console.log('Level statistics reset successfully');
-      
-      // 3. Delete related data from other tables
-      console.log('Deleting game history...');
-      const { error: gameHistoryError } = await supabase
-        .from('game_history')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameHistoryError) {
-        console.error('Error deleting game history:', gameHistoryError);
-      } else {
-        console.log('Game history deleted successfully');
-      }
-
-      console.log('Deleting game stats...');
-      const { error: gameStatsError } = await supabase
-        .from('game_stats')
-        .delete()
-        .eq('user_id', userId);
-
-      if (gameStatsError) {
-        console.error('Error deleting game stats:', gameStatsError);
-      } else {
-        console.log('Game stats deleted successfully');
-      }
-
-      console.log('Deleting user achievements...');
-      const { error: achievementsError } = await supabase
-        .from('user_achievements')
-        .delete()
-        .eq('user_id', userId);
-
-      if (achievementsError) {
-        console.error('Error deleting user achievements:', achievementsError);
-      } else {
-        console.log('User achievements deleted successfully');
-      }
-
-      console.log('Deleting case rewards...');
-      const { error: caseRewardsError } = await supabase
-        .from('case_rewards')
-        .delete()
-        .eq('user_id', userId);
-
-      if (caseRewardsError) {
-        console.error('Error deleting case rewards:', caseRewardsError);
-      } else {
-        console.log('Case rewards deleted successfully');
-      }
-
-      console.log('Deleting free case claims...');
-      const { error: freeCaseClaimsError } = await supabase
-        .from('free_case_claims')
-        .delete()
-        .eq('user_id', userId);
-
-      if (freeCaseClaimsError) {
-        console.error('Error deleting free case claims:', freeCaseClaimsError);
-      } else {
-        console.log('Free case claims deleted successfully');
-      }
-
-      console.log('Deleting notifications...');
-      const { error: notificationsError } = await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', userId);
-
-      if (notificationsError) {
-        console.error('Error deleting notifications:', notificationsError);
-      } else {
-        console.log('Notifications deleted successfully');
-      }
-
-      console.log('Deleting level daily cases...');
-      const { error: levelDailyCasesError } = await supabase
-        .from('level_daily_cases')
-        .delete()
-        .eq('user_id', userId);
-
-      if (levelDailyCasesError) {
-        console.error('Error deleting level daily cases:', levelDailyCasesError);
-      } else {
-        console.log('Level daily cases deleted successfully');
-      }
-
-      console.log('Deleting user rate limits...');
-      const { error: rateLimitsError } = await supabase
-        .from('user_rate_limits')
-        .delete()
-        .eq('user_id', userId);
-
-      if (rateLimitsError) {
-        console.error('Error deleting user rate limits:', rateLimitsError);
-      } else {
-        console.log('User rate limits deleted successfully');
-      }
-      
-      // Success message
+      // Success message with details
       toast({
         title: "Success",
-        description: "User statistics have been completely reset",
+        description: `User statistics have been completely reset across ${resetResult.tables_reset} tables`,
+        duration: 5000,
       });
       
       setShowResetConfirm(false);
@@ -558,7 +391,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       loadUsers(); // Refresh the user list
       loadPendingDeletions(); // Refresh pending deletions
 
-      console.log('Reset completed successfully');
+      console.log('✅ Reset completed successfully');
     } catch (error) {
       console.error('Error resetting user stats:', error);
       toast({
