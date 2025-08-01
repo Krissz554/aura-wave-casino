@@ -3,6 +3,8 @@
 
 -- 1. FIRST, LET'S CHECK WHAT POLICIES EXIST
 DO $$
+DECLARE
+  policy_rec RECORD;
 BEGIN
   RAISE NOTICE 'Current admin_users policies:';
   FOR policy_rec IN 
@@ -205,6 +207,8 @@ END $$;
 
 -- 6. SHOW FINAL POLICY STATUS
 DO $$
+DECLARE
+  policy_rec RECORD;
 BEGIN
   RAISE NOTICE 'Final admin_users policies:';
   FOR policy_rec IN 
