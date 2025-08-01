@@ -80,7 +80,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   
   // Get admin status for all users in the list
   const userIds = users.map(user => user.id);
-  const { adminStatuses } = useMultipleAdminStatus(userIds);
+  const { adminStatuses, refetch: refetchAdminStatuses } = useMultipleAdminStatus(userIds);
   const [pendingDeletions, setPendingDeletions] = useState<Record<string, any>>({});
   const [showInstantDeleteConfirm, setShowInstantDeleteConfirm] = useState(false);
   const [instantDeletingUser, setInstantDeletingUser] = useState(false);
@@ -196,15 +196,39 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       } else {
         console.log(`✅ Loaded ${data?.length || 0} users`);
         console.log('📊 Users data:', data);
-        setUsers((data || []).map(user => ({
-          id: user.id,
-          username: user.username || '',
-          level: 1, // Default level since we're not fetching user_level_stats
-          xp: 0, // Default XP since we're not fetching user_level_stats
-          balance: user.balance || 0,
-          total_wagered: user.total_wagered || 0,
-          created_at: user.created_at || ''
-        })));
+        
+        // Fetch level stats for all users
+        console.log('📊 Fetching level stats for all users...');
+        const userIds = data?.map(user => user.id) || [];
+        const { data: levelStatsData, error: levelStatsError } = await supabase
+          .from('user_level_stats')
+          .select('user_id, current_level, current_level_xp')
+          .in('user_id', userIds);
+
+        if (levelStatsError) {
+          console.warn('⚠️ Error loading level stats:', levelStatsError);
+        } else {
+          console.log(`✅ Loaded level stats for ${levelStatsData?.length || 0} users`);
+        }
+
+        // Create a map of user_id -> level stats for easy lookup
+        const levelStatsMap = new Map();
+        levelStatsData?.forEach(stats => {
+          levelStatsMap.set(stats.user_id, stats);
+        });
+
+        setUsers((data || []).map(user => {
+          const levelStats = levelStatsMap.get(user.id);
+          return {
+            id: user.id,
+            username: user.username || '',
+            level: levelStats?.current_level || 1,
+            xp: levelStats?.current_level_xp || 0,
+            balance: user.balance || 0,
+            total_wagered: user.total_wagered || 0,
+            created_at: user.created_at || ''
+          };
+        }));
         
         // Show success message with count
         const message = totalCount && totalCount !== data?.length 
@@ -215,6 +239,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           title: "Success",
           description: message,
         });
+
+        // Refresh admin statuses after loading users
+        console.log('🔄 Refreshing admin statuses...');
+        setTimeout(() => {
+          refetchAdminStatuses();
+        }, 100); // Small delay to ensure users state is updated
       }
     } catch (err) {
       console.error('❌ Error loading users:', err);
@@ -283,8 +313,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Reset user statistics - COMPLETE VERSION
   const resetUserStatsFinal = async (userId: string) => {
+    console.log('🛡️ Reset protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
+    
     // Prevent resetting admin accounts
     if (adminStatuses[userId]) {
+      console.log('🚫 Reset blocked: User is admin');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be reset for security reasons.",
@@ -531,8 +564,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Delete user account completely
   const deleteUserAccount = async (userId: string) => {
+    console.log('🛡️ Delete protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
+    
     // Prevent deletion of admin accounts
     if (adminStatuses[userId]) {
+      console.log('🚫 Delete blocked: User is admin');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be deleted for security reasons.",
@@ -689,8 +725,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Instant delete user account (skips the 24-hour delay)
   const instantDeleteUserAccount = async (userId: string) => {
+    console.log('🛡️ Instant delete protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
+    
     // Prevent deletion of admin accounts
     if (adminStatuses[userId]) {
+      console.log('🚫 Instant delete blocked: User is admin');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be deleted for security reasons.",
@@ -1030,6 +1069,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
       setShowAdminRoleModal(false);
       setSelectedUser(null);
+      
+      // Refresh admin statuses immediately
+      console.log('🔄 Refreshing admin statuses after role change...');
+      refetchAdminStatuses();
+      
       loadUsers(); // Refresh the user list
     } catch (error) {
       console.error('Error changing admin role:', error);
