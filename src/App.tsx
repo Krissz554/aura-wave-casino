@@ -8,6 +8,7 @@ import { LevelSyncProvider } from "@/contexts/LevelSyncContext";
 import { XPSyncProvider } from "@/contexts/XPSyncContext";
 import { MaintenanceProvider } from "@/contexts/MaintenanceContext";
 import MaintenanceOverlay from "@/components/MaintenanceOverlay";
+import AccountDeletionOverlay from "@/components/AccountDeletionOverlay";
 import Index from "./pages/Index";
 import Rewards from "./pages/Rewards";
 import NotFound from "./pages/NotFound";
@@ -26,6 +27,7 @@ const App = () => (
         <XPSyncProvider>
           <MaintenanceProvider>
           <MaintenanceOverlay />
+          <AccountDeletionOverlay />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/roulette" element={<Index initialGame="roulette" />} />
