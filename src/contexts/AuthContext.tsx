@@ -63,91 +63,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data, error }
       }
 
-      // If registration is successful, ensure profile and stats are created
+      // If registration is successful, the database trigger should handle profile creation
       if (data.user) {
-        console.log('✅ User created successfully, ensuring profile and stats...')
+        console.log('✅ User created successfully, trigger should handle profile creation')
         console.log('👤 User ID:', data.user.id)
         
-        // Wait a bit for any triggers to complete
-        await new Promise(resolve => setTimeout(resolve, 1000))
+        // Wait a moment for trigger to complete
+        await new Promise(resolve => setTimeout(resolve, 2000))
         
-        // Check if profile was created by trigger
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single()
-        
-        console.log('📋 Profile check result:', { profileData, profileError })
-        
-        if (profileError) {
-          console.error('❌ Profile creation failed:', profileError)
+        // Verify profile was created (optional check)
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('id, username')
+            .eq('id', data.user.id)
+            .single()
           
-          // Try to manually create the profile using the function
-          console.log('🔧 Attempting manual profile creation...')
-          const { data: manualProfile, error: manualError } = await supabase
-            .rpc('create_user_profile_manual', {
-              user_id: data.user.id,
-              username: username
-            })
-          
-          console.log('🔧 Manual profile creation result:', { manualProfile, manualError })
-          
-          if (manualError) {
-            console.error('❌ Manual profile creation failed:', manualError)
+          if (profileData) {
+            console.log('✅ Profile verified successfully:', profileData)
+          } else if (profileError) {
+            console.warn('⚠️ Profile verification failed, but this might be normal for unconfirmed users:', profileError)
             
-            // Try direct insert as last resort
-            console.log('🔧 Attempting direct profile insert...')
-            const { data: directProfile, error: directError } = await supabase
-              .from('profiles')
-              .insert({
-                id: data.user.id,
-                username: username,
-                registration_date: new Date().toISOString(),
-                balance: 0,
-                total_wagered: 0,
-                total_profit: 0,
-                last_claim_time: '1970-01-01T00:00:00Z',
-                badges: ['welcome'],
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                available_cases: 0,
-                total_cases_opened: 0
-              })
-              .select()
-              .single()
-            
-            console.log('🔧 Direct profile insert result:', { directProfile, directError })
-            
-            if (directError) {
-              console.error('❌ Direct profile insert failed:', directError)
-              return { 
-                data, 
-                error: { 
-                  message: 'Registration completed but profile setup failed. Please contact support.',
-                  details: { profileError, manualError, directError }
-                } 
+            // Only attempt manual creation if it's a genuine missing profile issue
+            if (profileError.code === 'PGRST116') { // No rows returned
+              console.log('🔧 Attempting manual profile creation as fallback...')
+              
+              const { data: manualResult, error: manualError } = await supabase
+                .rpc('create_user_profile_manual', {
+                  user_id: data.user.id,
+                  username: username
+                })
+              
+              if (manualError) {
+                console.error('❌ Manual profile creation failed:', manualError)
+              } else {
+                console.log('✅ Manual profile creation successful:', manualResult)
               }
-            } else {
-              console.log('✅ Direct profile creation successful')
             }
-          } else {
-            console.log('✅ Manual profile creation successful')
           }
-        } else {
-          console.log('✅ Profile created successfully via trigger')
-        }
-
-        // Ensure user_level_stats exists
-        console.log('📊 Ensuring user level stats exist...')
-        const { data: statsResult, error: statsError } = await supabase
-          .rpc('ensure_user_level_stats', { user_uuid: data.user.id })
-        
-        if (statsError) {
-          console.error('❌ Stats creation failed:', statsError)
-          // Don't fail registration for stats issues, just log
-        } else {
-          console.log('✅ User level stats ensured')
+        } catch (verificationError) {
+          console.warn('⚠️ Profile verification threw error (might be normal):', verificationError)
         }
       }
 
@@ -165,14 +120,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { data, error }
+    console.log('🔐 Starting sign in process...', { email })
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      
+      if (error) {
+        console.error('❌ Sign in error:', error)
+      } else {
+        console.log('✅ Sign in successful:', data.user?.id)
+      }
+      
+      return { data, error }
+    } catch (err) {
+      console.error('💥 Unexpected sign in error:', err)
+      return {
+        data: null,
+        error: {
+          message: 'An unexpected error occurred during sign in',
+          details: err
+        }
+      }
+    }
   }
 
   const signOut = async () => {
+    console.log('🚪 Starting sign out process...')
+    
     try {
       // Try to sign out from Supabase
       const { error } = await supabase.auth.signOut()
@@ -192,13 +169,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         )
         
         if (!isSafeError) {
-          console.warn('SignOut warning:', error.message)
+          console.warn('⚠️ SignOut warning:', error.message)
+        } else {
+          console.log('ℹ️ Safe sign out message:', error.message)
         }
+      } else {
+        console.log('✅ Sign out successful')
       }
       
     } catch (networkError) {
       // Network errors or other issues - we still want to clear local state
-      console.warn('Network error during signOut:', networkError)
+      console.warn('⚠️ Network error during signOut:', networkError)
     }
     
     // Always clear local state regardless of Supabase response
@@ -212,7 +193,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('sb-' + supabase.supabaseUrl.split('//')[1].split('.')[0] + '-auth-token')
     } catch (storageError) {
       // Ignore localStorage errors
-      console.warn('Could not clear localStorage:', storageError)
+      console.warn('⚠️ Could not clear localStorage:', storageError)
     }
   }
 
