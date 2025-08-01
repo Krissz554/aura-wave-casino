@@ -1,8 +1,8 @@
 -- =====================================================
--- FIX ROULETTE DATA INTEGRITY ISSUES
+-- FIX ROULETTE DATA INTEGRITY ISSUES - CORRECTED VERSION
 -- =====================================================
 -- This script fixes the foreign key constraint error by cleaning up orphaned data
--- Run this BEFORE the MANUAL_ROULETTE_FIX.sql
+-- Run this BEFORE the COMPREHENSIVE_USER_STATS_FIX.sql
 
 -- =====================================================
 -- STEP 1: Identify and clean up orphaned roulette_bets
@@ -68,9 +68,10 @@ WHERE user_id NOT IN (
 -- STEP 4: Now safely add the foreign key constraint
 -- =====================================================
 
--- Drop existing constraint if it exists
+-- Drop existing constraint if it exists and add new one
 DO $$
 BEGIN
+  -- Drop existing constraint if it exists
   IF EXISTS (
     SELECT 1 FROM information_schema.table_constraints 
     WHERE constraint_name = 'roulette_bets_user_id_fkey'
@@ -80,26 +81,44 @@ BEGIN
     ALTER TABLE public.roulette_bets DROP CONSTRAINT roulette_bets_user_id_fkey;
     RAISE NOTICE '✅ Dropped existing foreign key constraint';
   END IF;
-EXCEPTION
-  WHEN OTHERS THEN
-    RAISE NOTICE '⚠️ No existing constraint to drop: %', SQLERRM;
-END $$;
 
--- Add the foreign key constraint (should work now)
-DO $$
-BEGIN
+  -- Add the foreign key constraint (should work now)
   ALTER TABLE public.roulette_bets 
   ADD CONSTRAINT roulette_bets_user_id_fkey 
   FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
   
   RAISE NOTICE '✅ Successfully added foreign key constraint';
+  
 EXCEPTION
   WHEN OTHERS THEN
-    RAISE NOTICE '⚠️ Error adding foreign key constraint: %', SQLERRM;
+    RAISE NOTICE '⚠️ Error with foreign key constraint: %', SQLERRM;
 END $$;
 
 -- =====================================================
--- STEP 5: Verification
+-- STEP 5: Ensure proper permissions
+-- =====================================================
+
+DO $$
+BEGIN
+  -- Grant permissions to service_role (needed for edge functions)
+  GRANT ALL ON public.profiles TO service_role;
+  GRANT ALL ON public.roulette_bets TO service_role;
+  GRANT ALL ON public.roulette_rounds TO service_role;
+  GRANT ALL ON public.user_level_stats TO service_role;
+
+  -- Grant read permissions to authenticated users
+  GRANT SELECT ON public.profiles TO authenticated;
+  GRANT SELECT ON public.user_level_stats TO authenticated;
+  
+  RAISE NOTICE '✅ Updated table permissions';
+  
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE NOTICE '⚠️ Error updating permissions: %', SQLERRM;
+END $$;
+
+-- =====================================================
+-- STEP 6: Verification
 -- =====================================================
 
 -- Verify the constraint was added
@@ -121,4 +140,8 @@ SELECT
 FROM public.roulette_bets rb
 JOIN public.profiles p ON p.id = rb.user_id;
 
-SELECT '🎰 ROULETTE DATA INTEGRITY FIX COMPLETED' as status;
+-- Final status message
+DO $$
+BEGIN
+  RAISE NOTICE '🎰 ROULETTE DATA INTEGRITY FIX COMPLETED SUCCESSFULLY';
+END $$;
