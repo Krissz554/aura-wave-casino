@@ -10,6 +10,7 @@ import { XPSyncProvider } from "@/contexts/XPSyncContext";
 import { MaintenanceProvider } from "@/contexts/MaintenanceContext";
 import MaintenanceOverlay from "@/components/MaintenanceOverlay";
 import AccountDeletionOverlay from "@/components/AccountDeletionOverlay";
+import InstantDeletionHandler from "@/components/InstantDeletionHandler";
 import Index from "./pages/Index";
 import Rewards from "./pages/Rewards";
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
           <MaintenanceProvider>
           <MaintenanceOverlay />
           <AccountDeletionOverlay />
+          <InstantDeletionHandler />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/roulette" element={<Index initialGame="roulette" />} />

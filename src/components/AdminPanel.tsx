@@ -828,20 +828,32 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       }
 
              // 3. Send real-time broadcast to user's client for immediate action
+       console.log('Broadcasting instant deletion to user channel:', `user-${userId}`);
        const userChannel = supabase.channel(`user-${userId}`);
-       userChannel.send({
-         type: 'broadcast',
-         event: 'instant_deletion_initiated',
-         payload: {
-           message: 'Your account deletion has been expedited. You will be logged out immediately.',
-           timestamp: new Date().toISOString(),
-           force_logout: true,
-           instant_deletion: true
+       
+       // Subscribe to the channel first, then send the broadcast
+       await userChannel.subscribe(async (status) => {
+         if (status === 'SUBSCRIBED') {
+           console.log('Admin channel subscribed, sending instant deletion broadcast');
+           userChannel.send({
+             type: 'broadcast',
+             event: 'instant_deletion_initiated',
+             payload: {
+               message: 'Your account deletion has been expedited. You will be logged out immediately.',
+               timestamp: new Date().toISOString(),
+               force_logout: true,
+               instant_deletion: true,
+               user_id: userId
+             }
+           });
          }
        });
 
        // 4. Give user a moment to see the notification before deletion
        await new Promise(resolve => setTimeout(resolve, 2000));
+       
+       // Clean up the admin broadcast channel
+       userChannel.unsubscribe();
        
        // 5. Call the existing Edge Function directly for immediate deletion
       const response = await fetch(`${SUPABASE_URL}/functions/v1/delete-user-account`, {
