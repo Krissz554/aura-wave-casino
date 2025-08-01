@@ -1,11 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 
 interface RouletteReelProps {
   isSpinning: boolean;
   winningSlot: number | null;
   showWinAnimation: boolean;
   extendedWinAnimation?: boolean;
-  serverReelPosition?: number | null; // 🎯 NEW: Server-calculated position for synchronization
+  serverReelPosition?: number | null;
 }
 
 // 🎰 EXACT WHEEL CONFIGURATION - Must match backend provably fair system
@@ -28,30 +28,27 @@ const WHEEL_SLOTS = [
 ];
 
 // 🎯 FIXED DIMENSIONS - PIXEL PERFECT (Match backend calculations EXACTLY)
-const TILE_SIZE_PX = 100;                              // Each tile is exactly 100px × 100px  
-const VISIBLE_TILES = 15;                              // Always show exactly 15 tiles
-const REEL_WIDTH_PX = VISIBLE_TILES * TILE_SIZE_PX;    // 1500px viewport width
-const REEL_HEIGHT_PX = TILE_SIZE_PX;                   // Match tile height exactly - no gray area
-const CENTER_MARKER_PX = REEL_WIDTH_PX / 2;            // 750px - fixed center marker
+const TILE_SIZE_PX = 100;
+const VISIBLE_TILES = 15;
+const REEL_WIDTH_PX = VISIBLE_TILES * TILE_SIZE_PX;
+const REEL_HEIGHT_PX = TILE_SIZE_PX;
+const CENTER_MARKER_PX = REEL_WIDTH_PX / 2;
 
-// 🔄 INFINITE LOOPING SYSTEM - Duplicated sequences for seamless scrolling
-const TILE_REPEATS = 200;                              // Generate 200 copies (was 100) - more safety margin
-const TOTAL_TILES = WHEEL_SLOTS.length * TILE_REPEATS; // 3000 total tiles  
-const TOTAL_REEL_WIDTH_PX = TOTAL_TILES * TILE_SIZE_PX; // 300,000px total width
+// 🔄 OPTIMIZED TILE GENERATION - Reduced from 200 to 50 repeats for better performance
+const TILE_REPEATS = 50; // Reduced from 200
+const TOTAL_TILES = WHEEL_SLOTS.length * TILE_REPEATS;
+const TOTAL_REEL_WIDTH_PX = TOTAL_TILES * TILE_SIZE_PX;
 
 // 🛡️ TILE SAFETY BOUNDS - Prevent disappearing tiles
-const WHEEL_CYCLE_PX = WHEEL_SLOTS.length * TILE_SIZE_PX; // 1500px per full wheel cycle
-const SAFE_ZONE_CYCLES = 20; // Keep position within 20 cycles of center for extra safety
-const MIN_SAFE_POSITION = -SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX; // -30,000px
-const MAX_SAFE_POSITION = SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;  // +30,000px
+const WHEEL_CYCLE_PX = WHEEL_SLOTS.length * TILE_SIZE_PX;
+const SAFE_ZONE_CYCLES = 10; // Reduced from 20
+const MIN_SAFE_POSITION = -SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;
+const MAX_SAFE_POSITION = SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;
 
 // 🔄 POSITION NORMALIZATION - Keep reel within safe bounds while maintaining alignment
 const normalizePosition = (position: number): number => {
-  // Use modular arithmetic to keep position within one wheel cycle
-  // This maintains perfect alignment while preventing tile disappearance
   let normalized = position % WHEEL_CYCLE_PX;
   
-  // Ensure we stay within our safe tile generation bounds
   while (normalized < MIN_SAFE_POSITION) {
     normalized += WHEEL_CYCLE_PX;
   }
@@ -65,12 +62,50 @@ const normalizePosition = (position: number): number => {
 // ⏱️ ANIMATION CONFIGURATION - Exactly 4 seconds
 const SPIN_DURATION_MS = 4000;
 
+// 🎨 Memoized tile styling function
+const getTileStyle = (color: string): string => {
+  switch (color) {
+    case 'green': 
+      return 'bg-gradient-to-br from-emerald-900/90 via-emerald-800/70 to-emerald-900/90 border-emerald-500/70 text-emerald-100 shadow-lg hover:border-emerald-400';
+    case 'red': 
+      return 'bg-gradient-to-br from-red-900/90 via-red-800/70 to-red-900/90 border-red-500/70 text-red-100 shadow-lg hover:border-red-400';
+    case 'black': 
+      return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg hover:border-slate-400';
+    default: 
+      return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg';
+  }
+};
+
+// 🎲 Memoized tile generation
+const generateTiles = () => {
+  const allTiles = [];
+  const centerOffset = Math.floor(TILE_REPEATS / 2);
+  
+  for (let repeat = 0; repeat < TILE_REPEATS; repeat++) {
+    for (let slotIndex = 0; slotIndex < WHEEL_SLOTS.length; slotIndex++) {
+      const slot = WHEEL_SLOTS[slotIndex];
+      const globalIndex = repeat * WHEEL_SLOTS.length + slotIndex;
+      const centeredPosition = (globalIndex - centerOffset * WHEEL_SLOTS.length) * TILE_SIZE_PX;
+      
+      allTiles.push({
+        id: `tile-${globalIndex}`,
+        slot: slot.slot,
+        color: slot.color,
+        index: globalIndex,
+        leftPosition: centeredPosition
+      });
+    }
+  }
+  
+  return allTiles;
+};
+
 export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extendedWinAnimation, serverReelPosition }: RouletteReelProps) {
   // 🎲 Reel position state - starts from localStorage or 0, always normalized
   const [currentPosition, setCurrentPosition] = useState(() => {
     const saved = localStorage.getItem('rouletteReelPosition');
     const position = saved ? parseFloat(saved) : 0;
-    return normalizePosition(position); // Always start with normalized position
+    return normalizePosition(position);
   });
   
   const [isAnimating, setIsAnimating] = useState(false);
@@ -89,54 +124,27 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
     isSpinning: false
   });
 
-  // 🎨 Get cyberpunk tile styling based on color (EXACT SAME DIMENSIONS)
-  const getTileStyle = (color: string): string => {
-    switch (color) {
-      case 'green': 
-        return 'bg-gradient-to-br from-emerald-900/90 via-emerald-800/70 to-emerald-900/90 border-emerald-500/70 text-emerald-100 shadow-lg hover:border-emerald-400';
-      case 'red': 
-        return 'bg-gradient-to-br from-red-900/90 via-red-800/70 to-red-900/90 border-red-500/70 text-red-100 shadow-lg hover:border-red-400';
-      case 'black': 
-        return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg hover:border-slate-400';
-      default: 
-        return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg';
-    }
-  };
-
   // 🧮 Calculate winning position using PROVABLY FAIR system algorithm
-  const calculateWinningPosition = (winningNumber: number, startPosition: number): number => {
-    // Find the index of the winning slot in our WHEEL_SLOTS array (PROVABLY FAIR STEP 1)
+  const calculateWinningPosition = useCallback((winningNumber: number, startPosition: number): number => {
     const winningSlotIndex = WHEEL_SLOTS.findIndex(slot => slot.slot === winningNumber);
     if (winningSlotIndex === -1) {
       console.error('❌ Invalid winning slot:', winningNumber);
       return startPosition;
     }
     
-    // PROVABLY FAIR CALCULATION (matches backend exactly):
-    // Goal: Make winning slot center align with CENTER_MARKER_PX (750px)
-    // Formula: position = CENTER_MARKER_PX - (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX/2)
     const idealPosition = CENTER_MARKER_PX - (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
     
-    // Ensure we spin left (negative direction) with sufficient distance
-    const minSpinDistance = 50 * WHEEL_SLOTS.length * TILE_SIZE_PX; // 50 full wheel rotations minimum
+    const minSpinDistance = 50 * WHEEL_SLOTS.length * TILE_SIZE_PX;
     const minFinalPosition = startPosition - minSpinDistance;
     
-    // Find the best position that satisfies both ideal alignment AND minimum spin distance
     let bestPosition = idealPosition;
     
-    // If ideal position doesn't spin far enough, adjust by full wheel cycles
     while (bestPosition > minFinalPosition) {
-      bestPosition -= WHEEL_SLOTS.length * TILE_SIZE_PX; // Move back by one full wheel cycle (1500px)
+      bestPosition -= WHEEL_SLOTS.length * TILE_SIZE_PX;
     }
     
-    // Verification: Where will the winning slot center actually be?
-    const verificationSlotCenter = bestPosition + (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
-    const alignmentAccuracy = Math.abs(verificationSlotCenter - CENTER_MARKER_PX);
-    
-
-    
     return bestPosition;
-  };
+  }, []);
 
   // 🎬 Start CSS transition animation when spinning begins
   useEffect(() => {
@@ -163,16 +171,12 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       // 🎯 CALCULATE WINNING POSITION
       let targetPosition: number;
       
-      // Always calculate client-side first for safety
       const clientCalculatedPosition = calculateWinningPosition(winningSlot, startPosition);
       
       if (serverReelPosition !== null && serverReelPosition !== undefined) {
-        // Validate server position is reasonable and has proper spin distance
         const serverDistance = Math.abs(serverReelPosition - startPosition);
-        const minSpinDistance = 3 * WHEEL_SLOTS.length * TILE_SIZE_PX; // At least 3 full rotations
-        const maxReasonableDistance = 100 * WHEEL_SLOTS.length * TILE_SIZE_PX; // Max 100 rotations
-        
-        // IMPORTANT: Also ensure server position moves LEFT (right to left)
+        const minSpinDistance = 3 * WHEEL_SLOTS.length * TILE_SIZE_PX;
+        const maxReasonableDistance = 100 * WHEEL_SLOTS.length * TILE_SIZE_PX;
         const movesLeft = serverReelPosition < startPosition;
         
         if (serverDistance >= minSpinDistance && serverDistance <= maxReasonableDistance && movesLeft) {
@@ -188,13 +192,11 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       
       // 🛡️ FINAL SAFEGUARD: Absolutely ensure LEFT movement (right → left)
       if (targetPosition >= startPosition) {
-        targetPosition = startPosition - (5 * WHEEL_SLOTS.length * TILE_SIZE_PX); // Force 5 rotations left
+        targetPosition = startPosition - (5 * WHEEL_SLOTS.length * TILE_SIZE_PX);
         
-        // Re-align to correct winning slot
         const winningSlotIndex = WHEEL_SLOTS.findIndex(slot => slot.slot === winningSlot);
         const correctAlignment = CENTER_MARKER_PX - (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
         
-        // Find the closest alignment position that's still left of start
         while (targetPosition + (WHEEL_SLOTS.length * TILE_SIZE_PX) < startPosition) {
           const testPosition = targetPosition + (WHEEL_SLOTS.length * TILE_SIZE_PX);
           const testAlignment = testPosition + (winningSlotIndex * TILE_SIZE_PX + TILE_SIZE_PX / 2);
@@ -207,9 +209,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         }
       }
       
-      const animationDistance = Math.abs(targetPosition - startPosition);
-      const rotations = animationDistance / (WHEEL_SLOTS.length * TILE_SIZE_PX);
-      
       // Set animation state
       setIsAnimating(true);
       setShowWinGlow(false);
@@ -218,17 +217,13 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       const reel = reelRef.current;
       
       // ROBUST ANIMATION SEQUENCE
-      // Step 1: Ensure no transition and set starting position
       reel.style.transition = 'none';
       reel.style.transform = `translateX(${startPosition}px)`;
       
-      // Step 2: Force reflow
       void reel.offsetHeight;
       
-      // Step 3: Set transition
       reel.style.transition = `transform ${SPIN_DURATION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
       
-      // Step 4: Start animation after next frame
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (reelRef.current) {
@@ -244,10 +239,8 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       
       // Complete animation after exactly 4 seconds
       animationTimeoutRef.current = setTimeout(() => {
-        // 🛡️ NORMALIZE POSITION - Prevent tiles from disappearing over time
         const normalizedPosition = normalizePosition(targetPosition);
         
-        // Update reel position to normalized value to prevent visual jumps
         if (reelRef.current) {
           reelRef.current.style.transform = `translateX(${normalizedPosition}px)`;
         }
@@ -256,26 +249,22 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         setIsAnimating(false);
         setShowWinGlow(true);
         
-        // 🔄 RESET ANIMATION TRACKING - Allow fresh animations for new rounds
         lastAnimationRef.current = {
           winningSlot: null,
           serverReelPosition: null,
           isSpinning: false
         };
         
-        // Save normalized position for next round
         localStorage.setItem('rouletteReelPosition', normalizedPosition.toString());
         
-        // Remove transition for instant updates
         if (reelRef.current) {
           reelRef.current.style.transition = 'none';
         }
         
-        // Hide win glow after 2 seconds
         setTimeout(() => setShowWinGlow(false), 2000);
       }, SPIN_DURATION_MS);
     }
-  }, [isSpinning, winningSlot, serverReelPosition]);
+  }, [isSpinning, winningSlot, serverReelPosition, currentPosition, isAnimating, calculateWinningPosition]);
 
   // 🔄 Reset animation tracking when spinning stops (handle round changes)
   useEffect(() => {
@@ -297,32 +286,12 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
     };
   }, []);
 
-  // 🎲 Generate all tiles (duplicated sequences for infinite scrolling)
-  // Center tiles around 0 for coverage in both positive and negative directions
-  const allTiles = [];
-  const centerOffset = Math.floor(TILE_REPEATS / 2); // Center the tile generation
-  
-  for (let repeat = 0; repeat < TILE_REPEATS; repeat++) {
-    for (let slotIndex = 0; slotIndex < WHEEL_SLOTS.length; slotIndex++) {
-      const slot = WHEEL_SLOTS[slotIndex];
-      const globalIndex = repeat * WHEEL_SLOTS.length + slotIndex;
-      
-      // Center tiles around 0 by subtracting the center offset
-      const centeredPosition = (globalIndex - centerOffset * WHEEL_SLOTS.length) * TILE_SIZE_PX;
-      
-      allTiles.push({
-        id: `tile-${globalIndex}`,
-        slot: slot.slot,
-        color: slot.color,
-        index: globalIndex,
-        leftPosition: centeredPosition
-      });
-    }
-  }
+  // 🎲 Memoized tile generation for better performance
+  const allTiles = useMemo(() => generateTiles(), []);
 
   return (
     <div className="flex justify-center w-full">
-      {/* 🎰 ROULETTE CONTAINER - Fixed 1500px width, 100px height (matches tiles) */}
+      {/* 🎰 ROULETTE CONTAINER - Fixed 1500px width, 100px height */}
       <div 
         className="relative rounded-xl shadow-2xl overflow-hidden"
         style={{ 
@@ -373,7 +342,6 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
           className="flex h-full will-change-transform"
           style={{ 
             width: `${TOTAL_REEL_WIDTH_PX}px`,
-            // Transform is handled by JavaScript during animation for smooth transitions
             ...(isAnimating ? {} : { transform: `translateX(${currentPosition}px)` })
           }}
         >
