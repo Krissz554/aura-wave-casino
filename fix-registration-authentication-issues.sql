@@ -167,6 +167,10 @@ GRANT SELECT, INSERT, UPDATE ON public.user_level_stats TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON public.profiles TO authenticated;
 
 -- 6. ENSURE THE PROFILE CREATION FUNCTION EXISTS AND WORKS
+-- Drop existing function first to avoid return type conflicts
+DROP FUNCTION IF EXISTS public.create_user_profile_manual(UUID, TEXT);
+DROP FUNCTION IF EXISTS public.create_user_profile_manual(uuid, text);
+
 CREATE OR REPLACE FUNCTION public.create_user_profile_manual(user_id UUID, username TEXT)
 RETURNS JSONB
 LANGUAGE plpgsql
@@ -318,6 +322,10 @@ END;
 $$;
 
 -- 7. ENSURE THE USER LEVEL STATS FUNCTION EXISTS
+-- Drop existing function first to avoid return type conflicts
+DROP FUNCTION IF EXISTS public.ensure_user_level_stats(UUID);
+DROP FUNCTION IF EXISTS public.ensure_user_level_stats(uuid);
+
 CREATE OR REPLACE FUNCTION public.ensure_user_level_stats(user_uuid UUID)
 RETURNS JSONB
 LANGUAGE plpgsql
