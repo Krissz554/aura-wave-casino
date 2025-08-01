@@ -1,25 +1,30 @@
 #!/bin/bash
 
-echo "🚀 Deploying Roulette Engine to Supabase..."
+# Deploy Roulette Engine Edge Function
+# This script redeploys the roulette-engine function to ensure it's working properly
 
-# Check if we're in the right directory
-if [ ! -f "supabase/functions/roulette-engine/index.ts" ]; then
-    echo "❌ Error: supabase/functions/roulette-engine/index.ts not found"
-    echo "Make sure you're running this from the project root directory"
+echo "🚀 Deploying roulette-engine Edge Function..."
+
+# Check if Supabase CLI is installed
+if ! command -v supabase &> /dev/null; then
+    echo "❌ Supabase CLI not found. Please install it first:"
+    echo "npm install -g supabase"
     exit 1
 fi
 
-echo "📁 Found roulette-engine function"
-
 # Deploy the function
-echo "🔧 Deploying function..."
-npx supabase functions deploy roulette-engine
+echo "📦 Deploying roulette-engine function..."
+supabase functions deploy roulette-engine
 
 if [ $? -eq 0 ]; then
-    echo "✅ Roulette Engine deployed successfully!"
-    echo "🎰 The provably fair modal should now work correctly"
+    echo "✅ roulette-engine function deployed successfully!"
+    echo ""
+    echo "📋 Next steps:"
+    echo "1. Run the emergency-comprehensive-fix.sql in your Supabase SQL Editor"
+    echo "2. Test placing a roulette bet"
+    echo "3. Check browser console for any remaining errors"
 else
-    echo "❌ Deployment failed"
-    echo "Please check your Supabase CLI setup and try again"
+    echo "❌ Failed to deploy roulette-engine function"
+    echo "Please check your Supabase project configuration and try again"
     exit 1
 fi
