@@ -1,5 +1,5 @@
--- FIX ADMIN_USERS 406 ERRORS - RUN THIS DIRECTLY ON PRODUCTION DATABASE
--- This script comprehensively fixes the admin_users RLS policies causing 406 errors
+-- COMPREHENSIVE FIX FOR ADMIN_USERS 406 ERRORS AND USER PROFILE VIEWING
+-- This script fixes both admin_users queries and allows users to view other profiles
 
 -- 1. FIRST, LET'S CHECK WHAT POLICIES EXIST
 DO $$
@@ -18,7 +18,8 @@ BEGIN
   END LOOP;
 END $$;
 
--- 2. DROP ALL EXISTING ADMIN_USERS POLICIES
+-- 2. DROP ALL EXISTING POLICIES FOR BOTH TABLES
+-- Admin users policies
 DROP POLICY IF EXISTS "Users can view their own admin status" ON public.admin_users;
 DROP POLICY IF EXISTS "Admins can view all admin users" ON public.admin_users;
 DROP POLICY IF EXISTS "Service role can insert admin users" ON public.admin_users;
@@ -34,45 +35,13 @@ DROP POLICY IF EXISTS "admin_users_select_all" ON public.admin_users;
 DROP POLICY IF EXISTS "admin_users_insert_all" ON public.admin_users;
 DROP POLICY IF EXISTS "admin_users_update_all" ON public.admin_users;
 DROP POLICY IF EXISTS "admin_users_delete_all" ON public.admin_users;
+DROP POLICY IF EXISTS "admin_users_authenticated_select_own" ON public.admin_users;
+DROP POLICY IF EXISTS "admin_users_service_role_select_all" ON public.admin_users;
+DROP POLICY IF EXISTS "admin_users_service_role_insert" ON public.admin_users;
+DROP POLICY IF EXISTS "admin_users_service_role_update" ON public.admin_users;
+DROP POLICY IF EXISTS "admin_users_service_role_delete" ON public.admin_users;
 
--- 3. CREATE COMPREHENSIVE ADMIN_USERS POLICIES
-
--- Allow authenticated users to view their own admin status
-CREATE POLICY "admin_users_authenticated_select_own" 
-ON public.admin_users 
-FOR SELECT 
-USING (
-  auth.uid() = user_id 
-  AND auth.role() = 'authenticated'
-);
-
--- Allow service role to view all admin users
-CREATE POLICY "admin_users_service_role_select_all" 
-ON public.admin_users 
-FOR SELECT 
-USING (auth.role() = 'service_role');
-
--- Allow service role to insert admin users
-CREATE POLICY "admin_users_service_role_insert" 
-ON public.admin_users 
-FOR INSERT 
-WITH CHECK (auth.role() = 'service_role');
-
--- Allow service role to update admin users
-CREATE POLICY "admin_users_service_role_update" 
-ON public.admin_users 
-FOR UPDATE 
-USING (auth.role() = 'service_role');
-
--- Allow service role to delete admin users
-CREATE POLICY "admin_users_service_role_delete" 
-ON public.admin_users 
-FOR DELETE 
-USING (auth.role() = 'service_role');
-
--- 4. ALSO FIX USER_LEVEL_STATS POLICIES (in case they're still causing issues)
-
--- Drop existing user_level_stats policies
+-- User level stats policies
 DROP POLICY IF EXISTS "Users can view their own user level stats" ON public.user_level_stats;
 DROP POLICY IF EXISTS "Users can update their own user level stats" ON public.user_level_stats;
 DROP POLICY IF EXISTS "Users can insert their own user level stats" ON public.user_level_stats;
@@ -80,16 +49,49 @@ DROP POLICY IF EXISTS "Service role can insert user level stats" ON public.user_
 DROP POLICY IF EXISTS "Service role can update user level stats" ON public.user_level_stats;
 DROP POLICY IF EXISTS "Service role can select user level stats" ON public.user_level_stats;
 DROP POLICY IF EXISTS "Authenticated users can view their own user level stats" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_authenticated_select_own" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_authenticated_update_own" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_authenticated_insert_own" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_service_role_select_all" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_service_role_insert" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_service_role_update" ON public.user_level_stats;
+DROP POLICY IF EXISTS "user_level_stats_service_role_delete" ON public.user_level_stats;
 
--- Create comprehensive user_level_stats policies
-CREATE POLICY "user_level_stats_authenticated_select_own" 
+-- Profiles policies (for viewing other users)
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Users can insert their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Service role can insert profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Service role can update profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Service role can select profiles" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_insert_own" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_service_role_select" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_service_role_insert" ON public.profiles;
+DROP POLICY IF EXISTS "profiles_service_role_update" ON public.profiles;
+
+-- 3. CREATE COMPREHENSIVE POLICIES
+
+-- ADMIN_USERS POLICIES - Allow all authenticated users to view admin status
+CREATE POLICY "admin_users_authenticated_select_all" 
+ON public.admin_users 
+FOR SELECT 
+USING (auth.role() = 'authenticated');
+
+-- Allow service role full access
+CREATE POLICY "admin_users_service_role_all" 
+ON public.admin_users 
+FOR ALL 
+USING (auth.role() = 'service_role');
+
+-- USER_LEVEL_STATS POLICIES - Allow all authenticated users to view stats
+CREATE POLICY "user_level_stats_authenticated_select_all" 
 ON public.user_level_stats 
 FOR SELECT 
-USING (
-  auth.uid() = user_id 
-  AND auth.role() = 'authenticated'
-);
+USING (auth.role() = 'authenticated');
 
+-- Allow users to update their own stats
 CREATE POLICY "user_level_stats_authenticated_update_own" 
 ON public.user_level_stats 
 FOR UPDATE 
@@ -98,6 +100,7 @@ USING (
   AND auth.role() = 'authenticated'
 );
 
+-- Allow users to insert their own stats
 CREATE POLICY "user_level_stats_authenticated_insert_own" 
 ON public.user_level_stats 
 FOR INSERT 
@@ -106,27 +109,43 @@ WITH CHECK (
   AND auth.role() = 'authenticated'
 );
 
-CREATE POLICY "user_level_stats_service_role_select_all" 
+-- Allow service role full access
+CREATE POLICY "user_level_stats_service_role_all" 
 ON public.user_level_stats 
+FOR ALL 
+USING (auth.role() = 'service_role');
+
+-- PROFILES POLICIES - Allow all authenticated users to view profiles (for user profiles)
+CREATE POLICY "profiles_authenticated_select_all" 
+ON public.profiles 
 FOR SELECT 
-USING (auth.role() = 'service_role');
+USING (auth.role() = 'authenticated');
 
-CREATE POLICY "user_level_stats_service_role_insert" 
-ON public.user_level_stats 
-FOR INSERT 
-WITH CHECK (auth.role() = 'service_role');
-
-CREATE POLICY "user_level_stats_service_role_update" 
-ON public.user_level_stats 
+-- Allow users to update their own profile
+CREATE POLICY "profiles_authenticated_update_own" 
+ON public.profiles 
 FOR UPDATE 
+USING (
+  auth.uid() = id 
+  AND auth.role() = 'authenticated'
+);
+
+-- Allow users to insert their own profile
+CREATE POLICY "profiles_authenticated_insert_own" 
+ON public.profiles 
+FOR INSERT 
+WITH CHECK (
+  auth.uid() = id 
+  AND auth.role() = 'authenticated'
+);
+
+-- Allow service role full access
+CREATE POLICY "profiles_service_role_all" 
+ON public.profiles 
+FOR ALL 
 USING (auth.role() = 'service_role');
 
-CREATE POLICY "user_level_stats_service_role_delete" 
-ON public.user_level_stats 
-FOR DELETE 
-USING (auth.role() = 'service_role');
-
--- 5. TEST THE FIX
+-- 4. TEST THE COMPREHENSIVE FIX
 DO $$
 DECLARE
   test_user_id UUID := gen_random_uuid();
@@ -191,6 +210,15 @@ BEGIN
       RAISE NOTICE '❌ Cannot query admin_users: %', SQLERRM;
   END;
   
+  -- Test if we can query profiles (for user profile viewing)
+  BEGIN
+    PERFORM 1 FROM public.profiles WHERE id = test_user_id;
+    RAISE NOTICE '✅ Can query profiles successfully';
+  EXCEPTION
+    WHEN OTHERS THEN
+      RAISE NOTICE '❌ Cannot query profiles: %', SQLERRM;
+  END;
+  
   -- Test if we can query admin_users with specific user_id (like the hook does)
   BEGIN
     PERFORM 1 FROM public.admin_users WHERE user_id = test_user_id;
@@ -205,7 +233,7 @@ BEGIN
   RAISE NOTICE 'Test completed and cleaned up';
 END $$;
 
--- 6. SHOW FINAL POLICY STATUS
+-- 5. SHOW FINAL POLICY STATUS
 DO $$
 DECLARE
   policy_rec RECORD;
@@ -226,6 +254,17 @@ BEGIN
     SELECT policyname, permissive, roles, cmd, qual, with_check 
     FROM pg_policies 
     WHERE tablename = 'user_level_stats' AND schemaname = 'public'
+  LOOP
+    RAISE NOTICE 'Policy: %, Permissive: %, Roles: %, Cmd: %, Qual: %, WithCheck: %', 
+      policy_rec.policyname, policy_rec.permissive, policy_rec.roles, 
+      policy_rec.cmd, policy_rec.qual, policy_rec.with_check;
+  END LOOP;
+  
+  RAISE NOTICE 'Final profiles policies:';
+  FOR policy_rec IN 
+    SELECT policyname, permissive, roles, cmd, qual, with_check 
+    FROM pg_policies 
+    WHERE tablename = 'profiles' AND schemaname = 'public'
   LOOP
     RAISE NOTICE 'Policy: %, Permissive: %, Roles: %, Cmd: %, Qual: %, WithCheck: %', 
       policy_rec.policyname, policy_rec.permissive, policy_rec.roles, 
