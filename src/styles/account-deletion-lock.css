@@ -1,0 +1,98 @@
+/* Account Deletion Overlay Lock Styles */
+/* This CSS completely locks down the website when account deletion overlay is shown */
+
+body.account-deletion-locked {
+  /* Prevent scrolling */
+  overflow: hidden !important;
+  height: 100vh !important;
+  
+  /* Prevent text selection on background elements */
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  
+  /* Disable pointer events on all background elements */
+  pointer-events: none !important;
+}
+
+body.account-deletion-locked * {
+  /* Disable pointer events on all child elements */
+  pointer-events: none !important;
+  
+  /* Prevent text selection */
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  
+  /* Prevent drag and drop */
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -moz-user-drag: none !important;
+  -o-user-drag: none !important;
+  user-drag: none !important;
+}
+
+/* Re-enable interactions only for the account deletion overlay */
+body.account-deletion-locked [data-account-deletion-overlay],
+body.account-deletion-locked [data-account-deletion-overlay] * {
+  pointer-events: auto !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+}
+
+/* Ensure buttons in the overlay are fully interactive */
+body.account-deletion-locked [data-account-deletion-overlay] button,
+body.account-deletion-locked [data-account-deletion-overlay] input,
+body.account-deletion-locked [data-account-deletion-overlay] textarea,
+body.account-deletion-locked [data-account-deletion-overlay] select {
+  pointer-events: auto !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+  -moz-user-select: auto !important;
+  -ms-user-select: auto !important;
+}
+
+/* Prevent any focus on background elements */
+body.account-deletion-locked *:not([data-account-deletion-overlay] *):focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Hide cursor on locked background */
+body.account-deletion-locked {
+  cursor: not-allowed !important;
+}
+
+/* Normal cursor only in the overlay */
+body.account-deletion-locked [data-account-deletion-overlay] {
+  cursor: default !important;
+}
+
+body.account-deletion-locked [data-account-deletion-overlay] button {
+  cursor: pointer !important;
+}
+
+/* Prevent any animations or transitions on background elements */
+body.account-deletion-locked *:not([data-account-deletion-overlay] *) {
+  animation-play-state: paused !important;
+  transition: none !important;
+}
+
+/* Ensure overlay is always on top */
+[data-account-deletion-overlay] {
+  z-index: 99999 !important;
+  position: fixed !important;
+}
+
+/* Prevent any scrolling attempts */
+html.account-deletion-locked,
+html.account-deletion-locked body {
+  overflow: hidden !important;
+  height: 100% !important;
+  position: fixed !important;
+  width: 100% !important;
+}

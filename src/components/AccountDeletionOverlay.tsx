@@ -24,6 +24,94 @@ export default function AccountDeletionOverlay() {
   const [timeRemaining, setTimeRemaining] = useState<string>('');
   const [refreshing, setRefreshing] = useState(false);
 
+  // Disable scrolling and all interactions when overlay is shown
+  useEffect(() => {
+    if (hasPendingDeletion && !loading) {
+      // Disable scrolling
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      
+      // Add class to prevent any interactions with background
+      document.body.classList.add('account-deletion-locked');
+      document.documentElement.classList.add('account-deletion-locked');
+      
+      // Prevent all keyboard interactions except for our overlay
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // Allow only Tab, Enter, Space, and Escape for accessibility
+        const allowedKeys = ['Tab', 'Enter', ' ', 'Escape'];
+        if (!allowedKeys.includes(e.key)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      // Prevent right-click context menu
+      const handleContextMenu = (e: MouseEvent) => {
+        e.preventDefault();
+      };
+
+      // Prevent text selection
+      const handleSelectStart = (e: Event) => {
+        const target = e.target as HTMLElement;
+        // Allow selection only within our overlay
+        if (!target.closest('[data-account-deletion-overlay]')) {
+          e.preventDefault();
+        }
+      };
+
+      // Prevent mouse wheel scrolling
+      const handleWheel = (e: WheelEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-account-deletion-overlay]')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      // Prevent touch scrolling on mobile
+      const handleTouchMove = (e: TouchEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-account-deletion-overlay]')) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+
+      // Prevent drag and drop
+      const handleDragStart = (e: DragEvent) => {
+        const target = e.target as HTMLElement;
+        if (!target.closest('[data-account-deletion-overlay]')) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown, true);
+      document.addEventListener('contextmenu', handleContextMenu, true);
+      document.addEventListener('selectstart', handleSelectStart, true);
+      document.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+      document.addEventListener('touchmove', handleTouchMove, { passive: false, capture: true });
+      document.addEventListener('dragstart', handleDragStart, true);
+
+      return () => {
+        // Re-enable scrolling
+        document.body.style.overflow = '';
+        document.documentElement.style.overflow = '';
+        
+        // Remove lock class
+        document.body.classList.remove('account-deletion-locked');
+        document.documentElement.classList.remove('account-deletion-locked');
+        
+        // Remove event listeners
+        document.removeEventListener('keydown', handleKeyDown, true);
+        document.removeEventListener('contextmenu', handleContextMenu, true);
+        document.removeEventListener('selectstart', handleSelectStart, true);
+        document.removeEventListener('wheel', handleWheel);
+        document.removeEventListener('touchmove', handleTouchMove);
+        document.removeEventListener('dragstart', handleDragStart, true);
+      };
+    }
+  }, [hasPendingDeletion, loading]);
+
   // Calculate time remaining until deletion
   useEffect(() => {
     if (!pendingDeletion) return;
@@ -98,14 +186,20 @@ export default function AccountDeletionOverlay() {
   const scheduledTime = new Date(pendingDeletion.scheduled_deletion_time).toLocaleTimeString();
 
   return (
-    <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
+      data-account-deletion-overlay
+      onMouseDown={(e) => e.stopPropagation()}
+      onMouseUp={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       {/* Animated background pattern */}
-      <div className="absolute inset-0 opacity-10">
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-red-900/20 via-orange-900/20 to-yellow-900/20" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,0,0,0.1),transparent_50%)]" />
       </div>
 
-      <Card className="relative w-full max-w-2xl bg-slate-900/95 border-red-500/50 shadow-2xl shadow-red-500/20">
+      <Card className="relative w-full max-w-2xl bg-slate-900/95 border-red-500/50 shadow-2xl shadow-red-500/20 select-text">
         <CardHeader className="text-center pb-4">
           <div className="flex justify-center mb-4">
             <div className="relative">
