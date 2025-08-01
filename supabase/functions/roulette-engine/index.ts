@@ -97,7 +97,7 @@ serve(async (req) => {
               .from('roulette_bets')
               .select(`
                 *,
-                profiles(username, avatar_url)
+                profiles(username)
               `)
               .eq('round_id', roundId)
               .order('created_at', { ascending: false });
@@ -800,7 +800,7 @@ async function placeBet(supabase: any, userId: string, roundId: string, betColor
   // First try profiles table
   const { data: profileData, error: profileErr } = await supabase
     .from('profiles')
-    .select('username, avatar_url')
+    .select('username')
     .eq('id', userId)
     .single();
 
@@ -811,14 +811,12 @@ async function placeBet(supabase: any, userId: string, roundId: string, betColor
     const { data: userData, error: userErr } = await supabase.auth.admin.getUserById(userId);
     if (userData?.user) {
       userProfile = {
-        username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0] || `User${userId.slice(-4)}`,
-        avatar_url: userData.user.user_metadata?.avatar_url || null
+        username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0] || `User${userId.slice(-4)}`
       };
     } else {
       console.error('❌ Error fetching from auth.users:', userErr);
       userProfile = {
-        username: `User${userId.slice(-4)}`,
-        avatar_url: null
+        username: `User${userId.slice(-4)}`
       };
     }
   } else {
@@ -862,7 +860,7 @@ async function placeBet(supabase: any, userId: string, roundId: string, betColor
       .insert({
         user_id: userId,
         username: userProfile?.username || `User${userId.slice(-4)}`,
-        avatar_url: userProfile?.avatar_url,
+        avatar_url: null, // profiles table doesn't have avatar_url column
         bet_amount: betAmount,
         bet_color: betColor,
         game_type: 'roulette',
