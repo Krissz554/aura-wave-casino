@@ -115,7 +115,7 @@ CREATE TRIGGER update_game_stats_updated_at
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO public.profiles (id, username, registration_date, balance, level, xp, total_wagered, total_profit, last_claim_time, badges)
+  INSERT INTO public.profiles (id, username, registration_date, balance, level, xp, total_wagered, total_profit, last_claim_time, badges, created_at, updated_at)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'username', 'User_' || substr(NEW.id::text, 1, 8)),
@@ -126,11 +126,13 @@ BEGIN
     0,
     0,
     '1970-01-01T00:00:00Z',
-    ARRAY['welcome']
+    ARRAY['welcome'],
+    NEW.created_at,
+    NEW.created_at
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
 -- Create trigger for new user profile creation
 CREATE TRIGGER on_auth_user_created
