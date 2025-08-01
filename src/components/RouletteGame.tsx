@@ -799,21 +799,8 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         variant: "success",
       });
 
-      // XP TRACKING - Now handled automatically by total_wagered trigger
-      
-      // Force refresh XP data after successful bet - IMMEDIATE + FOLLOW-UP
-      
-      // Immediate refresh (no delay)
-      forceFullRefresh().catch(console.error);
-      
-      // Follow-up refreshes to ensure it catches (backend processing can take time)
-      setTimeout(() => {
-        forceFullRefresh().catch(console.error);
-      }, 200);
-      
-      setTimeout(() => {
-        forceFullRefresh().catch(console.error);
-      }, 1000);
+      // XP TRACKING - XP will be awarded when round completes, not on bet placement
+      // No immediate XP refresh needed - XP is only awarded when the round ends
 
       // Update local user bets immediately
       setUserBets(prev => {

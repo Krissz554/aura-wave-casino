@@ -573,507 +573,271 @@ async function placeBet(supabase: any, userId: string, roundId: string, betColor
       throw new Error('Invalid user ID');
     }
   
-  if (!roundId || typeof roundId !== 'string') {
-    throw new Error('Invalid round ID');
-  }
+    if (!roundId || typeof roundId !== 'string') {
+      throw new Error('Invalid round ID');
+    }
   
-  if (!betColor || !['green', 'red', 'black'].includes(betColor)) {
-    throw new Error('Invalid bet color');
-  }
+    if (!betColor || !['green', 'red', 'black'].includes(betColor)) {
+      throw new Error('Invalid bet color');
+    }
   
-  if (!betAmount || typeof betAmount !== 'number' || betAmount < 0.01 || betAmount > 1000000) {
-    throw new Error('Invalid bet amount');
-  }
+    if (!betAmount || typeof betAmount !== 'number' || betAmount < 0.01 || betAmount > 1000000) {
+      throw new Error('Invalid bet amount');
+    }
 
-  // SECURITY 2: Rate limiting - prevent spam clicking
-  const rateLimitKey = `bet_rate_limit_${userId}`;
-  console.log('🔍 Checking rate limits for user:', userId);
-  
-  const { data: rateLimitData, error: rateLimitError } = await supabase
-    .from('user_rate_limits')
-    .select('last_bet_time, bet_count')
-    .eq('user_id', userId)
-    .single();
-
-  if (rateLimitError && rateLimitError.code !== 'PGRST116') {
-    console.error('❌ Rate limit check failed:', rateLimitError);
-    // Continue without rate limiting if there's an error
-  }
-
-  const now = new Date();
-  const oneSecondAgo = new Date(now.getTime() - 1000);
-  
-  if (rateLimitData) {
-    const lastBetTime = new Date(rateLimitData.last_bet_time);
+    // SECURITY 2: Rate limiting - prevent spam clicking
+    const rateLimitKey = `bet_rate_limit_${userId}`;
+    console.log('🔍 Checking rate limits for user:', userId);
     
-    // Allow max 1 bet per second
-    if (lastBetTime > oneSecondAgo) {
-      throw new Error('Rate limit exceeded. Please wait before placing another bet.');
-    }
-    
-    // Update rate limit record
-    try {
-      await supabase
-        .from('user_rate_limits')
-        .upsert({
-          user_id: userId,
-          last_bet_time: now.toISOString(),
-          bet_count: (rateLimitData.bet_count || 0) + 1
-        });
-    } catch (updateError) {
-      console.error('❌ Failed to update rate limit:', updateError);
-      // Continue without updating rate limit
-    }
-  } else {
-    // Create new rate limit record
-    try {
-      await supabase
-        .from('user_rate_limits')
-        .insert({
-          user_id: userId,
-          last_bet_time: now.toISOString(),
-          bet_count: 1
-        });
-    } catch (insertError) {
-      console.error('❌ Failed to create rate limit record:', insertError);
-      // Continue without rate limiting
-    }
-  }
-
-  console.log('✅ Rate limiting check completed');
-
-  // SECURITY 3: Verify round is in betting phase with time checks
-  const { data: round, error: roundError } = await supabase
-    .from('roulette_rounds')
-    .select('status, betting_end_time, betting_start_time')
-    .eq('id', roundId)
-    .single();
-
-  if (roundError || !round) {
-    throw new Error('Round not found');
-  }
-
-  if (round.status !== 'betting') {
-    throw new Error('Betting is closed for this round');
-  }
-
-  const currentTime = new Date();
-  const bettingEndTime = new Date(round.betting_end_time);
-  const bettingStartTime = new Date(round.betting_start_time);
-
-  if (currentTime >= bettingEndTime) {
-    throw new Error('Betting time has expired');
-  }
-
-  if (currentTime < bettingStartTime) {
-    throw new Error('Betting has not started yet');
-  }
-
-  // SECURITY 4: Prevent duplicate bets in same transaction (idempotency)
-  const { data: existingBet } = await supabase
-    .from('roulette_bets')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('round_id', roundId)
-    .eq('bet_color', betColor)
-    .eq('bet_amount', betAmount)
-    .gte('created_at', oneSecondAgo.toISOString())
-    .single();
-
-  if (existingBet) {
-    throw new Error('Duplicate bet detected. Please wait before placing the same bet again.');
-  }
-
-  // SECURITY 5: Atomic balance check and deduction using database transaction
-  console.log('🔍 Attempting atomic balance check for:', {
-    userId,
-    betAmount,
-    roundId
-  });
-
-  const { data: balanceResult, error: balanceError } = await supabase.rpc('atomic_bet_balance_check', {
-    p_user_id: userId,
-    p_bet_amount: betAmount,
-    p_round_id: roundId
-  });
-
-  console.log('🔍 Atomic balance check result:', {
-    data: balanceResult,
-    error: balanceError
-  });
-
-  if (balanceError) {
-    console.error('❌ Atomic balance check failed:', balanceError);
-    console.error('❌ Error details:', JSON.stringify(balanceError, null, 2));
-    throw new Error(`Balance validation failed: ${balanceError.message || balanceError.details || 'Unknown error'}`);
-  }
-
-  if (!balanceResult) {
-    console.error('❌ No result from atomic balance check');
-    throw new Error('Balance validation failed: No result returned');
-  }
-
-  if (!balanceResult.success) {
-    console.error('❌ Balance check returned failure:', balanceResult);
-    throw new Error(balanceResult.error_message || 'Insufficient balance');
-  }
-
-  console.log('✅ Atomic balance check successful:', balanceResult);
-
-  // SECURITY 6: Check total bets per user per round limit
-  const { data: userBetsCount, error: userBetsError } = await supabase
-    .from('roulette_bets')
-    .select('bet_amount')
-    .eq('user_id', userId)
-    .eq('round_id', roundId);
-
-  if (userBetsError) {
-    console.error('❌ Error checking user bets:', userBetsError);
-    throw new Error('Failed to validate user betting history');
-  }
-
-  const totalUserBets = (userBetsCount || []).reduce((sum, bet) => sum + bet.bet_amount, 0);
-  const maxBetsPerUserPerRound = 100000; // Maximum $100,000 per user per round
-
-  if (totalUserBets + betAmount > maxBetsPerUserPerRound) {
-    throw new Error(`Maximum bet limit per round is $${maxBetsPerUserPerRound}`);
-  }
-
-  // SECURITY 7: Calculate potential payout with validation
-  const multiplier = betColor === 'green' ? 14 : 2;
-  const potentialPayout = betAmount * multiplier;
-
-  if (potentialPayout > 14000000) { // Max payout $14,000,000 (1M * 14 for green)
-    throw new Error('Bet amount too high - maximum payout exceeded');
-  }
-
-  // SECURITY 8: Get and validate user's client seed
-  let finalClientSeed = clientSeed;
-  if (!finalClientSeed || typeof finalClientSeed !== 'string') {
-    const { data: seedData } = await supabase
-      .from('roulette_client_seeds')
-      .select('client_seed')
+    const { data: rateLimitData, error: rateLimitError } = await supabase
+      .from('user_rate_limits')
+      .select('last_bet_time, bet_count')
       .eq('user_id', userId)
-      .eq('is_active', true)
       .single();
+
+    if (rateLimitError && rateLimitError.code !== 'PGRST116') {
+      console.error('❌ Rate limit check failed:', rateLimitError);
+      // Continue without rate limiting if there's an error
+    }
+
+    const now = new Date();
+    const oneSecondAgo = new Date(now.getTime() - 1000);
     
-    finalClientSeed = seedData?.client_seed || 'default_client_seed';
-  }
+    if (rateLimitData) {
+      const lastBetTime = new Date(rateLimitData.last_bet_time);
+      
+      // Allow max 1 bet per second
+      if (lastBetTime > oneSecondAgo) {
+        throw new Error('Rate limit exceeded. Please wait before placing another bet.');
+      }
+      
+      // Update rate limit record
+      try {
+        await supabase
+          .from('user_rate_limits')
+          .upsert({
+            user_id: userId,
+            last_bet_time: now.toISOString(),
+            bet_count: (rateLimitData.bet_count || 0) + 1
+          });
+      } catch (updateError) {
+        console.error('❌ Failed to update rate limit:', updateError);
+        // Continue without updating rate limit
+      }
+    } else {
+      // Create new rate limit record
+      try {
+        await supabase
+          .from('user_rate_limits')
+          .insert({
+            user_id: userId,
+            last_bet_time: now.toISOString(),
+            bet_count: 1
+          });
+      } catch (insertError) {
+        console.error('❌ Failed to create rate limit record:', insertError);
+        // Continue without rate limiting
+      }
+    }
 
-  // Validate client seed format
-  if (finalClientSeed.length < 8 || finalClientSeed.length > 64) {
-    throw new Error('Invalid client seed format');
-  }
+    console.log('✅ Rate limiting check completed');
 
-  // SECURITY 9: Create bet record with additional security fields
-  const { data: bet, error: betError } = await supabase
-    .from('roulette_bets')
-    .insert({
-      round_id: roundId,
-      user_id: userId,
-      bet_color: betColor,
-      bet_amount: betAmount,
-      potential_payout: potentialPayout,
-      client_seed: finalClientSeed,
-      ip_address: null, // Would need to be passed from request headers
-      user_agent: null, // Would need to be passed from request headers
-      created_at: new Date().toISOString()
-    })
-    .select()
-    .single();
-
-  if (betError) {
-    console.error('❌ Error creating bet:', betError);
+    // SECURITY 3: Use the new place_roulette_bet function (NO XP/STATS yet)
+    console.log('🔍 Using new place_roulette_bet function for secure bet placement');
     
-    // SECURITY 10: Rollback balance deduction if bet creation fails
-    await supabase.rpc('rollback_bet_balance', {
+    const { data: betResult, error: betError } = await supabase.rpc('place_roulette_bet', {
       p_user_id: userId,
+      p_round_id: roundId,
+      p_bet_color: betColor,
       p_bet_amount: betAmount
     });
-    
-    throw new Error('Failed to place bet - balance has been restored');
-  }
 
-  // Get user profile for live feed with fallback to auth.users
-  let userProfile = null;
-  
-  // First try profiles table
-  const { data: profileData, error: profileErr } = await supabase
-    .from('profiles')
-    .select('username')
-    .eq('id', userId)
-    .single();
-
-  if (profileErr) {
-    console.error('❌ Error fetching from profiles:', profileErr);
-    
-    // Fallback to auth.users table  
-    const { data: userData, error: userErr } = await supabase.auth.admin.getUserById(userId);
-    if (userData?.user) {
-      userProfile = {
-        username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0] || `User${userId.slice(-4)}`
-      };
-    } else {
-      console.error('❌ Error fetching from auth.users:', userErr);
-      userProfile = {
-        username: `User${userId.slice(-4)}`
-      };
+    if (betError) {
+      console.error('❌ place_roulette_bet failed:', betError);
+      throw new Error(`Bet placement failed: ${betError.message || betError.details || 'Unknown error'}`);
     }
-  } else {
-    userProfile = profileData;
-  }
 
-  // SECURITY 11: Audit log for bet placement
-  try {
-    await supabase
-      .from('audit_logs')
-      .insert({
-        user_id: userId,
-        action: 'place_bet',
-        details: {
-          round_id: roundId,
-          bet_color: betColor,
-          bet_amount: betAmount,
-          potential_payout: potentialPayout
-        },
-        timestamp: new Date().toISOString()
-      });
-    console.log('✅ Audit log created successfully');
-  } catch (auditError) {
-    console.error('❌ Failed to create audit log:', auditError);
-    // Continue without audit logging - don't fail the bet
-  }
+    if (!betResult || !betResult.success) {
+      console.error('❌ place_roulette_bet returned failure:', betResult);
+      throw new Error(betResult?.error || 'Bet placement failed');
+    }
 
-  // Insert to live bet feed for real-time updates
-  try {
-    console.log('📡 Inserting bet into live_bet_feed:', {
-      user_id: userId,
-      username: userProfile?.username || `User${userId.slice(-4)}`,
-      game_type: 'roulette',
-      bet_amount: betAmount,
-      bet_color: betColor,
-      round_id: roundId
-    });
+    console.log('✅ Bet placed successfully using new function:', betResult);
 
-    const { data: liveFeedData, error: liveFeedError } = await supabase
-      .from('live_bet_feed')
-      .insert({
-        user_id: userId,
-        username: userProfile?.username || `User${userId.slice(-4)}`,
-        avatar_url: null, // profiles table doesn't have avatar_url column
-        bet_amount: betAmount,
-        bet_color: betColor,
-        game_type: 'roulette',
-        round_id: roundId,
-        result: 'pending', // Will be updated when round completes
-        profit: 0 // Will be updated when round completes
-      })
-      .select()
+    // Get user profile for live feed with fallback to auth.users
+    let userProfile = null;
+    
+    // First try profiles table
+    const { data: profileData, error: profileErr } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
       .single();
 
-    if (liveFeedError) {
-      console.error('❌ Failed to insert into live_bet_feed:', liveFeedError);
-      console.error('❌ Error details:', JSON.stringify(liveFeedError, null, 2));
+    if (profileErr) {
+      console.error('❌ Error fetching from profiles:', profileErr);
+      
+      // Fallback to auth.users table  
+      const { data: userData, error: userErr } = await supabase.auth.admin.getUserById(userId);
+      if (userData?.user) {
+        userProfile = {
+          username: userData.user.user_metadata?.username || userData.user.email?.split('@')[0] || `User${userId.slice(-4)}`
+        };
+      } else {
+        console.error('❌ Error fetching from auth.users:', userErr);
+        userProfile = {
+          username: `User${userId.slice(-4)}`
+        };
+      }
     } else {
-      console.log('✅ Successfully inserted into live_bet_feed:', liveFeedData?.id);
+      userProfile = profileData;
     }
-  } catch (liveFeedInsertError) {
-    console.error('❌ Exception during live_bet_feed insertion:', liveFeedInsertError);
-    // Don't fail the bet if live feed insertion fails
-  }
 
-  console.log(`✅ Bet placed successfully: ${betAmount} on ${betColor} for user ${userId}`);
-  
-  return {
-    success: true,
-    bet,
-    message: 'Bet placed successfully'
-  };
-  } catch (error) {
-    console.error('❌ Error placing bet:', error);
+    // SECURITY 4: Audit log for bet placement
+    try {
+      await supabase
+        .from('audit_logs')
+        .insert({
+          user_id: userId,
+          action: 'place_bet',
+          details: {
+            round_id: roundId,
+            bet_color: betColor,
+            bet_amount: betAmount,
+            potential_payout: betResult.potential_payout,
+            bet_id: betResult.bet_id
+          },
+          timestamp: new Date().toISOString()
+        });
+      console.log('✅ Audit log created successfully');
+    } catch (auditError) {
+      console.error('❌ Failed to create audit log:', auditError);
+      // Continue without audit logging - don't fail the bet
+    }
+
+    // Insert to live bet feed for real-time updates
+    try {
+      console.log('📡 Inserting bet into live_bet_feed:', {
+        user_id: userId,
+        username: userProfile?.username || 'Unknown',
+        game_type: 'roulette',
+        bet_amount: betAmount,
+        bet_color: betColor,
+        round_id: roundId,
+        status: 'pending' // Will be updated when round completes
+      });
+
+      await supabase
+        .from('live_bet_feed')
+        .insert({
+          user_id: userId,
+          username: userProfile?.username || 'Unknown',
+          game_type: 'roulette',
+          bet_amount: betAmount,
+          bet_color: betColor,
+          round_id: roundId,
+          status: 'pending',
+          created_at: new Date().toISOString()
+        });
+      
+      console.log('✅ Live bet feed updated successfully');
+    } catch (feedError) {
+      console.error('❌ Failed to update live bet feed:', feedError);
+      // Continue without live feed update - don't fail the bet
+    }
+
     return {
-      success: false,
-      message: error.message || 'Failed to place bet'
+      success: true,
+      bet_id: betResult.bet_id,
+      balance_deducted: betResult.balance_deducted,
+      potential_payout: betResult.potential_payout,
+      message: 'Bet placed successfully - XP and stats will be awarded when round completes'
     };
+
+  } catch (error: any) {
+    console.error('❌ Bet placement failed:', error);
+    throw error;
   }
 }
 
 async function completeRound(supabase: any, round: any) {
   console.log(`🏁 Completing round ${round.id} with result: ${round.result_color} ${round.result_slot}`);
 
-  // Mark round as completed
-  await supabase
-    .from('roulette_rounds')
-    .update({ status: 'completed' })
-    .eq('id', round.id);
-
-  // Get all bets for this round
-  const { data: bets } = await supabase
-    .from('roulette_bets')
-    .select('*')
-    .eq('round_id', round.id);
-
-  if (!bets || bets.length === 0) {
-    console.log('🎯 No bets to process for this round');
-    return;
-  }
-
-  console.log(`🎯 Processing ${bets.length} bets for round ${round.id}`);
-  
-  // 🛡️ PERFORMANCE FIX: Process bets in batches to prevent timeouts
-  const betBatches = [];
-  for (let i = 0; i < bets.length; i += BATCH_SIZE) {
-    betBatches.push(bets.slice(i, i + BATCH_SIZE));
-  }
-
-  let totalBetsCount = 0;
-  let totalBetsAmount = 0;
-
-  // Process each batch in parallel
-  for (let batchIndex = 0; batchIndex < betBatches.length; batchIndex++) {
-    const batch = betBatches[batchIndex];
-    console.log(`🔄 Processing batch ${batchIndex + 1}/${betBatches.length} (${batch.length} bets)`);
+  try {
+    // Use the new complete_roulette_round function (XP + STATS on completion)
+    console.log('🔍 Using new complete_roulette_round function for comprehensive processing');
     
-    // Prepare all batch operations
-    const betUpdates = [];
-    const liveFeedUpdates = [];
-    const statsUpdates = [];
-    
-    for (const bet of batch) {
-      totalBetsCount++;
-      totalBetsAmount += bet.bet_amount;
-      
-      const isWinner = bet.bet_color === round.result_color;
-      const actualPayout = isWinner ? bet.potential_payout : 0;
-      const profit = actualPayout - bet.bet_amount;
-
-      console.log(`🎲 Preparing bet: user=${bet.user_id}, color=${bet.bet_color}, winner=${isWinner}, profit=${profit}`);
-
-      // Prepare bet update
-      betUpdates.push(
-        supabase
-          .from('roulette_bets')
-          .update({
-            is_winner: isWinner,
-            actual_payout: actualPayout,
-            profit: profit
-          })
-          .eq('id', bet.id)
-      );
-
-      // Prepare live feed update
-      liveFeedUpdates.push(
-        supabase
-          .from('live_bet_feed')
-          .update({
-            result: isWinner ? 'win' : 'loss',
-            profit: profit
-          })
-          .eq('user_id', bet.user_id)
-          .eq('game_type', 'roulette')
-          .eq('round_id', round.id)
-      );
-
-      // Prepare comprehensive roulette bet processing (stats + XP)
-      statsUpdates.push(
-        supabase.rpc('process_roulette_bet_complete', {
-          p_user_id: bet.user_id,
-          p_bet_amount: bet.bet_amount,
-          p_result: isWinner ? 'win' : 'loss',
-          p_profit: profit,
-          p_winning_color: round.result_color,
-          p_bet_color: bet.bet_color
-        })
-      );
-    }
-
-    try {
-      // Execute all updates in parallel for this batch
-      console.log(`⚡ Executing ${betUpdates.length} bet updates in parallel...`);
-      await Promise.all(betUpdates);
-      
-      console.log(`⚡ Executing ${liveFeedUpdates.length} live feed updates in parallel...`);
-      await Promise.all(liveFeedUpdates);
-      
-      console.log(`⚡ Executing ${statsUpdates.length} stats updates in parallel...`);
-      const statsResults = await Promise.allSettled(statsUpdates);
-      
-      // Log any stats update failures
-      statsResults.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error(`❌ Stats update failed for bet ${batch[index].id}:`, result.reason);
-        } else if (result.value?.data?.[0]?.leveled_up) {
-          console.log(`🎉 User ${batch[index].user_id} leveled up!`);
-        }
-      });
-      
-      console.log(`✅ Batch ${batchIndex + 1} completed successfully`);
-      
-    } catch (error) {
-      console.error(`❌ Error processing batch ${batchIndex + 1}:`, error);
-      // Continue with next batch even if this one fails
-    }
-  }
-
-  // Process balance updates for winners after all stats are updated
-  console.log('💰 Processing balance updates for winners...');
-  
-  for (const bet of bets) {
-    const isWinner = bet.bet_color === round.result_color;
-    const actualPayout = isWinner ? bet.potential_payout : 0;
-    
-    if (isWinner && actualPayout > 0) {
-      console.log(`🎯 Processing winner: ${bet.user_id}, payout: ${actualPayout}`);
-      
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('balance')
-        .eq('id', bet.user_id)
-        .single();
-
-      if (profileError) {
-        console.error('❌ Error fetching profile for balance update:', profileError);
-        continue;
-      }
-
-      if (profile) {
-        const oldBalance = profile.balance;
-        const newBalance = oldBalance + actualPayout;
-        
-        console.log(`💰 Updating balance for ${bet.user_id}: ${oldBalance} + ${actualPayout} = ${newBalance}`);
-        
-        const { error: balanceError, data: updatedProfile } = await supabase
-          .from('profiles')
-          .update({
-            balance: newBalance,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', bet.user_id)
-          .select('balance')
-          .single();
-
-        if (balanceError) {
-          console.error('❌ Error updating balance:', balanceError);
-        } else {
-          console.log(`✅ Balance successfully updated for ${bet.user_id}: ${oldBalance} → ${updatedProfile?.balance || newBalance}`);
-        }
-      }
-    }
-  }
-
-  // Add to results history
-  await supabase
-    .from('roulette_results')
-    .insert({
-      round_id: round.id,
-      round_number: round.round_number,
-      result_color: round.result_color,
-      result_slot: round.result_slot,
-      total_bets_count: totalBetsCount,
-      total_bets_amount: totalBetsAmount
+    const { data: completionResult, error: completionError } = await supabase.rpc('complete_roulette_round', {
+      p_round_id: round.id
     });
 
-  console.log(`🎉 Round completed with ${totalBetsCount} bets totaling ${totalBetsAmount}`);
+    if (completionError) {
+      console.error('❌ complete_roulette_round failed:', completionError);
+      throw new Error(`Round completion failed: ${completionError.message || completionError.details || 'Unknown error'}`);
+    }
+
+    if (!completionResult || !completionResult.success) {
+      console.error('❌ complete_roulette_round returned failure:', completionResult);
+      throw new Error(completionResult?.error || 'Round completion failed');
+    }
+
+    console.log('✅ Round completed successfully using new function:', completionResult);
+
+    // Update live bet feed for all bets in this round
+    try {
+      const { data: bets } = await supabase
+        .from('roulette_bets')
+        .select('user_id, bet_color, is_winner, profit')
+        .eq('round_id', round.id);
+
+      if (bets && bets.length > 0) {
+        console.log(`📡 Updating live bet feed for ${bets.length} bets`);
+        
+        for (const bet of bets) {
+          await supabase
+            .from('live_bet_feed')
+            .update({
+              result: bet.is_winner ? 'win' : 'loss',
+              profit: bet.profit,
+              status: 'completed',
+              updated_at: new Date().toISOString()
+            })
+            .eq('user_id', bet.user_id)
+            .eq('game_type', 'roulette')
+            .eq('round_id', round.id);
+        }
+        
+        console.log('✅ Live bet feed updated for all bets');
+      }
+    } catch (feedError) {
+      console.error('❌ Failed to update live bet feed:', feedError);
+      // Continue without live feed update - don't fail the round completion
+    }
+
+    // Add to results history
+    await supabase
+      .from('roulette_results')
+      .insert({
+        round_id: round.id,
+        round_number: round.round_number,
+        result_color: round.result_color,
+        result_slot: round.result_slot,
+        result_multiplier: round.result_multiplier,
+        created_at: new Date().toISOString()
+      });
+
+    console.log(`🎉 Round ${round.id} completed successfully with:`, {
+      bets_processed: completionResult.bets_processed,
+      xp_awarded: completionResult.xp_awarded,
+      winners_processed: completionResult.winners_processed
+    });
+
+    return completionResult;
+
+  } catch (error: any) {
+    console.error('❌ Round completion failed:', error);
+    throw error;
+  }
 }
 
 // Advanced Provably Fair Result Generation
