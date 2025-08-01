@@ -287,26 +287,52 @@ export function useUserProfile() {
 
       if (levelStatsError) {
         console.error('[useUserProfile] Error fetching level stats:', levelStatsError);
-        // Create a default profile with game stats
-        const profileWithGameStats = {
-          ...finalProfile,
-          levelStats: {
-            current_level: 1,
-            current_level_xp: 0,
-            xp_to_next_level: 100,
-            lifetime_xp: 0,
-            border_tier: 1
-          },
-          gameStats: {
-            coinflip: { wins: 0, losses: 0, profit: 0 },
-            crash: { wins: 0, losses: 0, profit: 0 },
-            roulette: { wins: 0, losses: 0, profit: 0 },
-            tower: { wins: 0, losses: 0, profit: 0 },
+        
+        // Try to create stats if they don't exist
+        if (levelStatsError.code === 'PGRST116') { // No rows returned
+          console.log('[useUserProfile] No stats found, attempting to create...');
+          const { data: statsResult, error: statsCreateError } = await supabase
+            .rpc('ensure_user_level_stats', { user_uuid: user.id });
+          
+          if (statsCreateError) {
+            console.error('[useUserProfile] Failed to create stats:', statsCreateError);
+          } else {
+            console.log('[useUserProfile] Stats created successfully');
+            // Try fetching stats again
+            const { data: retryStats, error: retryError } = await supabase
+              .from('user_level_stats')
+              .select('*')
+              .eq('user_id', user.id)
+              .single();
+            
+            if (!retryError && retryStats) {
+              levelStats = retryStats;
+            }
           }
-        };
-        setUserData(profileWithGameStats);
-        setLoading(false);
-        return;
+        }
+        
+        // If still no stats, create a default profile with game stats
+        if (!levelStats) {
+          const profileWithGameStats = {
+            ...finalProfile,
+            levelStats: {
+              current_level: 1,
+              current_level_xp: 0,
+              xp_to_next_level: 100,
+              lifetime_xp: 0,
+              border_tier: 1
+            },
+            gameStats: {
+              coinflip: { wins: 0, losses: 0, profit: 0 },
+              crash: { wins: 0, losses: 0, profit: 0 },
+              roulette: { wins: 0, losses: 0, profit: 0 },
+              tower: { wins: 0, losses: 0, profit: 0 },
+            }
+          };
+          setUserData(profileWithGameStats);
+          setLoading(false);
+          return;
+        }
       }
 
       console.log('[useUserProfile] Level stats fetched successfully');

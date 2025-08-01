@@ -63,13 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data, error }
       }
 
-      // If registration is successful, wait for trigger and then verify
+      // If registration is successful, ensure profile and stats are created
       if (data.user) {
-        console.log('✅ User created successfully, waiting for profile creation...')
+        console.log('✅ User created successfully, ensuring profile and stats...')
         console.log('👤 User ID:', data.user.id)
         
-        // Wait a bit for the trigger to complete
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        // Wait a bit for any triggers to complete
+        await new Promise(resolve => setTimeout(resolve, 1000))
         
         // Check if profile was created by trigger
         const { data: profileData, error: profileError } = await supabase
@@ -83,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (profileError) {
           console.error('❌ Profile creation failed:', profileError)
           
-          // Try to manually create the profile using the correct function
+          // Try to manually create the profile using the function
           console.log('🔧 Attempting manual profile creation...')
           const { data: manualProfile, error: manualError } = await supabase
             .rpc('create_user_profile_manual', {
@@ -94,17 +94,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           console.log('🔧 Manual profile creation result:', { manualProfile, manualError })
           
           if (manualError) {
-            console.error('❌ Manual profile creation also failed:', manualError)
+            console.error('❌ Manual profile creation failed:', manualError)
             
-            // Try direct insert with ALL required columns as last resort
-            console.log('🔧 Attempting direct profile insert with all columns...')
+            // Try direct insert as last resort
+            console.log('🔧 Attempting direct profile insert...')
             const { data: directProfile, error: directError } = await supabase
               .from('profiles')
               .insert({
                 id: data.user.id,
                 username: username,
                 registration_date: new Date().toISOString(),
-                balance: 0,  // New users start with $0
+                balance: 0,
                 total_wagered: 0,
                 total_profit: 0,
                 last_claim_time: '1970-01-01T00:00:00Z',
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('🔧 Direct profile insert result:', { directProfile, directError })
             
             if (directError) {
-              console.error('❌ Direct profile insert also failed:', directError)
+              console.error('❌ Direct profile insert failed:', directError)
               return { 
                 data, 
                 error: { 
@@ -136,6 +136,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }
         } else {
           console.log('✅ Profile created successfully via trigger')
+        }
+
+        // Ensure user_level_stats exists
+        console.log('📊 Ensuring user level stats exist...')
+        const { data: statsResult, error: statsError } = await supabase
+          .rpc('ensure_user_level_stats', { user_uuid: data.user.id })
+        
+        if (statsError) {
+          console.error('❌ Stats creation failed:', statsError)
+          // Don't fail registration for stats issues, just log
+        } else {
+          console.log('✅ User level stats ensured')
         }
       }
 
