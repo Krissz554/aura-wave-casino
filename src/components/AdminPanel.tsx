@@ -68,7 +68,7 @@ interface NotificationForm {
 }
 
 export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
-  const { user } = useAuth();
+  const { user: currentUser } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showPushNotification, setShowPushNotification] = useState(false);
@@ -288,6 +288,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be reset for security reasons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent current user from resetting themselves
+    if (userId === currentUser?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You cannot reset your own account.",
         variant: "destructive",
       });
       return;
@@ -531,6 +541,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       return;
     }
 
+    // Prevent current user from deleting themselves
+    if (userId === currentUser?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You cannot delete your own account.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setDeletingUser(true);
     try {
       console.log('=== INITIATE USER ACCOUNT DELETION ===');
@@ -548,7 +568,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .from('pending_account_deletions')
           .insert({
             user_id: userId,
-            initiated_by: user?.id,
+            initiated_by: currentUser?.id,
             scheduled_deletion_time: deletionTime.toISOString(),
             status: 'pending'
           })
@@ -674,6 +694,16 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be deleted for security reasons.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Prevent current user from deleting themselves
+    if (userId === currentUser?.id) {
+      toast({
+        title: "Access Denied",
+        description: "You cannot delete your own account.",
         variant: "destructive",
       });
       return;
@@ -930,7 +960,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   // Handle admin role changes
   const handleAdminRoleChange = async (userId: string, action: 'add' | 'remove') => {
     // Prevent admins from removing their own admin rights
-    if (action === 'remove' && userId === user?.id) {
+    if (action === 'remove' && userId === currentUser?.id) {
       toast({
         title: "Access Denied",
         description: "You cannot remove your own admin rights.",
@@ -1139,7 +1169,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Check admin status function - using RPC to avoid 406 errors
   const checkAdminStatus = async () => {
-    if (!user) {
+    if (!currentUser) {
       setIsAdmin(false);
       setLoading(false);
       return;
@@ -1148,7 +1178,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     try {
       console.log('Admin status check (AdminPanel): Using RPC function directly');
       const { data, error } = await supabase
-        .rpc('check_admin_status_simple', { user_uuid: user.id });
+        .rpc('check_admin_status_simple', { user_uuid: currentUser.id });
 
       if (error) {
         console.log('RPC admin check failed, treating as non-admin:', error);
@@ -1167,7 +1197,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   useEffect(() => {
     checkAdminStatus();
-  }, [user]);
+  }, [currentUser]);
 
   // Check system status when admin panel opens
   useEffect(() => {
@@ -1728,8 +1758,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Admin
                         </Button>
                       )}
-                      {/* Hide Remove Admin button if user is admin and trying to remove themselves or if target is admin */}
-                      {!(adminStatuses[user.id] && user.id === user?.id) && adminStatuses[user.id] ? (
+                      {/* Hide Remove Admin button if current user is trying to remove their own admin status */}
+                      {adminStatuses[user.id] && user.id === currentUser?.id ? (
                         <Button
                           disabled
                           size="sm"
@@ -1755,14 +1785,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                           Remove
                         </Button>
                       )}
-                      {/* Hide Reset button for admin users */}
-                      {adminStatuses[user.id] ? (
+                      {/* Hide Reset button for admin users or current user */}
+                      {adminStatuses[user.id] || user.id === currentUser?.id ? (
                         <Button
                           disabled
                           size="sm"
                           variant="outline"
                           className="bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 border-0 font-mono text-xs h-7 cursor-not-allowed"
-                          title="Admin accounts cannot be reset"
+                          title={adminStatuses[user.id] ? "Admin accounts cannot be reset" : "You cannot reset your own account"}
                         >
                           <Shield className="h-2.5 w-2.5 mr-1" />
                           Protected
@@ -1782,13 +1812,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                         </Button>
                       )}
                       {/* Delete, Instant Delete, and Stop Deletion buttons */}
-                      {adminStatuses[user.id] ? (
+                      {adminStatuses[user.id] || user.id === currentUser?.id ? (
                         <Button
                           disabled
                           size="sm"
                           variant="outline"
                           className="bg-gradient-to-r from-gray-600 to-gray-700 text-gray-400 border-0 font-mono text-xs h-7 col-span-2 cursor-not-allowed"
-                          title="Admin accounts cannot be deleted"
+                          title={adminStatuses[user.id] ? "Admin accounts cannot be deleted" : "You cannot delete your own account"}
                         >
                           <Shield className="h-2.5 w-2.5 mr-1" />
                           Protected
