@@ -1018,16 +1018,14 @@ async function completeRound(supabase: any, round: any) {
       // Continue with next batch even if this one fails
     }
   }
-        newLevel: result.new_level,
-        oldLevel: result.old_level,
-        casesEarned: result.cases_earned,
-        borderTierChanged: result.border_tier_changed
-      });
-    } else {
-      console.warn('⚠️ Stats update returned no result for user:', bet.user_id);
-    }
 
-    // Process winnings (update balance with real-time trigger)
+  // Process balance updates for winners after all stats are updated
+  console.log('💰 Processing balance updates for winners...');
+  
+  for (const bet of bets) {
+    const isWinner = bet.bet_color === round.result_color;
+    const actualPayout = isWinner ? bet.potential_payout : 0;
+    
     if (isWinner && actualPayout > 0) {
       console.log(`🎯 Processing winner: ${bet.user_id}, payout: ${actualPayout}`);
       
@@ -1052,7 +1050,7 @@ async function completeRound(supabase: any, round: any) {
           .from('profiles')
           .update({
             balance: newBalance,
-            updated_at: new Date().toISOString() // Force timestamp update for real-time trigger
+            updated_at: new Date().toISOString()
           })
           .eq('id', bet.user_id)
           .select('balance')
@@ -1062,14 +1060,8 @@ async function completeRound(supabase: any, round: any) {
           console.error('❌ Error updating balance:', balanceError);
         } else {
           console.log(`✅ Balance successfully updated for ${bet.user_id}: ${oldBalance} → ${updatedProfile?.balance || newBalance}`);
-          console.log(`🔔 Real-time update should trigger for user ${bet.user_id}`);
-          
-          // Small delay to ensure real-time update propagates
-          await new Promise(resolve => setTimeout(resolve, 100));
         }
       }
-    } else {
-      console.log(`😢 Loser: ${bet.user_id} lost ${bet.bet_amount} on ${bet.bet_color}`);
     }
   }
 
