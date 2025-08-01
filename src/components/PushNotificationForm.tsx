@@ -60,7 +60,7 @@ export function PushNotificationForm({ onClose }: PushNotificationFormProps) {
       // Create notifications for all users
       const notifications = users.map(user => ({
         user_id: user.id,
-        type: 'admin_broadcast',
+        type: 'admin_message',
         title: title.trim(),
         message: message.trim(),
         data: {
