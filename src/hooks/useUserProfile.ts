@@ -40,116 +40,12 @@ export function useUserProfile() {
       return
     }
 
-    // TEMPORARILY DISABLED: Realtime subscriptions causing schema mismatch errors    console.log("[useUserProfile] Realtime disabled, using manual refresh only");    return;
+    // Disable realtime subscriptions temporarily to reduce console noise
+    console.log("[useUserProfile] Realtime disabled, using polling fallback");
+    
     fetchUserProfile()
     
-    // Set up real-time subscription for user_level_stats (primary data source)
-    const statsChannel = supabase
-      .channel(`user_stats_${user.id}_${Date.now()}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'user_level_stats',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          if (payload.new) {
-            const newStats = payload.new as any;
-            setUserData(prev => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                // Update all level/XP/stats data from user_level_stats
-                current_level: newStats.current_level,
-                current_xp: newStats.current_level_xp,
-                xp_to_next_level: newStats.xp_to_next_level,
-                lifetime_xp: newStats.lifetime_xp,
-                total_wagered: newStats.total_wagered,
-                total_profit: newStats.total_profit,
-        gameStats: {
-          coinflip: {
-            wins: newStats.coinflip_wins || 0,
-            losses: Math.max(0, (newStats.coinflip_games || 0) - (newStats.coinflip_wins || 0)),
-            profit: newStats.coinflip_profit || 0,
-          },
-          crash: {
-            wins: newStats.crash_wins || 0,
-            losses: Math.max(0, (newStats.crash_games || 0) - (newStats.crash_wins || 0)),
-            profit: newStats.crash_profit || 0,
-          },
-          roulette: {
-            wins: newStats.roulette_wins || 0,
-            losses: Math.max(0, (newStats.roulette_games || 0) - (newStats.roulette_wins || 0)),
-            profit: newStats.roulette_profit || 0,
-          },
-          tower: {
-            wins: newStats.tower_wins || 0,
-            losses: Math.max(0, (newStats.tower_games || 0) - (newStats.tower_wins || 0)),
-            profit: newStats.tower_profit || 0,
-          },
-        },
-              };
-            });
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
-        },
-        (payload) => {
-          if (payload.new && payload.old) {
-            // Only update profile-specific data (balance, username, etc.)
-            if (payload.new.balance !== payload.old.balance) {
-              setUserData(prev => {
-                if (!prev) return null;
-                return {
-                  ...prev,
-                  balance: payload.new.balance,
-                  username: payload.new.username,
-                  badges: payload.new.badges,
-                };
-              });
-            }
-          }
-        }
-      )
-      .subscribe();
-
-    // Additional dedicated balance subscription for maximum reliability
-    const balanceChannel = supabase
-      .channel(`balance_updates_${user.id}_${Date.now()}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'profiles',
-          filter: `id=eq.${user.id}`
-        },
-        (payload) => {
-          if (payload.new && payload.new.balance !== undefined) {
-            setUserData(prev => {
-              if (!prev) return null;
-              return {
-                ...prev,
-                balance: payload.new.balance,
-                username: payload.new.username || prev.username,
-                badges: payload.new.badges || prev.badges,
-              };
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    // Periodic balance refresh to ensure sync (every 10 seconds)
+    // Set up polling for balance updates (every 30 seconds instead of 5)
     const balanceRefreshInterval = setInterval(async () => {
       try {
         const { data: currentProfile } = await supabase
@@ -174,11 +70,9 @@ export function useUserProfile() {
       } catch (error) {
         console.error('Error in periodic balance refresh:', error);
       }
-    }, 5000); // Every 5 seconds
+    }, 30000); // Every 30 seconds instead of 5
 
     return () => {
-      supabase.removeChannel(statsChannel);
-      supabase.removeChannel(balanceChannel);
       clearInterval(balanceRefreshInterval);
     };
   }, [user])

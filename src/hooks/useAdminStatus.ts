@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Global cache for admin status to prevent excessive queries
 const adminStatusCache = new Map<string, { isAdmin: boolean; timestamp: number }>();
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes (increased from 5)
 
 export const useAdminStatus = (userId?: string) => {
   const { user } = useAuth();
@@ -49,7 +49,8 @@ export const useAdminStatus = (userId?: string) => {
         
         if (error) {
           // Handle 406 errors gracefully - treat as "not admin" instead of error
-          if (error.code === 'PGRST116' || error.message?.includes('406')) {
+          if (error.code === 'PGRST116' || error.message?.includes('406') || error.code === '406') {
+            console.log('Admin status check: 406 error, treating as non-admin');
             setIsAdmin(false);
             setError(null); // Don't treat this as an error
           } else {
@@ -66,7 +67,8 @@ export const useAdminStatus = (userId?: string) => {
     } catch (err: any) {
       if (mountedRef.current) {
         // Handle 406 errors gracefully
-        if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+        if (err?.code === 'PGRST116' || err?.message?.includes('406') || err?.code === '406') {
+          console.log('Admin status check exception: 406 error, treating as non-admin');
           setIsAdmin(false);
           setError(null); // Don't treat this as an error
         } else {
@@ -140,7 +142,8 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
       if (mountedRef.current) {
         if (error) {
           // Handle 406 errors gracefully - treat as "not admin" instead of error
-          if (error.code === 'PGRST116' || error.message?.includes('406')) {
+          if (error.code === 'PGRST116' || error.message?.includes('406') || error.code === '406') {
+            console.log('Multiple admin status check: 406 error, treating all as non-admin');
             const statuses: Record<string, boolean> = { ...cachedStatuses };
             userIds.forEach(userId => {
               if (!cachedStatuses[userId]) {
@@ -183,7 +186,8 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
     } catch (err: any) {
       if (mountedRef.current) {
         // Handle 406 errors gracefully
-        if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+        if (err?.code === 'PGRST116' || err?.message?.includes('406') || err?.code === '406') {
+          console.log('Multiple admin status check exception: 406 error, treating all as non-admin');
           const statuses: Record<string, boolean> = { ...cachedStatuses };
           userIds.forEach(userId => {
             if (!cachedStatuses[userId]) {
