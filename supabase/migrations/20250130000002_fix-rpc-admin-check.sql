@@ -118,7 +118,7 @@ BEGIN
   LOOP
     RAISE NOTICE 'Mixed test result: user_id=%, is_admin=%', test_result.user_id, test_result.is_admin;
   END LOOP;
+  
+  RAISE NOTICE 'RPC admin check function has been fixed and tested';
 END;
 $$;
-
-RAISE NOTICE 'RPC admin check function has been fixed and tested';
