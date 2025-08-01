@@ -553,8 +553,8 @@ BEGIN
       policy_rec.policyname, policy_rec.permissive, policy_rec.roles, 
       policy_rec.cmd, policy_rec.qual, policy_rec.with_check;
   END LOOP;
+  
+  RAISE NOTICE '=== FIX COMPLETED ===';
+  RAISE NOTICE 'Registration and authentication issues should now be resolved.';
+  RAISE NOTICE 'Users should be able to register and access their profiles without 406 errors.';
 END $$;
-
-RAISE NOTICE '=== FIX COMPLETED ===';
-RAISE NOTICE 'Registration and authentication issues should now be resolved.';
-RAISE NOTICE 'Users should be able to register and access their profiles without 406 errors.';
