@@ -1,5 +1,6 @@
 /* Account Deletion Overlay Lock Styles */
 /* This CSS completely locks down the website when account deletion overlay is shown */
+/* Users can only sign out - no other interactions are possible */
 
 body.account-deletion-locked {
   /* Prevent scrolling */

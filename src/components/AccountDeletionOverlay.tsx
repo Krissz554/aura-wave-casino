@@ -5,11 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   AlertTriangle, 
   Clock, 
-  Shield, 
   LogOut, 
-  RefreshCw, 
   Calendar,
-  User,
   Trash2,
   Lock,
   AlertCircle
@@ -19,11 +16,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from '@/hooks/use-toast';
 
 export default function AccountDeletionOverlay() {
-  const { pendingDeletion, loading, hasPendingDeletion, refreshPendingDeletion } = usePendingDeletion();
+  const { pendingDeletion, loading, hasPendingDeletion } = usePendingDeletion();
   const { signOut } = useAuth();
   const [timeRemaining, setTimeRemaining] = useState<string>('');
-  const [refreshing, setRefreshing] = useState(false);
-
   // Disable scrolling and all interactions when overlay is shown
   useEffect(() => {
     if (hasPendingDeletion && !loading) {
@@ -37,7 +32,7 @@ export default function AccountDeletionOverlay() {
       
       // Prevent all keyboard interactions except for our overlay
       const handleKeyDown = (e: KeyboardEvent) => {
-        // Allow only Tab, Enter, Space, and Escape for accessibility
+        // Allow only Tab, Enter, Space, and Escape for accessibility within overlay
         const allowedKeys = ['Tab', 'Enter', ' ', 'Escape'];
         if (!allowedKeys.includes(e.key)) {
           e.preventDefault();
@@ -145,19 +140,7 @@ export default function AccountDeletionOverlay() {
     return () => clearInterval(interval);
   }, [pendingDeletion]);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await refreshPendingDeletion();
-    setRefreshing(false);
-    
-    if (!hasPendingDeletion) {
-      toast({
-        title: "Account Status Updated",
-        description: "Your account deletion has been cancelled. You can now use the site normally.",
-        duration: 5000,
-      });
-    }
-  };
+
 
   const handleSignOut = async () => {
     try {
@@ -276,28 +259,14 @@ export default function AccountDeletionOverlay() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button
-              onClick={handleRefresh}
-              disabled={refreshing}
-              variant="outline"
-              className="flex-1 bg-slate-800 border-slate-600 text-slate-300 hover:bg-slate-700"
-            >
-              {refreshing ? (
-                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="w-4 h-4 mr-2" />
-              )}
-              Check Status
-            </Button>
-            
+          {/* Action Button */}
+          <div className="flex justify-center pt-4">
             <Button
               onClick={handleSignOut}
               variant="destructive"
-              className="flex-1 bg-red-600 hover:bg-red-700"
+              className="px-8 py-3 bg-red-600 hover:bg-red-700 text-lg font-medium"
             >
-              <LogOut className="w-4 h-4 mr-2" />
+              <LogOut className="w-5 h-5 mr-2" />
               Sign Out
             </Button>
           </div>
@@ -305,7 +274,7 @@ export default function AccountDeletionOverlay() {
           {/* Support Contact */}
           <div className="pt-4 border-t border-slate-700">
             <p className="text-center text-slate-400 text-sm">
-              Need help? Contact support or reach out to an administrator
+              If you believe this is an error, please contact support or reach out to an administrator
             </p>
           </div>
         </CardContent>
