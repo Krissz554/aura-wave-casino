@@ -249,9 +249,16 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
       };
 
       // Use the correct XP source (prioritize stats for own profile, userData levelStats for others)
-      const currentLevel = stats?.current_level || userData.levelStats?.current_level || 1;
-      const currentXP = stats?.current_level_xp || userData.levelStats?.current_level_xp || 0;
-      const lifetimeXP = stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0;
+      const isViewingOwnProfile = (user && userData && user.id === userData.id) || (user && !username);
+      const currentLevel = isViewingOwnProfile 
+        ? (stats?.current_level || userData.levelStats?.current_level || 1)
+        : (userData.levelStats?.current_level || 1);
+      const currentXP = isViewingOwnProfile 
+        ? (stats?.current_level_xp || userData.levelStats?.current_level_xp || 0)
+        : (userData.levelStats?.current_level_xp || 0);
+      const lifetimeXP = isViewingOwnProfile 
+        ? (stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0)
+        : (userData.levelStats?.lifetime_xp || 0);
 
       animateValue(0, currentLevel, 800, (val) => 
         setAnimatedStats(prev => ({ ...prev, level: val }))
@@ -290,24 +297,40 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   if (!userData) return null;
 
   // Move variable declarations here to fix initialization order
-  const currentLevel = stats?.current_level || userData.levelStats?.current_level || 1;
-  const lifetimeXP = stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0; // Main XP display from user_level_stats
-  const currentXP = stats?.current_level_xp || userData.levelStats?.current_level_xp || 0; // XP within current level
-  const xpToNext = stats?.xp_to_next_level || userData.levelStats?.xp_to_next_level || 100;
+  // For other users' profiles, ALWAYS use userData.levelStats (fetched data)
+  // For own profile, use stats (from useUserLevelStats hook) as primary source
+  const isViewingOwnProfile = isOwnProfile || shouldShowOwnProfile;
+  const currentLevel = isViewingOwnProfile 
+    ? (stats?.current_level || userData.levelStats?.current_level || 1)
+    : (userData.levelStats?.current_level || 1);
+  const lifetimeXP = isViewingOwnProfile 
+    ? (stats?.lifetime_xp || userData.levelStats?.lifetime_xp || 0)
+    : (userData.levelStats?.lifetime_xp || 0);
+  const currentXP = isViewingOwnProfile 
+    ? (stats?.current_level_xp || userData.levelStats?.current_level_xp || 0)
+    : (userData.levelStats?.current_level_xp || 0);
+  const xpToNext = isViewingOwnProfile 
+    ? (stats?.xp_to_next_level || userData.levelStats?.xp_to_next_level || 100)
+    : (userData.levelStats?.xp_to_next_level || 100);
   const totalXP = currentXP + xpToNext;
   const xpProgress = calculateXPProgress(currentXP, xpToNext);
 
   // Debug logging for level stats display
   console.log('📊 UserProfile level stats display:', {
     username: userData.username,
-    isOwnProfile: isOwnProfile || shouldShowOwnProfile,
+    isViewingOwnProfile,
     hasStats: !!stats,
     hasUserDataLevelStats: !!userData.levelStats,
-    currentLevel,
-    lifetimeXP,
-    currentXP,
-    xpToNext,
-    xpProgress: Math.round(xpProgress)
+    statsSource: isViewingOwnProfile ? 'useUserLevelStats' : 'userData.levelStats',
+    rawUserDataLevelStats: userData.levelStats,
+    rawStats: stats ? { level: stats.current_level, xp: stats.current_level_xp, lifetime: stats.lifetime_xp } : null,
+    finalValues: {
+      currentLevel,
+      lifetimeXP,
+      currentXP,
+      xpToNext,
+      xpProgress: Math.round(xpProgress)
+    }
   });
 
   const registrationDate = new Date(userData.registration_date).toLocaleDateString('en-US', {
