@@ -410,7 +410,7 @@ BEGIN
 EXCEPTION
   WHEN OTHERS THEN
     GET STACKED DIAGNOSTICS error_message = MESSAGE_TEXT;
-    RAISE ERROR '[REGISTRATION] 💥 Critical error in handle_new_user for user %: %', NEW.id, error_message;
+    RAISE EXCEPTION '[REGISTRATION] 💥 Critical error in handle_new_user for user %: %', NEW.id, error_message;
     RETURN NEW;
 END;
 $$;
