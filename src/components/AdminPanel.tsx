@@ -1668,8 +1668,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                             <div className="text-white font-mono text-sm font-semibold">{user.username}</div>
                             {/* Admin Shield Icon */}
                             {adminStatuses[user.id] && (
-                              <div className="flex items-center text-red-400 drop-shadow-[0_0_4px_rgba(239,68,68,0.8)]" title="Admin">
-                                <Shield className="w-3 h-3" />
+                              <div className="flex items-center text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)] animate-pulse" title="Admin User">
+                                <Shield className="w-4 h-4" />
                               </div>
                             )}
                           </div>
@@ -1992,7 +1992,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                       <div className="flex items-center space-x-3">
                         <User className="h-4 w-4 text-blue-400" />
                         <div>
-                          <div className="text-white font-mono">{user.username}</div>
+                          <div className="flex items-center gap-2">
+                            <div className="text-white font-mono">{user.username}</div>
+                            {/* Admin Shield Icon */}
+                            {adminStatuses[user.id] && (
+                              <div className="flex items-center text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)] animate-pulse" title="Admin User">
+                                <Shield className="w-3 h-3" />
+                              </div>
+                            )}
+                          </div>
                           <div className="text-xs text-slate-400 font-mono">ID: {user.id}</div>
                         </div>
                       </div>
