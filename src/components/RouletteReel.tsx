@@ -34,14 +34,14 @@ const REEL_WIDTH_PX = VISIBLE_TILES * TILE_SIZE_PX;
 const REEL_HEIGHT_PX = TILE_SIZE_PX;
 const CENTER_MARKER_PX = REEL_WIDTH_PX / 2;
 
-// 🔄 OPTIMIZED TILE GENERATION - Reduced from 200 to 50 repeats for better performance
-const TILE_REPEATS = 50; // Reduced from 200
+// 🔄 OPTIMIZED TILE GENERATION - Reduced from 200 to 30 repeats for maximum performance
+const TILE_REPEATS = 30; // Further reduced from 50
 const TOTAL_TILES = WHEEL_SLOTS.length * TILE_REPEATS;
 const TOTAL_REEL_WIDTH_PX = TOTAL_TILES * TILE_SIZE_PX;
 
 // 🛡️ TILE SAFETY BOUNDS - Prevent disappearing tiles
 const WHEEL_CYCLE_PX = WHEEL_SLOTS.length * TILE_SIZE_PX;
-const SAFE_ZONE_CYCLES = 10; // Reduced from 20
+const SAFE_ZONE_CYCLES = 5; // Further reduced from 10
 const MIN_SAFE_POSITION = -SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;
 const MAX_SAFE_POSITION = SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;
 
@@ -62,21 +62,21 @@ const normalizePosition = (position: number): number => {
 // ⏱️ ANIMATION CONFIGURATION - Exactly 4 seconds
 const SPIN_DURATION_MS = 4000;
 
-// 🎨 Memoized tile styling function
+// 🎨 OPTIMIZED tile styling - Removed all hover effects, gradients, and shadows
 const getTileStyle = (color: string): string => {
   switch (color) {
     case 'green': 
-      return 'bg-gradient-to-br from-emerald-900/90 via-emerald-800/70 to-emerald-900/90 border-emerald-500/70 text-emerald-100 shadow-lg hover:border-emerald-400';
+      return 'bg-green-600 border-green-400 text-white';
     case 'red': 
-      return 'bg-gradient-to-br from-red-900/90 via-red-800/70 to-red-900/90 border-red-500/70 text-red-100 shadow-lg hover:border-red-400';
+      return 'bg-red-600 border-red-400 text-white';
     case 'black': 
-      return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg hover:border-slate-400';
+      return 'bg-gray-800 border-gray-600 text-white';
     default: 
-      return 'bg-gradient-to-br from-slate-900/90 via-slate-800/70 to-slate-900/90 border-slate-500/70 text-slate-100 shadow-lg';
+      return 'bg-gray-600 border-gray-400 text-white';
   }
 };
 
-// 🎲 Memoized tile generation
+// 🎲 OPTIMIZED tile generation
 const generateTiles = () => {
   const allTiles = [];
   const centerOffset = Math.floor(TILE_REPEATS / 2);
@@ -216,20 +216,18 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
       // Get reel element
       const reel = reelRef.current;
       
-      // ROBUST ANIMATION SEQUENCE
+      // OPTIMIZED ANIMATION SEQUENCE - Removed complex transitions
       reel.style.transition = 'none';
       reel.style.transform = `translateX(${startPosition}px)`;
       
       void reel.offsetHeight;
       
-      reel.style.transition = `transform ${SPIN_DURATION_MS}ms cubic-bezier(0.25, 0.1, 0.25, 1)`;
+      reel.style.transition = `transform ${SPIN_DURATION_MS}ms ease-out`;
       
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (reelRef.current) {
-            reelRef.current.style.transform = `translateX(${targetPosition}px)`;
-          }
-        });
+        if (reelRef.current) {
+          reelRef.current.style.transform = `translateX(${targetPosition}px)`;
+        }
       });
       
       // Clear any existing timeout
@@ -291,29 +289,28 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
 
   return (
     <div className="flex justify-center w-full">
-      {/* 🎰 ROULETTE CONTAINER - Fixed 1500px width, 100px height */}
+      {/* 🎰 ROULETTE CONTAINER - Simplified styling */}
       <div 
-        className="relative rounded-xl shadow-2xl overflow-hidden"
+        className="relative rounded-lg overflow-hidden border-2 border-gray-300"
         style={{ 
           width: `${REEL_WIDTH_PX}px`,
           height: `${REEL_HEIGHT_PX}px`
         }}
       >
-        {/* 🎯 FIXED CENTER MARKER - Never moves, always at 750px */}
+        {/* 🎯 FIXED CENTER MARKER - Simplified styling */}
         <div 
-          className={`absolute inset-y-0 z-30 pointer-events-none transition-all duration-300 ${
-            showWinGlow ? 'bg-yellow-400 shadow-yellow-400/60' : 'bg-emerald-400 shadow-emerald-400/40'
+          className={`absolute inset-y-0 z-30 pointer-events-none ${
+            showWinGlow ? 'bg-yellow-400' : 'bg-green-400'
           }`}
           style={{ 
             left: `${CENTER_MARKER_PX}px`,
             width: '4px',
-            transform: 'translateX(-2px)',
-            boxShadow: showWinGlow ? '0 0 20px rgba(255, 255, 0, 0.8)' : '0 0 15px rgba(16, 185, 129, 0.6)'
+            transform: 'translateX(-2px)'
           }}
         >
           {/* Top triangle pointer */}
           <div 
-            className={`absolute -top-3 left-1/2 transform -translate-x-1/2 transition-colors duration-300`}
+            className="absolute -top-3 left-1/2 transform -translate-x-1/2"
             style={{
               width: 0,
               height: 0,
@@ -325,7 +322,7 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
           
           {/* Bottom triangle pointer */}
           <div 
-            className={`absolute -bottom-3 left-1/2 transform -translate-x-1/2 transition-colors duration-300`}
+            className="absolute -bottom-3 left-1/2 transform -translate-x-1/2"
             style={{
               width: 0,
               height: 0,
@@ -339,7 +336,7 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
         {/* 🎡 REEL - Horizontal scrolling tile container */}
         <div 
           ref={reelRef}
-          className="flex h-full will-change-transform"
+          className="flex h-full"
           style={{ 
             width: `${TOTAL_REEL_WIDTH_PX}px`,
             ...(isAnimating ? {} : { transform: `translateX(${currentPosition}px)` })
@@ -359,20 +356,19 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
                   flex-shrink-0 flex items-center justify-center text-xl font-bold border-2 
                   relative select-none
                   ${getTileStyle(tile.color)}
-                  ${isUnderMarker ? 'border-white border-opacity-90 z-20' : 'border-opacity-60 z-10'}
-                  ${isWinningTile ? 'ring-4 ring-yellow-400 ring-opacity-80 scale-105' : ''}
+                  ${isUnderMarker ? 'border-white z-20' : 'z-10'}
+                  ${isWinningTile ? 'ring-2 ring-yellow-400' : ''}
                 `}
                 style={{ 
                   width: `${TILE_SIZE_PX}px`,
-                  height: `${TILE_SIZE_PX}px`,
-                  clipPath: 'polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px))'
+                  height: `${TILE_SIZE_PX}px`
                 }}
               >
                 <span className="relative z-10 font-mono tracking-wider">{tile.slot}</span>
                 
-                {/* Winning effect overlay */}
+                {/* Simplified winning effect overlay */}
                 {isWinningTile && (
-                  <div className="absolute inset-0 bg-yellow-400 bg-opacity-25 animate-pulse" />
+                  <div className="absolute inset-0 bg-yellow-400 bg-opacity-25" />
                 )}
               </div>
             );
