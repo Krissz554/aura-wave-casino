@@ -10,7 +10,7 @@ import { Shield, Settings, Users, Activity, Bell, AlertTriangle, Cpu, Database, 
 import { PushNotificationForm } from './PushNotificationForm';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { useMultipleAdminStatus } from '@/hooks/useAdminStatus';
+import { useMultipleAdminStatus, clearAdminStatusCache } from '@/hooks/useAdminStatus';
 
 // Supabase configuration for Edge Function calls
 const SUPABASE_URL = "https://hqdbdczxottbupwbupdu.supabase.co";
@@ -137,13 +137,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         .select('*', { count: 'exact', head: true });
 
       if (error) {
-        console.error('❌ Error checking user count:', error);
+        console.error('Error checking user count:', error);
       } else {
-        console.log(`📊 Total users in database: ${count}`);
         return count;
       }
     } catch (err) {
-      console.error('❌ Error checking user count:', err);
+      console.error('Error checking user count:', err);
     }
     return null;
   };
@@ -172,7 +171,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      console.log('🔍 Loading all users...');
+      // Clear admin status cache to ensure fresh data
+      clearAdminStatusCache();
       
       // First check total count
       const totalCount = await checkTotalUserCount();
@@ -189,18 +189,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Error loading users:', error);
+        console.error('Error loading users:', error);
         toast({
           title: "Error",
           description: "Failed to load users",
           variant: "destructive",
         });
       } else {
-        console.log(`✅ Loaded ${data?.length || 0} users`);
-        console.log('📊 Users data:', data);
-        
         // Fetch level stats for all users
-        console.log('📊 Fetching level stats for all users...');
         const userIds = data?.map(user => user.id) || [];
         const { data: levelStatsData, error: levelStatsError } = await supabase
           .from('user_level_stats')
@@ -208,9 +204,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           .in('user_id', userIds);
 
         if (levelStatsError) {
-          console.warn('⚠️ Error loading level stats:', levelStatsError);
-        } else {
-          console.log(`✅ Loaded level stats for ${levelStatsData?.length || 0} users`);
+          console.warn('Error loading level stats:', levelStatsError);
         }
 
         // Create a map of user_id -> level stats for easy lookup
@@ -242,13 +236,13 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           description: message,
         });
 
-        // Refresh admin statuses after loading users
+        // Refresh admin statuses after loading users (cache cleared, will fetch fresh data)
         setTimeout(() => {
           refetchAdminStatuses();
         }, 500); // Delay to ensure users state is updated
       }
     } catch (err) {
-      console.error('❌ Error loading users:', err);
+      console.error('Error loading users:', err);
       toast({
         title: "Error",
         description: "Failed to load users",

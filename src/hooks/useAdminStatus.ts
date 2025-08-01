@@ -6,6 +6,11 @@ import { supabase } from '@/integrations/supabase/client';
 const adminStatusCache = new Map<string, { isAdmin: boolean; timestamp: number }>();
 const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes
 
+// Function to clear admin status cache
+export const clearAdminStatusCache = () => {
+  adminStatusCache.clear();
+};
+
 export const useAdminStatus = (userId?: string) => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
@@ -174,7 +179,6 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
       }
     } catch (err: any) {
       if (mountedRef.current) {
-        console.log('RPC multiple admin check exception, treating all as non-admin:', err);
         const statuses: Record<string, boolean> = { ...cachedStatuses };
         uncachedUserIds.forEach(userId => {
           statuses[userId] = false;
