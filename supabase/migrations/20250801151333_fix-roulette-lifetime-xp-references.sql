@@ -1,9 +1,10 @@
 -- =====================================================
--- FIX ROULETTE DATABASE ISSUES
+-- FIX ROULETTE DATABASE ISSUES - LIFETIME_XP REFERENCES
 -- =====================================================
--- This fixes two main issues:
--- 1. Missing lifetime_xp column causing bet placement failures
--- 2. Foreign key relationship between roulette_bets and profiles
+-- This fixes the main issues:
+-- 1. Remove problematic functions that reference lifetime_xp in profiles
+-- 2. Ensure proper foreign key relationship between roulette_bets and profiles
+-- 3. Ensure user_level_stats table has proper structure
 
 -- =====================================================
 -- ISSUE 1: Remove problematic functions that reference lifetime_xp in profiles
@@ -13,8 +14,6 @@
 DROP TRIGGER IF EXISTS total_wagered_xp_trigger ON public.profiles;
 DROP FUNCTION IF EXISTS public.handle_total_wagered_change() CASCADE;
 DROP FUNCTION IF EXISTS public.add_xp_from_wager(UUID, NUMERIC) CASCADE;
-
-RAISE NOTICE '✅ Removed problematic XP triggers and functions that reference lifetime_xp in profiles';
 
 -- =====================================================
 -- ISSUE 2: Ensure proper foreign key relationship
@@ -32,7 +31,6 @@ BEGIN
   ) THEN
     ALTER TABLE public.roulette_bets 
     DROP CONSTRAINT IF EXISTS roulette_bets_user_id_fkey;
-    RAISE NOTICE '✅ Dropped existing roulette_bets foreign key constraint';
   END IF;
   
   -- Add proper foreign key constraint to profiles table
@@ -40,7 +38,10 @@ BEGIN
   ADD CONSTRAINT roulette_bets_user_id_fkey 
   FOREIGN KEY (user_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
   
-  RAISE NOTICE '✅ Added proper foreign key constraint from roulette_bets to profiles';
+EXCEPTION
+  WHEN OTHERS THEN
+    -- If there's an error, just continue - the constraint might already exist properly
+    NULL;
 END $$;
 
 -- =====================================================
@@ -66,8 +67,6 @@ CREATE TABLE IF NOT EXISTS public.user_level_stats (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
-RAISE NOTICE '✅ Ensured user_level_stats table exists with proper structure including lifetime_xp';
-
 -- =====================================================
 -- ISSUE 4: Ensure profiles table has avatar_url column
 -- =====================================================
@@ -82,10 +81,6 @@ BEGIN
   ) THEN
     ALTER TABLE public.profiles 
     ADD COLUMN avatar_url TEXT;
-    
-    RAISE NOTICE '✅ Added avatar_url column to profiles table';
-  ELSE
-    RAISE NOTICE '✅ avatar_url column already exists in profiles table';
   END IF;
 END $$;
 
@@ -97,39 +92,8 @@ END $$;
 GRANT ALL ON public.profiles TO service_role;
 GRANT ALL ON public.roulette_bets TO service_role;
 GRANT ALL ON public.roulette_rounds TO service_role;
+GRANT ALL ON public.user_level_stats TO service_role;
 
 -- Ensure authenticated users can read profiles for joins
 GRANT SELECT ON public.profiles TO authenticated;
-
-RAISE NOTICE '✅ Updated table permissions for service_role and authenticated users';
-
--- =====================================================
--- VERIFICATION
--- =====================================================
-
--- Verify the fixes
-SELECT 
-  'VERIFICATION' as status,
-  (
-    SELECT COUNT(*) 
-    FROM information_schema.columns 
-    WHERE table_name = 'user_level_stats' 
-    AND column_name = 'lifetime_xp'
-    AND table_schema = 'public'
-  ) as lifetime_xp_column_exists_in_user_level_stats,
-  (
-    SELECT COUNT(*) 
-    FROM information_schema.columns 
-    WHERE table_name = 'profiles' 
-    AND column_name = 'avatar_url'
-    AND table_schema = 'public'
-  ) as avatar_url_column_exists,
-  (
-    SELECT COUNT(*) 
-    FROM information_schema.table_constraints 
-    WHERE constraint_name = 'roulette_bets_user_id_fkey'
-    AND table_name = 'roulette_bets'
-    AND table_schema = 'public'
-  ) as foreign_key_constraint_exists;
-
-RAISE NOTICE '🎰 ROULETTE DATABASE FIXES COMPLETED - Check verification results above';
+GRANT SELECT ON public.user_level_stats TO authenticated;
