@@ -6,6 +6,7 @@ export const useAdminStatus = (userId?: string) => {
   const { user } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const targetUserId = userId || user?.id;
 
@@ -27,12 +28,33 @@ export const useAdminStatus = (userId?: string) => {
           .single();
 
         if (mounted) {
-          setIsAdmin(!!data && !error);
+          if (error) {
+            // Handle 406 errors gracefully - treat as "not admin" instead of error
+            if (error.code === 'PGRST116' || error.message?.includes('406')) {
+              setIsAdmin(false);
+              setError(null); // Don't treat this as an error
+            } else {
+              console.error('Admin status check error:', error);
+              setError(error.message);
+              setIsAdmin(false);
+            }
+          } else {
+            setIsAdmin(!!data);
+            setError(null);
+          }
           setLoading(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (mounted) {
-          setIsAdmin(false);
+          // Handle 406 errors gracefully
+          if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+            setIsAdmin(false);
+            setError(null); // Don't treat this as an error
+          } else {
+            console.error('Admin status check exception:', err);
+            setError(err?.message || 'Unknown error');
+            setIsAdmin(false);
+          }
           setLoading(false);
         }
       }
@@ -45,13 +67,14 @@ export const useAdminStatus = (userId?: string) => {
     };
   }, [targetUserId]);
 
-  return { isAdmin, loading };
+  return { isAdmin, loading, error };
 };
 
 // Hook to check multiple users' admin status at once
 export const useMultipleAdminStatus = (userIds: string[]) => {
   const [adminStatuses, setAdminStatuses] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -69,23 +92,49 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
           .select('user_id')
           .in('user_id', userIds);
 
-        if (mounted && !error) {
-          const adminUserIds = new Set(data.map(admin => admin.user_id));
-          const statuses: Record<string, boolean> = {};
-          
-          userIds.forEach(userId => {
-            statuses[userId] = adminUserIds.has(userId);
-          });
-
-          setAdminStatuses(statuses);
-        }
-        
         if (mounted) {
+          if (error) {
+            // Handle 406 errors gracefully - treat as "not admin" instead of error
+            if (error.code === 'PGRST116' || error.message?.includes('406')) {
+              const statuses: Record<string, boolean> = {};
+              userIds.forEach(userId => {
+                statuses[userId] = false;
+              });
+              setAdminStatuses(statuses);
+              setError(null); // Don't treat this as an error
+            } else {
+              console.error('Multiple admin status check error:', error);
+              setError(error.message);
+              setAdminStatuses({});
+            }
+          } else {
+            const adminUserIds = new Set(data.map(admin => admin.user_id));
+            const statuses: Record<string, boolean> = {};
+            
+            userIds.forEach(userId => {
+              statuses[userId] = adminUserIds.has(userId);
+            });
+
+            setAdminStatuses(statuses);
+            setError(null);
+          }
           setLoading(false);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (mounted) {
-          setAdminStatuses({});
+          // Handle 406 errors gracefully
+          if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+            const statuses: Record<string, boolean> = {};
+            userIds.forEach(userId => {
+              statuses[userId] = false;
+            });
+            setAdminStatuses(statuses);
+            setError(null); // Don't treat this as an error
+          } else {
+            console.error('Multiple admin status check exception:', err);
+            setError(err?.message || 'Unknown error');
+            setAdminStatuses({});
+          }
           setLoading(false);
         }
       }
@@ -98,5 +147,5 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
     };
   }, [userIds.join(',')]);
 
-  return { adminStatuses, loading };
+  return { adminStatuses, loading, error };
 };
