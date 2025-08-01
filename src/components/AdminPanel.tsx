@@ -82,17 +82,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   const userIds = users.map(user => user.id);
   const { adminStatuses, refetch: refetchAdminStatuses } = useMultipleAdminStatus(userIds);
 
-  // Debug admin statuses when they change
-  useEffect(() => {
-    console.log('🛡️ Admin statuses updated:', adminStatuses);
-    console.log('👥 User IDs:', userIds);
-    Object.entries(adminStatuses).forEach(([userId, isAdmin]) => {
-      if (isAdmin) {
-        const user = users.find(u => u.id === userId);
-        console.log(`🛡️ Admin user found: ${user?.username} (${userId})`);
-      }
-    });
-  }, [adminStatuses, userIds, users]);
+
   const [pendingDeletions, setPendingDeletions] = useState<Record<string, any>>({});
   const [showInstantDeleteConfirm, setShowInstantDeleteConfirm] = useState(false);
   const [instantDeletingUser, setInstantDeletingUser] = useState(false);
@@ -253,37 +243,9 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         });
 
         // Refresh admin statuses after loading users
-        console.log('🔄 Refreshing admin statuses...');
-        console.log('👥 Users loaded:', data?.map(u => ({ id: u.id, username: u.username })));
-        
-        // Test direct admin_users table access
-        console.log('🧪 Testing direct admin_users table access...');
-        const { data: adminUsersData, error: adminUsersError } = await supabase
-          .from('admin_users')
-          .select('user_id');
-        
-        console.log('🧪 Direct admin_users query result:', { adminUsersData, adminUsersError });
-        
-        // Test RPC functions
-        if (data && data.length > 0) {
-          const testUserId = data[0].id;
-          console.log('🧪 Testing RPC function with user:', testUserId);
-          
-          const { data: rpcSingleResult, error: rpcSingleError } = await supabase
-            .rpc('check_admin_status_simple', { user_uuid: testUserId });
-          
-          console.log('🧪 RPC single check result:', { rpcSingleResult, rpcSingleError });
-          
-          const { data: rpcMultipleResult, error: rpcMultipleError } = await supabase
-            .rpc('check_multiple_admin_status', { user_uuids: [testUserId] });
-          
-          console.log('🧪 RPC multiple check result:', { rpcMultipleResult, rpcMultipleError });
-        }
-        
         setTimeout(() => {
           refetchAdminStatuses();
-          console.log('🛡️ Admin statuses after refresh:', adminStatuses);
-        }, 500); // Increased delay to ensure users state is updated
+        }, 500); // Delay to ensure users state is updated
       }
     } catch (err) {
       console.error('❌ Error loading users:', err);
@@ -352,17 +314,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Reset user statistics - COMPLETE VERSION
   const resetUserStatsFinal = async (userId: string) => {
-    console.log('🛡️ Reset protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
-    
     // Double-check admin status with RPC call for extra security
     try {
       const { data: isAdminRPC, error: adminCheckError } = await supabase
         .rpc('check_admin_status_simple', { user_uuid: userId });
       
-      console.log('🛡️ RPC admin check result:', { userId, isAdminRPC, error: adminCheckError });
-      
       if (isAdminRPC) {
-        console.log('🚫 Reset blocked: User is admin (confirmed by RPC)');
         toast({
           title: "Access Denied",
           description: "Admin accounts cannot be reset for security reasons.",
@@ -371,12 +328,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         return;
       }
     } catch (rpcError) {
-      console.warn('⚠️ RPC admin check failed, using cached status:', rpcError);
+      // RPC check failed, fall back to cached status
     }
     
     // Prevent resetting admin accounts (fallback to cached status)
     if (adminStatuses[userId]) {
-      console.log('🚫 Reset blocked: User is admin (cached status)');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be reset for security reasons.",
@@ -623,17 +579,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Delete user account completely
   const deleteUserAccount = async (userId: string) => {
-    console.log('🛡️ Delete protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
-    
     // Double-check admin status with RPC call for extra security
     try {
       const { data: isAdminRPC, error: adminCheckError } = await supabase
         .rpc('check_admin_status_simple', { user_uuid: userId });
       
-      console.log('🛡️ RPC admin check result:', { userId, isAdminRPC, error: adminCheckError });
-      
       if (isAdminRPC) {
-        console.log('🚫 Delete blocked: User is admin (confirmed by RPC)');
         toast({
           title: "Access Denied",
           description: "Admin accounts cannot be deleted for security reasons.",
@@ -642,12 +593,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         return;
       }
     } catch (rpcError) {
-      console.warn('⚠️ RPC admin check failed, using cached status:', rpcError);
+      // RPC check failed, fall back to cached status
     }
     
     // Prevent deletion of admin accounts (fallback to cached status)
     if (adminStatuses[userId]) {
-      console.log('🚫 Delete blocked: User is admin (cached status)');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be deleted for security reasons.",
@@ -804,17 +754,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
 
   // Instant delete user account (skips the 24-hour delay)
   const instantDeleteUserAccount = async (userId: string) => {
-    console.log('🛡️ Instant delete protection check:', { userId, isAdmin: adminStatuses[userId], adminStatuses });
-    
     // Double-check admin status with RPC call for extra security
     try {
       const { data: isAdminRPC, error: adminCheckError } = await supabase
         .rpc('check_admin_status_simple', { user_uuid: userId });
       
-      console.log('🛡️ RPC admin check result:', { userId, isAdminRPC, error: adminCheckError });
-      
       if (isAdminRPC) {
-        console.log('🚫 Instant delete blocked: User is admin (confirmed by RPC)');
         toast({
           title: "Access Denied",
           description: "Admin accounts cannot be deleted for security reasons.",
@@ -823,12 +768,11 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         return;
       }
     } catch (rpcError) {
-      console.warn('⚠️ RPC admin check failed, using cached status:', rpcError);
+      // RPC check failed, fall back to cached status
     }
     
     // Prevent deletion of admin accounts (fallback to cached status)
     if (adminStatuses[userId]) {
-      console.log('🚫 Instant delete blocked: User is admin (cached status)');
       toast({
         title: "Access Denied",
         description: "Admin accounts cannot be deleted for security reasons.",
@@ -1169,9 +1113,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       setShowAdminRoleModal(false);
       setSelectedUser(null);
       
-      // Refresh admin statuses immediately
-      console.log('🔄 Refreshing admin statuses after role change...');
-      refetchAdminStatuses();
+              // Refresh admin statuses immediately
+        refetchAdminStatuses();
       
       loadUsers(); // Refresh the user list
     } catch (error) {
@@ -1319,19 +1262,15 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
 
     try {
-      console.log('Admin status check (AdminPanel): Using RPC function directly');
       const { data, error } = await supabase
         .rpc('check_admin_status_simple', { user_uuid: currentUser.id });
 
       if (error) {
-        console.log('RPC admin check failed, treating as non-admin:', error);
         setIsAdmin(false);
       } else {
-        console.log('RPC admin check successful, admin status:', data);
         setIsAdmin(!!data);
       }
     } catch (err) {
-      console.log('RPC admin check exception, treating as non-admin:', err);
       setIsAdmin(false);
     } finally {
       setLoading(false);
@@ -1766,54 +1705,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   Check Total
                 </Button>
-                <Button
-                  onClick={() => {
-                    console.log('🔄 Manual admin status refresh triggered');
-                    refetchAdminStatuses();
-                  }}
-                  variant="outline"
-                  className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 font-mono"
-                >
-                  <Shield className="h-4 w-4 mr-2" />
-                  Refresh Admin Status
-                </Button>
-                <Button
-                  onClick={async () => {
-                    console.log('🧪 Manual admin table test triggered');
-                    
-                    // Direct table query
-                    const { data: directAdmins, error: directError } = await supabase
-                      .from('admin_users')
-                      .select('user_id, permissions, created_at');
-                    
-                    console.log('🧪 Direct admin_users table:', { directAdmins, directError });
-                    
-                    // Test RPC with all user IDs
-                    if (users.length > 0) {
-                      const allUserIds = users.map(u => u.id);
-                      const { data: rpcResult, error: rpcError } = await supabase
-                        .rpc('check_multiple_admin_status', { user_uuids: allUserIds });
-                      
-                      console.log('🧪 RPC check for all users:', { rpcResult, rpcError });
-                      
-                      // Compare results
-                      const directAdminIds = new Set(directAdmins?.map(a => a.user_id) || []);
-                      const rpcAdminIds = new Set(rpcResult?.filter(r => r.is_admin).map(r => r.user_id) || []);
-                      
-                      console.log('🧪 Comparison:', {
-                        directAdminIds: Array.from(directAdminIds),
-                        rpcAdminIds: Array.from(rpcAdminIds),
-                        match: directAdminIds.size === rpcAdminIds.size && 
-                               Array.from(directAdminIds).every(id => rpcAdminIds.has(id))
-                      });
-                    }
-                  }}
-                  variant="outline"
-                  className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 font-mono"
-                >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Test Admin Table
-                </Button>
+
               </div>
             </div>
 
@@ -1862,12 +1754,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                               <div className="flex items-center text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.8)] animate-pulse" title="Admin User">
                                 <Shield className="w-4 h-4" />
                               </div>
-                            )}
-                            {/* Debug admin status */}
-                            {process.env.NODE_ENV === 'development' && (
-                              <span className="text-xs text-gray-500 ml-2">
-                                Admin: {adminStatuses[user.id] ? 'YES' : 'NO'}
-                              </span>
                             )}
                           </div>
                           <div className="text-xs text-slate-500 font-mono">ID: {user.id.slice(0, 6)}...</div>
