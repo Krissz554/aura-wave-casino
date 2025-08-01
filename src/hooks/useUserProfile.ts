@@ -279,7 +279,7 @@ export function useUserProfile() {
       }
 
       // Fetch level stats
-      const { data: levelStats, error: levelStatsError } = await supabase
+      let { data: levelStats, error: levelStatsError } = await supabase
         .from('user_level_stats')
         .select('*')
         .eq('user_id', user.id)
