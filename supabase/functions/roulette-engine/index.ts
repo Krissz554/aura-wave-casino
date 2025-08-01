@@ -974,27 +974,15 @@ async function completeRound(supabase: any, round: any) {
           .eq('round_id', round.id)
       );
 
-      // Prepare roulette stats update (using clean function that doesn't insert into game_history)
+      // Prepare comprehensive roulette bet processing (stats + XP)
       statsUpdates.push(
-        supabase.rpc('update_user_roulette_stats', {
+        supabase.rpc('process_roulette_bet_complete', {
           p_user_id: bet.user_id,
           p_bet_amount: bet.bet_amount,
           p_result: isWinner ? 'win' : 'loss',
           p_profit: profit,
           p_winning_color: round.result_color,
           p_bet_color: bet.bet_color
-        })
-      );
-      
-      // Prepare level/XP update separately (without game_history insertion)
-      statsUpdates.push(
-        supabase.rpc('update_user_stats_and_level', {
-          p_user_id: bet.user_id,
-          p_game_type: 'roulette',
-          p_bet_amount: bet.bet_amount,
-          p_result: isWinner ? 'win' : 'loss',
-          p_profit: profit,
-          p_streak_length: 0
         })
       );
     }
