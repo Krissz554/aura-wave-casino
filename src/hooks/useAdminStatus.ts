@@ -1,6 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+
+// Global cache for admin status to prevent excessive queries
+const adminStatusCache = new Map<string, { isAdmin: boolean; timestamp: number }>();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 export const useAdminStatus = (userId?: string) => {
   const { user } = useAuth();
@@ -10,64 +14,85 @@ export const useAdminStatus = (userId?: string) => {
 
   const targetUserId = userId || user?.id;
 
-  useEffect(() => {
-    let mounted = true;
+  const checkAdminStatus = useCallback(async () => {
+    if (!targetUserId) {
+      setIsAdmin(false);
+      setLoading(false);
+      return;
+    }
 
-    const checkAdminStatus = async () => {
-      if (!targetUserId) {
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
+    // Check cache first
+    const cached = adminStatusCache.get(targetUserId);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      setIsAdmin(cached.isAdmin);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-      try {
-        const { data, error } = await supabase
-          .from('admin_users')
-          .select('user_id')
-          .eq('user_id', targetUserId)
-          .single();
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .eq('user_id', targetUserId)
+        .single();
 
-        if (mounted) {
-          if (error) {
-            // Handle 406 errors gracefully - treat as "not admin" instead of error
-            if (error.code === 'PGRST116' || error.message?.includes('406')) {
-              setIsAdmin(false);
-              setError(null); // Don't treat this as an error
-            } else {
-              console.error('Admin status check error:', error);
-              setError(error.message);
-              setIsAdmin(false);
-            }
-          } else {
-            setIsAdmin(!!data);
-            setError(null);
-          }
-          setLoading(false);
-        }
-      } catch (err: any) {
-        if (mounted) {
-          // Handle 406 errors gracefully
-          if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+      if (mounted) {
+        const adminStatus = !!data && !error;
+        
+        // Cache the result
+        adminStatusCache.set(targetUserId, {
+          isAdmin: adminStatus,
+          timestamp: Date.now()
+        });
+        
+        if (error) {
+          // Handle 406 errors gracefully - treat as "not admin" instead of error
+          if (error.code === 'PGRST116' || error.message?.includes('406')) {
             setIsAdmin(false);
             setError(null); // Don't treat this as an error
           } else {
-            console.error('Admin status check exception:', err);
-            setError(err?.message || 'Unknown error');
+            console.error('Admin status check error:', error);
+            setError(error.message);
             setIsAdmin(false);
           }
-          setLoading(false);
+        } else {
+          setIsAdmin(adminStatus);
+          setError(null);
         }
+        setLoading(false);
       }
+    } catch (err: any) {
+      if (mounted) {
+        // Handle 406 errors gracefully
+        if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+          setIsAdmin(false);
+          setError(null); // Don't treat this as an error
+        } else {
+          console.error('Admin status check exception:', err);
+          setError(err?.message || 'Unknown error');
+          setIsAdmin(false);
+        }
+        setLoading(false);
+      }
+    }
+  }, [targetUserId]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchStatus = async () => {
+      await checkAdminStatus();
     };
 
-    checkAdminStatus();
+    fetchStatus();
 
     return () => {
       mounted = false;
     };
-  }, [targetUserId]);
+  }, [checkAdminStatus]);
 
-  return { isAdmin, loading, error };
+  return { isAdmin, loading, error, refetch: checkAdminStatus };
 };
 
 // Hook to check multiple users' admin status at once
@@ -76,76 +101,123 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let mounted = true;
+  const checkMultipleAdminStatus = useCallback(async () => {
+    if (userIds.length === 0) {
+      setAdminStatuses({});
+      setLoading(false);
+      return;
+    }
 
-    const checkMultipleAdminStatus = async () => {
-      if (userIds.length === 0) {
-        setAdminStatuses({});
-        setLoading(false);
-        return;
+    // Check cache first for all user IDs
+    const uncachedUserIds: string[] = [];
+    const cachedStatuses: Record<string, boolean> = {};
+    
+    userIds.forEach(userId => {
+      const cached = adminStatusCache.get(userId);
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+        cachedStatuses[userId] = cached.isAdmin;
+      } else {
+        uncachedUserIds.push(userId);
       }
+    });
 
-      try {
-        const { data, error } = await supabase
-          .from('admin_users')
-          .select('user_id')
-          .in('user_id', userIds);
+    // If all users are cached, return immediately
+    if (uncachedUserIds.length === 0) {
+      setAdminStatuses(cachedStatuses);
+      setLoading(false);
+      setError(null);
+      return;
+    }
 
-        if (mounted) {
-          if (error) {
-            // Handle 406 errors gracefully - treat as "not admin" instead of error
-            if (error.code === 'PGRST116' || error.message?.includes('406')) {
-              const statuses: Record<string, boolean> = {};
-              userIds.forEach(userId => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('user_id')
+        .in('user_id', uncachedUserIds);
+
+      if (mounted) {
+        if (error) {
+          // Handle 406 errors gracefully - treat as "not admin" instead of error
+          if (error.code === 'PGRST116' || error.message?.includes('406')) {
+            const statuses: Record<string, boolean> = { ...cachedStatuses };
+            userIds.forEach(userId => {
+              if (!cachedStatuses[userId]) {
                 statuses[userId] = false;
-              });
-              setAdminStatuses(statuses);
-              setError(null); // Don't treat this as an error
-            } else {
-              console.error('Multiple admin status check error:', error);
-              setError(error.message);
-              setAdminStatuses({});
-            }
-          } else {
-            const adminUserIds = new Set(data.map(admin => admin.user_id));
-            const statuses: Record<string, boolean> = {};
-            
-            userIds.forEach(userId => {
-              statuses[userId] = adminUserIds.has(userId);
-            });
-
-            setAdminStatuses(statuses);
-            setError(null);
-          }
-          setLoading(false);
-        }
-      } catch (err: any) {
-        if (mounted) {
-          // Handle 406 errors gracefully
-          if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
-            const statuses: Record<string, boolean> = {};
-            userIds.forEach(userId => {
-              statuses[userId] = false;
+                // Cache the "not admin" result
+                adminStatusCache.set(userId, {
+                  isAdmin: false,
+                  timestamp: Date.now()
+                });
+              }
             });
             setAdminStatuses(statuses);
             setError(null); // Don't treat this as an error
           } else {
-            console.error('Multiple admin status check exception:', err);
-            setError(err?.message || 'Unknown error');
-            setAdminStatuses({});
+            console.error('Multiple admin status check error:', error);
+            setError(error.message);
+            setAdminStatuses(cachedStatuses);
           }
-          setLoading(false);
+        } else {
+          const adminUserIds = new Set(data.map(admin => admin.user_id));
+          const statuses: Record<string, boolean> = { ...cachedStatuses };
+          
+          userIds.forEach(userId => {
+            if (!cachedStatuses[userId]) {
+              const isAdmin = adminUserIds.has(userId);
+              statuses[userId] = isAdmin;
+              // Cache the result
+              adminStatusCache.set(userId, {
+                isAdmin,
+                timestamp: Date.now()
+              });
+            }
+          });
+
+          setAdminStatuses(statuses);
+          setError(null);
         }
+        setLoading(false);
       }
+    } catch (err: any) {
+      if (mounted) {
+        // Handle 406 errors gracefully
+        if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
+          const statuses: Record<string, boolean> = { ...cachedStatuses };
+          userIds.forEach(userId => {
+            if (!cachedStatuses[userId]) {
+              statuses[userId] = false;
+              // Cache the "not admin" result
+              adminStatusCache.set(userId, {
+                isAdmin: false,
+                timestamp: Date.now()
+              });
+            }
+          });
+          setAdminStatuses(statuses);
+          setError(null); // Don't treat this as an error
+        } else {
+          console.error('Multiple admin status check exception:', err);
+          setError(err?.message || 'Unknown error');
+          setAdminStatuses(cachedStatuses);
+        }
+        setLoading(false);
+      }
+    }
+  }, [userIds.join(',')]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const fetchStatuses = async () => {
+      await checkMultipleAdminStatus();
     };
 
-    checkMultipleAdminStatus();
+    fetchStatuses();
 
     return () => {
       mounted = false;
     };
-  }, [userIds.join(',')]);
+  }, [checkMultipleAdminStatus]);
 
-  return { adminStatuses, loading, error };
+  return { adminStatuses, loading, error, refetch: checkMultipleAdminStatus };
 };
