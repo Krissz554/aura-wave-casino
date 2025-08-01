@@ -23,27 +23,21 @@ export default function MaintenanceOverlay() {
       }
 
       try {
-        // Try the robust admin check function
+        // Use RPC function directly to avoid 406 errors
+        console.log('Admin status check (MaintenanceOverlay): Using RPC function directly');
         const { data: adminCheck, error: adminError } = await supabase.rpc('check_admin_status_simple', {
-      user_uuid: user.id
-    });
-        if (!adminError && adminCheck !== null) {
-          setIsAdmin(adminCheck);
+          user_uuid: user.id
+        });
+        
+        if (adminError) {
+          console.log('RPC admin check failed, treating as non-admin:', adminError);
+          setIsAdmin(false);
         } else {
-          // Fallback to direct table access
-          const { data, error } = await supabase
-            .from('admin_users')
-            .select('user_id, permissions, created_at')
-            .eq('user_id', '5b9c6d6c-1c2e-4609-91d1-6e706b93f315')
-            .single();
-
-          if (error && error.code !== 'PGRST116') {
-            console.error('Error checking admin status:', error);
-          }
-          setIsAdmin(!!data);
+          console.log('RPC admin check successful, admin status:', adminCheck);
+          setIsAdmin(!!adminCheck);
         }
       } catch (err) {
-        console.error('Error checking admin status:', err);
+        console.log('RPC admin check exception, treating as non-admin:', err);
         setIsAdmin(false);
       } finally {
         setAdminLoading(false);

@@ -197,7 +197,7 @@ export default function Index({ initialGame }: IndexProps) {
     }
   };
 
-  // Admin status check
+  // Admin status check - using RPC function directly to avoid 406 errors
   useEffect(() => {
     const checkAdminStatus = async () => {
       if (!user) {
@@ -207,33 +207,20 @@ export default function Index({ initialGame }: IndexProps) {
       }
 
       try {
+        console.log('Admin status check (Index): Using RPC function directly');
         const { data, error } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+          .rpc('check_admin_status_simple', { user_uuid: user.id });
 
         if (error) {
-          // Handle 406 errors gracefully - treat as "not admin" instead of error
-          if (error.code === 'PGRST116' || error.message?.includes('406') || error.code === '406') {
-            console.log('Admin status check: 406 error, treating as non-admin');
-            setIsAdmin(false);
-          } else {
-            console.error('Error checking admin status:', error);
-            setIsAdmin(false);
-          }
+          console.log('RPC admin check failed, treating as non-admin:', error);
+          setIsAdmin(false);
         } else {
+          console.log('RPC admin check successful, admin status:', data);
           setIsAdmin(!!data);
         }
       } catch (err: any) {
-        // Handle 406 errors gracefully
-        if (err?.code === 'PGRST116' || err?.message?.includes('406') || err?.code === '406') {
-          console.log('Admin status check exception: 406 error, treating as non-admin');
-          setIsAdmin(false);
-        } else {
-          console.error('Error checking admin status:', err);
-          setIsAdmin(false);
-        }
+        console.log('RPC admin check exception, treating as non-admin:', err);
+        setIsAdmin(false);
       } finally {
         setAdminLoading(false);
       }

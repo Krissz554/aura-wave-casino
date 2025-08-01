@@ -1137,7 +1137,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     setIsRefreshing(false);
   };
 
-  // Check admin status function
+  // Check admin status function - using RPC to avoid 406 errors
   const checkAdminStatus = async () => {
     if (!user) {
       setIsAdmin(false);
@@ -1146,19 +1146,19 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
     }
 
     try {
+      console.log('Admin status check (AdminPanel): Using RPC function directly');
       const { data, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+        .rpc('check_admin_status_simple', { user_uuid: user.id });
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking admin status:', error);
+      if (error) {
+        console.log('RPC admin check failed, treating as non-admin:', error);
+        setIsAdmin(false);
+      } else {
+        console.log('RPC admin check successful, admin status:', data);
+        setIsAdmin(!!data);
       }
-
-      setIsAdmin(!!data);
     } catch (err) {
-      console.error('Error checking admin status:', err);
+      console.log('RPC admin check exception, treating as non-admin:', err);
       setIsAdmin(false);
     } finally {
       setLoading(false);
