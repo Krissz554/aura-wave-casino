@@ -258,25 +258,28 @@ END $$;
 -- 6. VERIFY ALL FIXES WORK
 SELECT 
   'admin_users RLS enabled' as table_name,
-  CASE WHEN rls_enabled THEN '✅' ELSE '❌' END as enabled
-FROM pg_tables 
-WHERE tablename = 'admin_users' AND schemaname = 'public'
+  CASE WHEN relrowsecurity THEN '✅' ELSE '❌' END as enabled
+FROM pg_class c
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE c.relname = 'admin_users' AND n.nspname = 'public'
 
 UNION ALL
 
 SELECT 
   'user_level_stats RLS enabled' as table_name,
-  CASE WHEN rls_enabled THEN '✅' ELSE '❌' END as enabled
-FROM pg_tables 
-WHERE tablename = 'user_level_stats' AND schemaname = 'public'
+  CASE WHEN relrowsecurity THEN '✅' ELSE '❌' END as enabled
+FROM pg_class c
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE c.relname = 'user_level_stats' AND n.nspname = 'public'
 
 UNION ALL
 
 SELECT 
   'profiles RLS enabled' as table_name,
-  CASE WHEN rls_enabled THEN '✅' ELSE '❌' END as enabled
-FROM pg_tables 
-WHERE tablename = 'profiles' AND schemaname = 'public';
+  CASE WHEN relrowsecurity THEN '✅' ELSE '❌' END as enabled
+FROM pg_class c
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE c.relname = 'profiles' AND n.nspname = 'public';
 
 SELECT 
   'admin_users policies' as table_name,

@@ -100,9 +100,10 @@ END $$;
 -- 7. VERIFY THE FIX WORKS
 SELECT 
   'RLS is enabled' as status,
-  CASE WHEN rls_enabled THEN '✅' ELSE '❌' END as enabled
-FROM pg_tables 
-WHERE tablename = 'admin_users' AND schemaname = 'public';
+  CASE WHEN relrowsecurity THEN '✅' ELSE '❌' END as enabled
+FROM pg_class c
+JOIN pg_namespace n ON c.relnamespace = n.oid
+WHERE c.relname = 'admin_users' AND n.nspname = 'public';
 
 SELECT 
   'Policies exist' as status,
