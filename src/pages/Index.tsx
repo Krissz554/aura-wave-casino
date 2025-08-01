@@ -102,9 +102,9 @@ export default function Index({ initialGame }: IndexProps) {
   const getCurrentGame = () => {
     const path = location.pathname;
     if (path === '/roulette') return 'roulette';
-    if (path === '/coinflip') return 'roulette'; // Redirect coinflip to roulette during maintenance
-    if (path === '/tower') return 'roulette'; // Redirect tower to roulette during maintenance
-    return initialGame || 'roulette'; // Default to roulette instead of coinflip
+    if (path === '/coinflip') return 'coinflip';
+    if (path === '/tower') return 'tower';
+    return initialGame || 'roulette'; // Default to roulette
   };
 
   const [currentGame, setCurrentGame] = useState(getCurrentGame());
