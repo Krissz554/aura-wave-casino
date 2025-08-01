@@ -32,6 +32,7 @@ export const useAdminStatus = (userId?: string) => {
     }
 
     try {
+      // First, try the direct table query
       const { data, error } = await supabase
         .from('admin_users')
         .select('user_id')
@@ -39,38 +40,95 @@ export const useAdminStatus = (userId?: string) => {
         .single();
 
       if (mountedRef.current) {
-        const adminStatus = !!data && !error;
-        
-        // Cache the result
-        adminStatusCache.set(targetUserId, {
-          isAdmin: adminStatus,
-          timestamp: Date.now()
-        });
-        
         if (error) {
-          // Handle 406 errors gracefully - treat as "not admin" instead of error
+          // If we get a 406 error, try the RPC function as fallback
           if (error.code === 'PGRST116' || error.message?.includes('406') || error.code === '406') {
-            console.log('Admin status check: 406 error, treating as non-admin');
-            setIsAdmin(false);
-            setError(null); // Don't treat this as an error
+            console.log('Admin status check: 406 error, trying RPC fallback...');
+            
+            try {
+              const { data: rpcResult, error: rpcError } = await supabase
+                .rpc('check_admin_status_simple', { user_uuid: targetUserId });
+              
+              if (rpcError) {
+                console.log('RPC fallback also failed, treating as non-admin:', rpcError);
+                setIsAdmin(false);
+              } else {
+                console.log('RPC fallback successful, admin status:', rpcResult);
+                setIsAdmin(!!rpcResult);
+              }
+              
+              // Cache the result
+              adminStatusCache.set(targetUserId, {
+                isAdmin: !!rpcResult,
+                timestamp: Date.now()
+              });
+              
+              setError(null);
+            } catch (rpcErr: any) {
+              console.log('RPC fallback exception, treating as non-admin:', rpcErr);
+              setIsAdmin(false);
+              setError(null);
+              
+              // Cache as non-admin
+              adminStatusCache.set(targetUserId, {
+                isAdmin: false,
+                timestamp: Date.now()
+              });
+            }
           } else {
             console.error('Admin status check error:', error);
             setError(error.message);
             setIsAdmin(false);
           }
         } else {
+          const adminStatus = !!data;
           setIsAdmin(adminStatus);
           setError(null);
+          
+          // Cache the result
+          adminStatusCache.set(targetUserId, {
+            isAdmin: adminStatus,
+            timestamp: Date.now()
+          });
         }
         setLoading(false);
       }
     } catch (err: any) {
       if (mountedRef.current) {
-        // Handle 406 errors gracefully
+        // Handle 406 errors gracefully with RPC fallback
         if (err?.code === 'PGRST116' || err?.message?.includes('406') || err?.code === '406') {
-          console.log('Admin status check exception: 406 error, treating as non-admin');
-          setIsAdmin(false);
-          setError(null); // Don't treat this as an error
+          console.log('Admin status check exception: 406 error, trying RPC fallback...');
+          
+          try {
+            const { data: rpcResult, error: rpcError } = await supabase
+              .rpc('check_admin_status_simple', { user_uuid: targetUserId });
+            
+            if (rpcError) {
+              console.log('RPC fallback also failed, treating as non-admin:', rpcError);
+              setIsAdmin(false);
+            } else {
+              console.log('RPC fallback successful, admin status:', rpcResult);
+              setIsAdmin(!!rpcResult);
+            }
+            
+            // Cache the result
+            adminStatusCache.set(targetUserId, {
+              isAdmin: !!rpcResult,
+              timestamp: Date.now()
+            });
+            
+            setError(null);
+          } catch (rpcErr: any) {
+            console.log('RPC fallback exception, treating as non-admin:', rpcErr);
+            setIsAdmin(false);
+            setError(null);
+            
+            // Cache as non-admin
+            adminStatusCache.set(targetUserId, {
+              isAdmin: false,
+              timestamp: Date.now()
+            });
+          }
         } else {
           console.error('Admin status check exception:', err);
           setError(err?.message || 'Unknown error');
@@ -134,6 +192,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
     }
 
     try {
+      // First, try the direct table query
       const { data, error } = await supabase
         .from('admin_users')
         .select('user_id')
@@ -141,22 +200,54 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
 
       if (mountedRef.current) {
         if (error) {
-          // Handle 406 errors gracefully - treat as "not admin" instead of error
+          // If we get a 406 error, try the RPC function as fallback
           if (error.code === 'PGRST116' || error.message?.includes('406') || error.code === '406') {
-            console.log('Multiple admin status check: 406 error, treating all as non-admin');
-            const statuses: Record<string, boolean> = { ...cachedStatuses };
-            userIds.forEach(userId => {
-              if (!cachedStatuses[userId]) {
+            console.log('Multiple admin status check: 406 error, trying RPC fallback...');
+            
+            try {
+              const { data: rpcResult, error: rpcError } = await supabase
+                .rpc('check_multiple_admin_status', { user_uuids: uncachedUserIds });
+              
+              if (rpcError) {
+                console.log('RPC fallback also failed, treating all as non-admin:', rpcError);
+                const statuses: Record<string, boolean> = { ...cachedStatuses };
+                uncachedUserIds.forEach(userId => {
+                  statuses[userId] = false;
+                  adminStatusCache.set(userId, {
+                    isAdmin: false,
+                    timestamp: Date.now()
+                  });
+                });
+                setAdminStatuses(statuses);
+              } else {
+                console.log('RPC fallback successful for multiple users');
+                const statuses: Record<string, boolean> = { ...cachedStatuses };
+                
+                rpcResult.forEach((result: { user_id: string; is_admin: boolean }) => {
+                  statuses[result.user_id] = result.is_admin;
+                  adminStatusCache.set(result.user_id, {
+                    isAdmin: result.is_admin,
+                    timestamp: Date.now()
+                  });
+                });
+                
+                setAdminStatuses(statuses);
+              }
+              
+              setError(null);
+            } catch (rpcErr: any) {
+              console.log('RPC fallback exception, treating all as non-admin:', rpcErr);
+              const statuses: Record<string, boolean> = { ...cachedStatuses };
+              uncachedUserIds.forEach(userId => {
                 statuses[userId] = false;
-                // Cache the "not admin" result
                 adminStatusCache.set(userId, {
                   isAdmin: false,
                   timestamp: Date.now()
                 });
-              }
-            });
-            setAdminStatuses(statuses);
-            setError(null); // Don't treat this as an error
+              });
+              setAdminStatuses(statuses);
+              setError(null);
+            }
           } else {
             console.error('Multiple admin status check error:', error);
             setError(error.message);
@@ -185,22 +276,54 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
       }
     } catch (err: any) {
       if (mountedRef.current) {
-        // Handle 406 errors gracefully
+        // Handle 406 errors gracefully with RPC fallback
         if (err?.code === 'PGRST116' || err?.message?.includes('406') || err?.code === '406') {
-          console.log('Multiple admin status check exception: 406 error, treating all as non-admin');
-          const statuses: Record<string, boolean> = { ...cachedStatuses };
-          userIds.forEach(userId => {
-            if (!cachedStatuses[userId]) {
+          console.log('Multiple admin status check exception: 406 error, trying RPC fallback...');
+          
+          try {
+            const { data: rpcResult, error: rpcError } = await supabase
+              .rpc('check_multiple_admin_status', { user_uuids: uncachedUserIds });
+            
+            if (rpcError) {
+              console.log('RPC fallback also failed, treating all as non-admin:', rpcError);
+              const statuses: Record<string, boolean> = { ...cachedStatuses };
+              uncachedUserIds.forEach(userId => {
+                statuses[userId] = false;
+                adminStatusCache.set(userId, {
+                  isAdmin: false,
+                  timestamp: Date.now()
+                });
+              });
+              setAdminStatuses(statuses);
+            } else {
+              console.log('RPC fallback successful for multiple users');
+              const statuses: Record<string, boolean> = { ...cachedStatuses };
+              
+              rpcResult.forEach((result: { user_id: string; is_admin: boolean }) => {
+                statuses[result.user_id] = result.is_admin;
+                adminStatusCache.set(result.user_id, {
+                  isAdmin: result.is_admin,
+                  timestamp: Date.now()
+                });
+              });
+              
+              setAdminStatuses(statuses);
+            }
+            
+            setError(null);
+          } catch (rpcErr: any) {
+            console.log('RPC fallback exception, treating all as non-admin:', rpcErr);
+            const statuses: Record<string, boolean> = { ...cachedStatuses };
+            uncachedUserIds.forEach(userId => {
               statuses[userId] = false;
-              // Cache the "not admin" result
               adminStatusCache.set(userId, {
                 isAdmin: false,
                 timestamp: Date.now()
               });
-            }
-          });
-          setAdminStatuses(statuses);
-          setError(null); // Don't treat this as an error
+            });
+            setAdminStatuses(statuses);
+            setError(null);
+          }
         } else {
           console.error('Multiple admin status check exception:', err);
           setError(err?.message || 'Unknown error');
