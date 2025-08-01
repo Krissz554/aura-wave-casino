@@ -34,16 +34,16 @@ const REEL_WIDTH_PX = VISIBLE_TILES * TILE_SIZE_PX;    // 1500px viewport width
 const REEL_HEIGHT_PX = TILE_SIZE_PX;                   // Match tile height exactly - no gray area
 const CENTER_MARKER_PX = REEL_WIDTH_PX / 2;            // 750px - fixed center marker
 
-// 🔄 INFINITE LOOPING SYSTEM - Duplicated sequences for seamless scrolling
-const TILE_REPEATS = 200;                              // Generate 200 copies (was 100) - more safety margin
-const TOTAL_TILES = WHEEL_SLOTS.length * TILE_REPEATS; // 3000 total tiles  
-const TOTAL_REEL_WIDTH_PX = TOTAL_TILES * TILE_SIZE_PX; // 300,000px total width
+// 🔄 INFINITE LOOPING SYSTEM - Optimized for performance while maintaining smooth scrolling
+const TILE_REPEATS = 40;                               // Reduced from 200 to 40 - still provides smooth infinite scrolling
+const TOTAL_TILES = WHEEL_SLOTS.length * TILE_REPEATS; // 600 total tiles (down from 3000)
+const TOTAL_REEL_WIDTH_PX = TOTAL_TILES * TILE_SIZE_PX; // 60,000px total width (down from 300,000px)
 
-// 🛡️ TILE SAFETY BOUNDS - Prevent disappearing tiles
+// 🛡️ TILE SAFETY BOUNDS - Adjusted for reduced tile count
 const WHEEL_CYCLE_PX = WHEEL_SLOTS.length * TILE_SIZE_PX; // 1500px per full wheel cycle
-const SAFE_ZONE_CYCLES = 20; // Keep position within 20 cycles of center for extra safety
-const MIN_SAFE_POSITION = -SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX; // -30,000px
-const MAX_SAFE_POSITION = SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;  // +30,000px
+const SAFE_ZONE_CYCLES = 8; // Reduced from 20 to 8 cycles - still provides safety margin
+const MIN_SAFE_POSITION = -SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX; // -12,000px
+const MAX_SAFE_POSITION = SAFE_ZONE_CYCLES * WHEEL_CYCLE_PX;  // +12,000px
 
 // 🔄 POSITION NORMALIZATION - Keep reel within safe bounds while maintaining alignment
 const normalizePosition = (position: number): number => {
@@ -297,7 +297,7 @@ export function RouletteReel({ isSpinning, winningSlot, showWinAnimation, extend
     };
   }, []);
 
-  // 🎲 Generate all tiles (duplicated sequences for infinite scrolling)
+  // 🎲 Generate optimized tile array (reduced from 3000 to 600 tiles)
   // Center tiles around 0 for coverage in both positive and negative directions
   const allTiles = [];
   const centerOffset = Math.floor(TILE_REPEATS / 2); // Center the tile generation
