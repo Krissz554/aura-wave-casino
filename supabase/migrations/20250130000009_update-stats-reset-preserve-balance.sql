@@ -1,8 +1,8 @@
--- Create comprehensive user stats reset function
--- This function resets all user statistics across all relevant tables
+-- Update comprehensive user stats reset function to PRESERVE BALANCE
+-- This migration modifies the existing function to NOT reset user balance
 
 -- =============================================================================
--- 1. CREATE COMPREHENSIVE STATS RESET FUNCTION
+-- 1. UPDATE COMPREHENSIVE STATS RESET FUNCTION (PRESERVE BALANCE)
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION public.reset_user_stats_comprehensive(target_user_id UUID)
@@ -16,6 +16,7 @@ DECLARE
   error_message TEXT;
   tables_reset INTEGER := 0;
   records_affected INTEGER := 0;
+  user_balance NUMERIC;
 BEGIN
   RAISE NOTICE 'Starting comprehensive stats reset for user: %', target_user_id;
   
@@ -28,11 +29,15 @@ BEGIN
     );
   END IF;
 
+  -- Get current balance to preserve it
+  SELECT balance INTO user_balance FROM public.profiles WHERE id = target_user_id;
+  RAISE NOTICE 'Preserving user balance: %', user_balance;
+
   BEGIN
     -- =============================================================================
     -- RESET PROFILES TABLE (stats only - PRESERVE BALANCE)
     -- =============================================================================
-    RAISE NOTICE 'Resetting profiles table (preserving balance)...';
+    RAISE NOTICE 'Resetting profiles table (preserving balance: %)...', user_balance;
     UPDATE public.profiles 
     SET 
       total_wagered = 0,
@@ -45,7 +50,7 @@ BEGIN
     GET DIAGNOSTICS records_affected = ROW_COUNT;
     IF records_affected > 0 THEN
       tables_reset := tables_reset + 1;
-      RAISE NOTICE 'Profiles table reset: % rows affected', records_affected;
+      RAISE NOTICE 'Profiles table reset: % rows affected (balance preserved)', records_affected;
     END IF;
 
     -- =============================================================================
@@ -301,13 +306,14 @@ BEGIN
       RAISE NOTICE 'User rate limits reset: % rows affected', records_affected;
     END IF;
 
-    RAISE NOTICE 'Comprehensive stats reset completed successfully. Tables affected: %', tables_reset;
+    RAISE NOTICE 'Comprehensive stats reset completed successfully. Tables affected: % (Balance preserved: %)', tables_reset, user_balance;
 
     RETURN jsonb_build_object(
       'success', true,
-      'message', 'User statistics reset successfully',
+      'message', 'User statistics reset successfully (balance preserved)',
       'user_id', target_user_id,
       'tables_reset', tables_reset,
+      'balance_preserved', user_balance,
       'timestamp', now()
     );
 
@@ -319,26 +325,22 @@ BEGIN
         'success', false,
         'error', error_message,
         'user_id', target_user_id,
-        'tables_reset', tables_reset
+        'tables_reset', tables_reset,
+        'balance_preserved', user_balance
       );
   END;
 END;
 $$;
 
 -- =============================================================================
--- 2. GRANT PERMISSIONS
--- =============================================================================
-
-GRANT EXECUTE ON FUNCTION public.reset_user_stats_comprehensive(UUID) TO authenticated;
-
--- =============================================================================
--- 3. TEST THE FUNCTION
+-- 2. TEST THE UPDATED FUNCTION
 -- =============================================================================
 
 DO $$
 BEGIN
-  RAISE NOTICE 'Comprehensive user stats reset function has been created successfully!';
+  RAISE NOTICE 'Updated comprehensive user stats reset function!';
   RAISE NOTICE 'Function name: reset_user_stats_comprehensive(target_user_id UUID)';
-  RAISE NOTICE 'This function resets all user statistics across all relevant tables.';
+  RAISE NOTICE 'IMPORTANT: This function now PRESERVES user balance during reset';
+  RAISE NOTICE 'Balance will NOT be reset to 0 - only statistics are reset';
 END;
 $$;

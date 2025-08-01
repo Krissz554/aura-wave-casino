@@ -379,9 +379,10 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       console.log(`📊 Tables affected: ${resetResult.tables_reset}`);
       
       // Success message with details
+      const balancePreserved = resetResult.balance_preserved || 0;
       toast({
         title: "Success",
-        description: `User statistics have been completely reset across ${resetResult.tables_reset} tables`,
+        description: `User statistics have been completely reset across ${resetResult.tables_reset} tables (Balance preserved: $${balancePreserved})`,
         duration: 5000,
       });
       
