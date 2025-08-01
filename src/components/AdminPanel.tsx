@@ -182,11 +182,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           username, 
           balance, 
           total_wagered, 
-          created_at,
-          user_level_stats (
-            current_level,
-            lifetime_xp
-          )
+          created_at
         `, { count: 'exact' })
         .order('created_at', { ascending: false });
 
@@ -203,8 +199,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         setUsers((data || []).map(user => ({
           id: user.id,
           username: user.username || '',
-          level: user.user_level_stats?.current_level || 1,
-          xp: user.user_level_stats?.lifetime_xp || 0,
+          level: 1, // Default level since we're not fetching user_level_stats
+          xp: 0, // Default XP since we're not fetching user_level_stats
           balance: user.balance || 0,
           total_wagered: user.total_wagered || 0,
           created_at: user.created_at || ''
