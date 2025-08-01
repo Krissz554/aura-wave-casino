@@ -134,8 +134,11 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
     try {
       // DIRECTLY use RPC function to avoid 406 errors completely
       console.log('Multiple admin status check: Using RPC function directly');
+      console.log('🧪 Checking admin status for users:', uncachedUserIds);
       const { data: rpcResult, error: rpcError } = await supabase
         .rpc('check_multiple_admin_status', { user_uuids: uncachedUserIds });
+      
+      console.log('🧪 RPC response:', { rpcResult, rpcError });
 
       if (mountedRef.current) {
         if (rpcError) {
@@ -152,10 +155,13 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
           setError(null); // Don't show errors to user
         } else {
           console.log('RPC multiple admin check successful');
+          console.log('🧪 Processing RPC result:', rpcResult);
           const statuses: Record<string, boolean> = { ...cachedStatuses };
           
           if (Array.isArray(rpcResult)) {
+            console.log('🧪 RPC result is array, processing...');
             rpcResult.forEach((result: { user_id: string; is_admin: boolean }) => {
+              console.log('🧪 Processing user:', result.user_id, 'isAdmin:', result.is_admin);
               statuses[result.user_id] = result.is_admin;
               adminStatusCache.set(result.user_id, {
                 isAdmin: result.is_admin,
@@ -163,6 +169,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
               });
             });
           } else {
+            console.log('🧪 RPC result is not array, treating all as non-admin:', rpcResult);
             // If RPC returns unexpected format, treat all as non-admin
             uncachedUserIds.forEach(userId => {
               statuses[userId] = false;
@@ -173,6 +180,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
             });
           }
           
+          console.log('🧪 Final statuses to set:', statuses);
           setAdminStatuses(statuses);
           setError(null);
         }

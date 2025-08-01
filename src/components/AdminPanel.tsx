@@ -255,6 +255,31 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         // Refresh admin statuses after loading users
         console.log('🔄 Refreshing admin statuses...');
         console.log('👥 Users loaded:', data?.map(u => ({ id: u.id, username: u.username })));
+        
+        // Test direct admin_users table access
+        console.log('🧪 Testing direct admin_users table access...');
+        const { data: adminUsersData, error: adminUsersError } = await supabase
+          .from('admin_users')
+          .select('user_id');
+        
+        console.log('🧪 Direct admin_users query result:', { adminUsersData, adminUsersError });
+        
+        // Test RPC functions
+        if (data && data.length > 0) {
+          const testUserId = data[0].id;
+          console.log('🧪 Testing RPC function with user:', testUserId);
+          
+          const { data: rpcSingleResult, error: rpcSingleError } = await supabase
+            .rpc('check_admin_status_simple', { user_uuid: testUserId });
+          
+          console.log('🧪 RPC single check result:', { rpcSingleResult, rpcSingleError });
+          
+          const { data: rpcMultipleResult, error: rpcMultipleError } = await supabase
+            .rpc('check_multiple_admin_status', { user_uuids: [testUserId] });
+          
+          console.log('🧪 RPC multiple check result:', { rpcMultipleResult, rpcMultipleError });
+        }
+        
         setTimeout(() => {
           refetchAdminStatuses();
           console.log('🛡️ Admin statuses after refresh:', adminStatuses);
@@ -1751,6 +1776,43 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
                 >
                   <Shield className="h-4 w-4 mr-2" />
                   Refresh Admin Status
+                </Button>
+                <Button
+                  onClick={async () => {
+                    console.log('🧪 Manual admin table test triggered');
+                    
+                    // Direct table query
+                    const { data: directAdmins, error: directError } = await supabase
+                      .from('admin_users')
+                      .select('user_id, permissions, created_at');
+                    
+                    console.log('🧪 Direct admin_users table:', { directAdmins, directError });
+                    
+                    // Test RPC with all user IDs
+                    if (users.length > 0) {
+                      const allUserIds = users.map(u => u.id);
+                      const { data: rpcResult, error: rpcError } = await supabase
+                        .rpc('check_multiple_admin_status', { user_uuids: allUserIds });
+                      
+                      console.log('🧪 RPC check for all users:', { rpcResult, rpcError });
+                      
+                      // Compare results
+                      const directAdminIds = new Set(directAdmins?.map(a => a.user_id) || []);
+                      const rpcAdminIds = new Set(rpcResult?.filter(r => r.is_admin).map(r => r.user_id) || []);
+                      
+                      console.log('🧪 Comparison:', {
+                        directAdminIds: Array.from(directAdminIds),
+                        rpcAdminIds: Array.from(rpcAdminIds),
+                        match: directAdminIds.size === rpcAdminIds.size && 
+                               Array.from(directAdminIds).every(id => rpcAdminIds.has(id))
+                      });
+                    }
+                  }}
+                  variant="outline"
+                  className="bg-slate-800/50 border-slate-600 text-slate-300 hover:bg-slate-700/50 font-mono"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Test Admin Table
                 </Button>
               </div>
             </div>
