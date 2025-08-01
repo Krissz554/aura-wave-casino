@@ -1,8 +1,9 @@
 -- =====================================================
--- COMPREHENSIVE USER STATS TABLE FIX
+-- COMPREHENSIVE USER STATS TABLE FIX - CORRECTED VERSION
 -- =====================================================
--- This ensures ALL user statistics data comes from user_level_stats table
--- and NOT from profiles table
+-- This ensures ALL user statistics data comes from user_level_stats table ONLY
+-- Profiles table contains ONLY: id, username, balance, total_wagered, total_profit, etc.
+-- NO level, xp, or any stats in profiles table!
 
 -- =====================================================
 -- STEP 1: Drop ALL problematic functions that reference wrong tables
@@ -48,18 +49,20 @@ DECLARE
   new_border_tier_calc INTEGER;
   cases_to_add INTEGER := 0;
   level_diff INTEGER;
-  i INTEGER;
 BEGIN
-  -- Get current level and XP from user_level_stats (CORRECT TABLE)
+  -- Get current level and XP from user_level_stats (ONLY CORRECT TABLE)
   SELECT current_level, COALESCE(lifetime_xp, 0), COALESCE(border_tier, 1) 
   INTO old_level, old_xp, old_border_tier
   FROM public.user_level_stats 
   WHERE user_id = user_uuid;
   
-  -- If user not found, create record and return defaults
+  -- If user not found, create record with defaults
   IF old_level IS NULL THEN
-    INSERT INTO public.user_level_stats (user_id, current_level, lifetime_xp, border_tier)
-    VALUES (user_uuid, 1, 0, 1)
+    INSERT INTO public.user_level_stats (
+      user_id, current_level, lifetime_xp, current_level_xp, xp_to_next_level, border_tier
+    ) VALUES (
+      user_uuid, 1, 0, 0, 916, 1
+    )
     ON CONFLICT (user_id) DO NOTHING;
     
     old_level := 1;
@@ -96,8 +99,8 @@ BEGIN
     updated_at = NOW()
   WHERE user_id = user_uuid;
   
-  -- Profiles table contains NO stats data - only user_level_stats does
-  -- No need to update profiles table for level/xp data
+  -- Profiles table contains NO stats data - only basic user info
+  -- No updates needed to profiles table
   
   -- Return results
   RETURN QUERY SELECT 
@@ -125,6 +128,7 @@ DECLARE
   created_count INTEGER := 0;
 BEGIN
   -- Create user_level_stats records for any users that don't have them
+  -- Profiles table has NO stats data, so use defaults
   FOR user_record IN 
     SELECT p.id
     FROM public.profiles p
@@ -137,14 +141,26 @@ BEGIN
       lifetime_xp, 
       current_level_xp,
       xp_to_next_level,
-      border_tier
+      border_tier,
+      available_cases,
+      total_cases_opened,
+      total_case_value,
+      total_games,
+      roulette_games,
+      roulette_wins
     ) VALUES (
       user_record.id,
-      1,  -- Default level
-      0,  -- Default XP
-      0,  -- Default current level XP
-      916, -- Default XP to next level (level 2 requirement)
-      1   -- Default border tier
+      1,    -- Default level
+      0,    -- Default XP
+      0,    -- Default current level XP
+      916,  -- Default XP to next level (level 2 requirement)
+      1,    -- Default border tier
+      0,    -- Default available cases
+      0,    -- Default total cases opened
+      0,    -- Default total case value
+      0,    -- Default total games
+      0,    -- Default roulette games
+      0     -- Default roulette wins
     )
     ON CONFLICT (user_id) DO NOTHING;
     
@@ -201,14 +217,13 @@ GRANT EXECUTE ON FUNCTION public.ensure_user_level_stats_for_all() TO authentica
 GRANT SELECT ON public.complete_user_profile TO authenticated, service_role;
 
 -- =====================================================
--- STEP 7: Update all edge functions to use correct queries
+-- STEP 7: Create helper function for edge functions
 -- =====================================================
 
 -- Create helper function for edge functions to get user stats
 CREATE OR REPLACE FUNCTION public.get_user_stats(user_uuid UUID)
 RETURNS TABLE(
   username TEXT,
-  avatar_url TEXT,
   current_level INTEGER,
   lifetime_xp INTEGER,
   balance NUMERIC,
@@ -222,7 +237,6 @@ BEGIN
   RETURN QUERY
   SELECT 
     p.username,
-    NULL::TEXT as avatar_url,  -- profiles table may not have avatar_url column
     COALESCE(uls.current_level, 1) as current_level,
     COALESCE(uls.lifetime_xp, 0) as lifetime_xp,
     p.balance,
@@ -254,4 +268,10 @@ SELECT
   COUNT(*) as records_in_view
 FROM public.complete_user_profile;
 
-SELECT '🎯 COMPREHENSIVE USER STATS FIX COMPLETED - user_level_stats is now the single source of truth for all user statistics' as status;
+-- Final status
+DO $$
+BEGIN
+  RAISE NOTICE '🎯 COMPREHENSIVE USER STATS FIX COMPLETED';
+  RAISE NOTICE '📊 user_level_stats is now the SINGLE SOURCE OF TRUTH for ALL user statistics';
+  RAISE NOTICE '👤 profiles table contains ONLY basic user info (username, balance, etc.)';
+END $$;
