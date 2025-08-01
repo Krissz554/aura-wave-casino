@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,6 +11,7 @@ export const useAdminStatus = (userId?: string) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   const targetUserId = userId || user?.id;
 
@@ -37,7 +38,7 @@ export const useAdminStatus = (userId?: string) => {
         .eq('user_id', targetUserId)
         .single();
 
-      if (mounted) {
+      if (mountedRef.current) {
         const adminStatus = !!data && !error;
         
         // Cache the result
@@ -63,7 +64,7 @@ export const useAdminStatus = (userId?: string) => {
         setLoading(false);
       }
     } catch (err: any) {
-      if (mounted) {
+      if (mountedRef.current) {
         // Handle 406 errors gracefully
         if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
           setIsAdmin(false);
@@ -79,7 +80,7 @@ export const useAdminStatus = (userId?: string) => {
   }, [targetUserId]);
 
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
     const fetchStatus = async () => {
       await checkAdminStatus();
@@ -88,7 +89,7 @@ export const useAdminStatus = (userId?: string) => {
     fetchStatus();
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
   }, [checkAdminStatus]);
 
@@ -100,6 +101,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
   const [adminStatuses, setAdminStatuses] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const mountedRef = useRef(true);
 
   const checkMultipleAdminStatus = useCallback(async () => {
     if (userIds.length === 0) {
@@ -135,7 +137,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
         .select('user_id')
         .in('user_id', uncachedUserIds);
 
-      if (mounted) {
+      if (mountedRef.current) {
         if (error) {
           // Handle 406 errors gracefully - treat as "not admin" instead of error
           if (error.code === 'PGRST116' || error.message?.includes('406')) {
@@ -179,7 +181,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
         setLoading(false);
       }
     } catch (err: any) {
-      if (mounted) {
+      if (mountedRef.current) {
         // Handle 406 errors gracefully
         if (err?.code === 'PGRST116' || err?.message?.includes('406')) {
           const statuses: Record<string, boolean> = { ...cachedStatuses };
@@ -206,7 +208,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
   }, [userIds.join(',')]);
 
   useEffect(() => {
-    let mounted = true;
+    mountedRef.current = true;
 
     const fetchStatuses = async () => {
       await checkMultipleAdminStatus();
@@ -215,7 +217,7 @@ export const useMultipleAdminStatus = (userIds: string[]) => {
     fetchStatuses();
 
     return () => {
-      mounted = false;
+      mountedRef.current = false;
     };
   }, [checkMultipleAdminStatus]);
 

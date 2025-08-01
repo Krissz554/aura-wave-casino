@@ -268,7 +268,12 @@ export function useUserProfile() {
         .rpc('ensure_user_level_stats', { user_uuid: user.id });
       
       if (statsError) {
-        console.error('[useUserProfile] Error ensuring user_level_stats:', statsError);
+        // Handle duplicate key constraint error gracefully
+        if (statsError.code === '23505' && statsError.message?.includes('user_level_stats_user_id_key')) {
+          console.log('[useUserProfile] User level stats already exists (duplicate key constraint)');
+        } else {
+          console.error('[useUserProfile] Error ensuring user_level_stats:', statsError);
+        }
       } else {
         console.log('[useUserProfile] User level stats ensured');
       }
