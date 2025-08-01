@@ -157,13 +157,30 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
           }
 
           // Get user level stats
+          console.log('🎯 Fetching level stats for user:', profile.id, 'username:', profile.username);
           const { data: levelStats, error: levelError } = await supabase
             .from('user_level_stats')
             .select('*')
             .eq('user_id', profile.id)
             .single();
 
-          // Create mock game stats - in a real app, you'd fetch these from the database
+          if (levelError) {
+            console.warn('⚠️ Level stats error for user', profile.username, ':', levelError);
+            if (levelError.code !== 'PGRST116') {
+              console.error('❌ Unexpected level stats error:', levelError);
+            } else {
+              console.log('ℹ️ No level stats found for user, will use defaults');
+            }
+          } else {
+            console.log('✅ Level stats fetched successfully for', profile.username, ':', {
+              level: levelStats?.current_level,
+              xp: levelStats?.current_level_xp,
+              lifetime_xp: levelStats?.lifetime_xp,
+              xp_to_next: levelStats?.xp_to_next_level
+            });
+          }
+
+          // Create game stats from level stats data
           const gameStats = {
             coinflip: { wins: levelStats?.coinflip_wins || 0, losses: Math.max(0, (levelStats?.coinflip_games || 0) - (levelStats?.coinflip_wins || 0)), profit: levelStats?.coinflip_profit || 0 },
             crash: { wins: levelStats?.crash_wins || 0, losses: Math.max(0, (levelStats?.crash_games || 0) - (levelStats?.crash_wins || 0)), profit: levelStats?.crash_profit || 0 },
@@ -279,6 +296,19 @@ export default function UserProfile({ isOpen, onClose, userData: propUserData, u
   const xpToNext = stats?.xp_to_next_level || userData.levelStats?.xp_to_next_level || 100;
   const totalXP = currentXP + xpToNext;
   const xpProgress = calculateXPProgress(currentXP, xpToNext);
+
+  // Debug logging for level stats display
+  console.log('📊 UserProfile level stats display:', {
+    username: userData.username,
+    isOwnProfile: isOwnProfile || shouldShowOwnProfile,
+    hasStats: !!stats,
+    hasUserDataLevelStats: !!userData.levelStats,
+    currentLevel,
+    lifetimeXP,
+    currentXP,
+    xpToNext,
+    xpProgress: Math.round(xpProgress)
+  });
 
   const registrationDate = new Date(userData.registration_date).toLocaleDateString('en-US', {
     year: 'numeric',
