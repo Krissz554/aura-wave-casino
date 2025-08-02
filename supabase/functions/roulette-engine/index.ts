@@ -53,8 +53,9 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const startTime = Date.now();
-  
+    const startTime = Date.now();
+  let action1 = 'unknown';
+
   try {
     return await withTimeout((async () => {
       const supabase = createClient(
@@ -62,10 +63,11 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
-      const { action, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
-      console.log(`🎰 Roulette Engine: ${action} (started at ${new Date().toISOString()})`);
+      const { action: actionValue, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
+      action1 = actionValue;
+      console.log(`🎰 Roulette Engine: ${action1} (started at ${new Date().toISOString()})`);
 
-      switch (action) {
+      switch (action1) {
         case 'get_current_round': {
           const round = await getCurrentRound(supabase);
           return new Response(JSON.stringify(round), {
@@ -231,9 +233,9 @@ serve(async (req) => {
         }
 
         default:
-          throw new Error(`Unknown action: ${action}`);
+          throw new Error(`Unknown action: ${action1}`);
       }
-    })(), FUNCTION_TIMEOUT_MS, `${req.url} ${action || 'unknown'}`);
+    })(), FUNCTION_TIMEOUT_MS, `${req.url} ${action1 || 'unknown'}`);
 
   } catch (error) {
     const executionTime = Date.now() - startTime;
