@@ -53,9 +53,8 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-    const startTime = Date.now();
-  let action1 = 'unknown';
-
+  const startTime = Date.now();
+  
   try {
     return await withTimeout((async () => {
       const supabase = createClient(
@@ -63,11 +62,10 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
-      const { action: actionValue, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
-      action1 = actionValue;
-      console.log(`🎰 Roulette Engine: ${action1} (started at ${new Date().toISOString()})`);
+      const { action, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
+      console.log(`🎰 Roulette Engine: ${action} (started at ${new Date().toISOString()})`);
 
-      switch (action1) {
+      switch (action) {
         case 'get_current_round': {
           const round = await getCurrentRound(supabase);
           return new Response(JSON.stringify(round), {
@@ -233,9 +231,9 @@ serve(async (req) => {
         }
 
         default:
-          throw new Error(`Unknown action: ${action1}`);
+          throw new Error(`Unknown action: ${action}`);
       }
-    })(), FUNCTION_TIMEOUT_MS, `${req.url} ${action1 || 'unknown'}`);
+    })(), FUNCTION_TIMEOUT_MS, `${req.url} ${action || 'unknown'}`);
 
   } catch (error) {
     const executionTime = Date.now() - startTime;
@@ -1018,60 +1016,6 @@ async function completeRound(supabase: any, round: any) {
     } catch (error) {
       console.error(`❌ Error processing batch ${batchIndex + 1}:`, error);
       // Continue with next batch even if this one fails
-    }
-  }
-        newLevel: result.new_level,
-        oldLevel: result.old_level,
-        casesEarned: result.cases_earned,
-        borderTierChanged: result.border_tier_changed
-      });
-    } else {
-      console.warn('⚠️ Stats update returned no result for user:', bet.user_id);
-    }
-
-    // Process winnings (update balance with real-time trigger)
-    if (isWinner && actualPayout > 0) {
-      console.log(`🎯 Processing winner: ${bet.user_id}, payout: ${actualPayout}`);
-      
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('balance')
-        .eq('id', bet.user_id)
-        .single();
-
-      if (profileError) {
-        console.error('❌ Error fetching profile for balance update:', profileError);
-        continue;
-      }
-
-      if (profile) {
-        const oldBalance = profile.balance;
-        const newBalance = oldBalance + actualPayout;
-        
-        console.log(`💰 Updating balance for ${bet.user_id}: ${oldBalance} + ${actualPayout} = ${newBalance}`);
-        
-        const { error: balanceError, data: updatedProfile } = await supabase
-          .from('profiles')
-          .update({
-            balance: newBalance,
-            updated_at: new Date().toISOString() // Force timestamp update for real-time trigger
-          })
-          .eq('id', bet.user_id)
-          .select('balance')
-          .single();
-
-        if (balanceError) {
-          console.error('❌ Error updating balance:', balanceError);
-        } else {
-          console.log(`✅ Balance successfully updated for ${bet.user_id}: ${oldBalance} → ${updatedProfile?.balance || newBalance}`);
-          console.log(`🔔 Real-time update should trigger for user ${bet.user_id}`);
-          
-          // Small delay to ensure real-time update propagates
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-      }
-    } else {
-      console.log(`😢 Loser: ${bet.user_id} lost ${bet.bet_amount} on ${bet.bet_color}`);
     }
   }
 
