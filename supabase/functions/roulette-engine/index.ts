@@ -844,8 +844,32 @@ async function completeRound(supabase: any, round: any) {
 async function generateProvablyFairResult(supabase: any, dailySeed: any, nonceId: number) {
   console.log('🎲 Generating advanced provably fair result');
   
+  // 🛡️ SECURITY FIX: Fetch the ACTUAL seed values for calculation (bypassing hidden response)
+  let actualDailySeed = dailySeed;
+  
+  // If we have hidden values, fetch the actual seed from database
+  if (dailySeed.server_seed === '[HIDDEN_UNTIL_DAY_ENDS]' || dailySeed.lotto === '[HIDDEN_UNTIL_DAY_ENDS]') {
+    console.log('🔍 Fetching actual seed values for result generation...');
+    const { data: actualSeed, error: seedError } = await supabase
+      .from('daily_seeds')
+      .select('*')
+      .eq('id', dailySeed.id)
+      .single();
+
+    if (seedError) {
+      throw new Error(`Failed to fetch actual seed values: ${seedError.message}`);
+    }
+
+    if (!actualSeed) {
+      throw new Error('Daily seed not found for result generation');
+    }
+
+    actualDailySeed = actualSeed;
+    console.log('✅ Retrieved actual seed values for calculation');
+  }
+  
   // Industry standard formula: hash("sha256", server_seed + "-" + lotto + "-" + round_id)
-  const hashInput = `${dailySeed.server_seed}-${dailySeed.lotto}-${nonceId}`;
+  const hashInput = `${actualDailySeed.server_seed}-${actualDailySeed.lotto}-${nonceId}`;
   const hash = await sha256Hash(hashInput);
   
   // Convert first 8 characters of hash to number and mod by 15
@@ -854,8 +878,8 @@ async function generateProvablyFairResult(supabase: any, dailySeed: any, nonceId
   const result = WHEEL_SLOTS[resultSlot];
   
   console.log(`🎯 Advanced Result Generated:`);
-  console.log(`📊 Server Seed: ${dailySeed.server_seed}`);
-  console.log(`🎰 Lotto: ${dailySeed.lotto}`);
+  console.log(`📊 Server Seed: ${actualDailySeed.server_seed}`);
+  console.log(`🎰 Lotto: ${actualDailySeed.lotto}`);
   console.log(`🔢 Nonce (Round ID): ${nonceId}`);
   console.log(`🔗 Hash Input: "${hashInput}"`);
   console.log(`#️⃣ SHA256 Hash: ${hash}`);
