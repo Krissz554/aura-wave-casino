@@ -59,11 +59,11 @@ DECLARE
   cases_to_add INTEGER := 0;
   i INTEGER;
 BEGIN
-  -- Get current XP and level from profiles (lifetime_xp is the main tracker)
+  -- Get current XP and level from user_level_stats (CORRECT TABLE)
   SELECT lifetime_xp, current_level, COALESCE(border_tier, 1) 
   INTO old_lifetime_xp, old_level, old_border_tier
-  FROM public.profiles 
-  WHERE id = user_uuid;
+  FROM public.user_level_stats 
+  WHERE user_id = user_uuid;
   
   -- If user not found, return defaults
   IF old_lifetime_xp IS NULL THEN

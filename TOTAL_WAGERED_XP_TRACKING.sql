@@ -92,16 +92,21 @@ BEGIN
     did_level_up := true;
   END IF;
   
-  -- Update profiles with new XP and level info
+  -- Update user_level_stats with new XP and level info
+  UPDATE public.user_level_stats 
+  SET 
+    lifetime_xp = FLOOR(new_lifetime_xp)::INTEGER,
+    current_level = new_level_data.level,
+    current_level_xp = new_level_data.current_level_xp,
+    xp_to_next_level = new_level_data.xp_to_next,
+    updated_at = now()
+  WHERE user_id = user_uuid;
+  
+  -- Also update profiles table with basic level info (no lifetime_xp)
   UPDATE public.profiles 
   SET 
-    lifetime_xp = new_lifetime_xp,
-    current_level = new_level_data.level,
     level = new_level_data.level,
-    current_xp = new_level_data.current_level_xp,
-    xp_to_next_level = new_level_data.xp_to_next,
-    total_xp = new_lifetime_xp,
-    xp = new_lifetime_xp,
+    xp = FLOOR(new_lifetime_xp)::INTEGER,
     updated_at = now()
   WHERE id = user_uuid;
   
@@ -207,10 +212,11 @@ BEGIN
     
     IF test_user_id IS NOT NULL THEN
         -- Get current values
-        SELECT total_wagered, lifetime_xp 
+        SELECT p.total_wagered, uls.lifetime_xp 
         INTO old_total_wagered, old_lifetime_xp
-        FROM public.profiles 
-        WHERE id = test_user_id;
+        FROM public.profiles p
+        LEFT JOIN public.user_level_stats uls ON uls.user_id = p.id
+        WHERE p.id = test_user_id;
         
         RAISE NOTICE 'TEST: User % - Current wagered: $%, Current XP: %', 
           test_user_id, old_total_wagered, old_lifetime_xp;
@@ -223,10 +229,11 @@ BEGIN
         RAISE NOTICE 'TEST: Added $1.23 to total_wagered - trigger should award 0.123 XP';
         
         -- Check results
-        SELECT total_wagered, lifetime_xp 
+        SELECT p.total_wagered, uls.lifetime_xp 
         INTO old_total_wagered, old_lifetime_xp
-        FROM public.profiles 
-        WHERE id = test_user_id;
+        FROM public.profiles p
+        LEFT JOIN public.user_level_stats uls ON uls.user_id = p.id
+        WHERE p.id = test_user_id;
         
         RAISE NOTICE 'TEST: New wagered: $%, New XP: %', old_total_wagered, old_lifetime_xp;
     ELSE

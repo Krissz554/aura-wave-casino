@@ -167,8 +167,8 @@ export default function UserStatsModal({ isOpen, onClose, username }: UserStatsM
         current_xp: levelStats?.current_level_xp || 0,
         xp_to_next_level: levelStats?.xp_to_next_level || 100,
         badges: profile.badges || [],
-        total_wagered: levelStats?.total_wagered || profile.total_wagered || 0,
-        total_profit: levelStats?.total_profit || profile.total_profit || 0,
+        total_wagered: levelStats?.total_wagered || 0,
+        total_profit: levelStats?.total_profit || 0,
         gameStats: {
           coinflip: {
             wins: levelStats?.coinflip_wins || 0,

@@ -8,8 +8,6 @@ export interface UserProfile {
   username: string
   registration_date: string
   balance: number
-  total_wagered: number
-  total_profit: number
   last_claim_time: string
   badges: string[]
   // Level and XP data comes from user_level_stats
@@ -93,8 +91,6 @@ export function useUserProfile() {
           username,
           registration_date,
           balance,
-          total_wagered,
-          total_profit,
           last_claim_time,
           badges,
           created_at,
@@ -131,8 +127,6 @@ export function useUserProfile() {
             username,
             registration_date,
             balance,
-            total_wagered,
-            total_profit,
             last_claim_time,
             badges,
             created_at,

@@ -1968,7 +1968,7 @@ function AchievementsSection({ isOwnProfile, userId, stats, propUserData, onUser
         // Trigger a refresh of the user profile data
         const { data: updatedProfile } = await supabase
           .from('profiles')
-          .select('balance, level, xp, total_wagered, total_profit')
+          .select('balance')
           .eq('id', userId)
           .single();
           

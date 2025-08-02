@@ -60,11 +60,11 @@ BEGIN
   -- Calculate XP from wager (10% of wager amount)
   calculated_xp := public.calculate_xp_from_bet(wager_amount);
   
-  -- Get current XP and level from profiles table
+  -- Get current XP and level from user_level_stats table (CORRECT TABLE)
   SELECT lifetime_xp, current_level 
   INTO old_lifetime_xp, old_level
-  FROM public.profiles 
-  WHERE id = user_uuid;
+  FROM public.user_level_stats 
+  WHERE user_id = user_uuid;
   
   -- If user not found, return defaults
   IF old_lifetime_xp IS NULL THEN
@@ -217,10 +217,10 @@ BEGIN
         WHERE user_id = test_user_id;
         
         SELECT lifetime_xp INTO old_lifetime_xp
-        FROM public.profiles 
-        WHERE id = test_user_id;
+        FROM public.user_level_stats 
+        WHERE user_id = test_user_id;
         
-        RAISE NOTICE 'TEST: User % - user_level_stats.total_wagered: $%, profiles.lifetime_xp: %', 
+        RAISE NOTICE 'TEST: User % - user_level_stats.total_wagered: $%, user_level_stats.lifetime_xp: %', 
           test_user_id, old_total_wagered, old_lifetime_xp;
         
         -- Increase user_level_stats.total_wagered by $2.34 (should trigger +0.234 XP)
@@ -236,10 +236,10 @@ BEGIN
         WHERE user_id = test_user_id;
         
         SELECT lifetime_xp INTO new_lifetime_xp
-        FROM public.profiles 
-        WHERE id = test_user_id;
+        FROM public.user_level_stats 
+        WHERE user_id = test_user_id;
         
-        RAISE NOTICE 'TEST RESULTS: user_level_stats.total_wagered: $%, profiles.lifetime_xp: %', 
+        RAISE NOTICE 'TEST RESULTS: user_level_stats.total_wagered: $%, user_level_stats.lifetime_xp: %', 
           new_total_wagered, new_lifetime_xp;
         
         IF (new_lifetime_xp - old_lifetime_xp) = 0.234 THEN
