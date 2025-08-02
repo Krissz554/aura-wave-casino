@@ -54,6 +54,7 @@ serve(async (req) => {
   }
 
   const startTime = Date.now();
+  let action = 'unknown'; // Declare action in outer scope for withTimeout
   
   try {
     return await withTimeout((async () => {
@@ -62,7 +63,9 @@ serve(async (req) => {
         Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
       );
 
-      const { action, userId, betColor, betAmount, roundId, clientSeed } = await req.json();
+      const requestData = await req.json();
+      ({ action } = requestData); // Assign to outer scope variable
+      const { userId, betColor, betAmount, roundId, clientSeed } = requestData;
       console.log(`🎰 Roulette Engine: ${action} (started at ${new Date().toISOString()})`);
 
       switch (action) {
