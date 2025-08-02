@@ -905,137 +905,47 @@ async function placeBet(supabase: any, userId: string, roundId: string, betColor
 
 async function completeRound(supabase: any, round: any) {
   console.log(`🏁 Completing round ${round.id} with result: ${round.result_color} ${round.result_slot}`);
+  console.log('🔍 Using new complete_roulette_round function for comprehensive processing');
 
-  // Mark round as completed
-  await supabase
-    .from('roulette_rounds')
-    .update({ status: 'completed' })
-    .eq('id', round.id);
-
-  // Get all bets for this round
-  const { data: bets } = await supabase
-    .from('roulette_bets')
-    .select('*')
-    .eq('round_id', round.id);
-
-  if (!bets || bets.length === 0) {
-    console.log('🎯 No bets to process for this round');
-    return;
-  }
-
-  console.log(`🎯 Processing ${bets.length} bets for round ${round.id}`);
-  
-  // 🛡️ PERFORMANCE FIX: Process bets in batches to prevent timeouts
-  const betBatches = [];
-  for (let i = 0; i < bets.length; i += BATCH_SIZE) {
-    betBatches.push(bets.slice(i, i + BATCH_SIZE));
-  }
-
-  let totalBetsCount = 0;
-  let totalBetsAmount = 0;
-
-  // Process each batch in parallel
-  for (let batchIndex = 0; batchIndex < betBatches.length; batchIndex++) {
-    const batch = betBatches[batchIndex];
-    console.log(`🔄 Processing batch ${batchIndex + 1}/${betBatches.length} (${batch.length} bets)`);
-    
-    // Prepare all batch operations
-    const betUpdates = [];
-    const liveFeedUpdates = [];
-    const statsUpdates = [];
-    
-    for (const bet of batch) {
-      totalBetsCount++;
-      totalBetsAmount += bet.bet_amount;
-      
-      const isWinner = bet.bet_color === round.result_color;
-      const actualPayout = isWinner ? bet.potential_payout : 0;
-      const profit = actualPayout - bet.bet_amount;
-
-      console.log(`🎲 Preparing bet: user=${bet.user_id}, color=${bet.bet_color}, winner=${isWinner}, profit=${profit}`);
-
-      // Prepare bet update
-      betUpdates.push(
-        supabase
-          .from('roulette_bets')
-          .update({
-            is_winner: isWinner,
-            actual_payout: actualPayout,
-            profit: profit
-          })
-          .eq('id', bet.id)
-      );
-
-      // Prepare live feed update
-      liveFeedUpdates.push(
-        supabase
-          .from('live_bet_feed')
-          .update({
-            result: isWinner ? 'win' : 'loss',
-            profit: profit
-          })
-          .eq('user_id', bet.user_id)
-          .eq('game_type', 'roulette')
-          .eq('round_id', round.id)
-      );
-
-      // Prepare stats update
-      statsUpdates.push(
-        supabase.rpc('update_user_stats_and_level', {
-          p_user_id: bet.user_id,
-          p_game_type: 'roulette',
-          p_bet_amount: bet.bet_amount,
-          p_result: isWinner ? 'win' : 'loss',
-          p_profit: profit,
-          p_streak_length: 0,
-          p_winning_color: round.result_color,
-          p_bet_color: bet.bet_color
-        })
-      );
-    }
-
-    try {
-      // Execute all updates in parallel for this batch
-      console.log(`⚡ Executing ${betUpdates.length} bet updates in parallel...`);
-      await Promise.all(betUpdates);
-      
-      console.log(`⚡ Executing ${liveFeedUpdates.length} live feed updates in parallel...`);
-      await Promise.all(liveFeedUpdates);
-      
-      console.log(`⚡ Executing ${statsUpdates.length} stats updates in parallel...`);
-      const statsResults = await Promise.allSettled(statsUpdates);
-      
-      // Log any stats update failures
-      statsResults.forEach((result, index) => {
-        if (result.status === 'rejected') {
-          console.error(`❌ Stats update failed for bet ${batch[index].id}:`, result.reason);
-        } else if (result.value?.data?.[0]?.leveled_up) {
-          console.log(`🎉 User ${batch[index].user_id} leveled up!`);
-        }
-      });
-      
-      console.log(`✅ Batch ${batchIndex + 1} completed successfully`);
-      
-    } catch (error) {
-      console.error(`❌ Error processing batch ${batchIndex + 1}:`, error);
-      // Continue with next batch even if this one fails
-    }
-  }
-
-  // Add to results history
-  await supabase
-    .from('roulette_results')
-    .insert({
-      round_id: round.id,
-      round_number: round.round_number,
-      result_color: round.result_color,
-      result_slot: round.result_slot,
-      total_bets_count: totalBetsCount,
-      total_bets_amount: totalBetsAmount
+  try {
+    // Use the database function to handle all round completion logic including XP
+    const { data: result, error } = await supabase.rpc('complete_roulette_round', {
+      p_round_id: round.id
     });
 
-  console.log(`🎉 Round completed with ${totalBetsCount} bets totaling ${totalBetsAmount}`);
-}
+    if (error) {
+      console.error('❌ complete_roulette_round failed:', error);
+      throw new Error(`Round completion failed: ${error.message}`);
+    }
+
+    if (!result || !result.success) {
+      console.error('❌ complete_roulette_round returned failure:', result);
+      throw new Error(`Round completion failed: ${result?.error || 'Unknown error'}`);
+    }
+
+    console.log('✅ Round completion successful:', {
+      bets_processed: result.bets_processed,
+      winners_processed: result.winners_processed,
+      xp_awarded: result.xp_awarded,
+      result_color: result.result_color,
+      result_slot: result.result_slot
+    });
+
+    console.log(`✅ Round ${round.id} completed successfully with ${result.bets_processed} bets and ${result.xp_awarded} total XP awarded`);
+    
+  } catch (error) {
+    console.error('❌ Error in completeRound:', error);
+    
+    // Fallback: Mark round as completed even if processing fails
+    await supabase
+      .from('roulette_rounds')
+      .update({ status: 'completed' })
+      .eq('id', round.id);
+      
+    throw error;
+  }
+
+    }
 
 // Advanced Provably Fair Result Generation
 async function generateProvablyFairResult(supabase: any, dailySeed: any, nonceId: number) {
