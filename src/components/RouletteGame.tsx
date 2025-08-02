@@ -827,8 +827,7 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       
       // Update profile balance through the parent component
       await onUpdateUser({
-        balance: newBalance,
-        total_wagered: profile.total_wagered + Number(betAmount)
+        balance: newBalance
       });
 
       currentRoundRef.current = currentRound.id;
@@ -863,15 +862,14 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
       try {
         const { data: refreshedProfile } = await supabase
           .from('profiles')
-          .select('balance, total_wagered')
+          .select('balance')
           .eq('id', user.id)
           .single();
 
         if (refreshedProfile) {
           balanceRef.current = refreshedProfile.balance;
           await onUpdateUser({
-            balance: refreshedProfile.balance,
-            total_wagered: refreshedProfile.total_wagered
+            balance: refreshedProfile.balance
           });
         }
       } catch (refreshError) {

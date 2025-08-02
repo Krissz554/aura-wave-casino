@@ -183,7 +183,6 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
           id, 
           username, 
           balance, 
-          total_wagered, 
           created_at
         `, { count: 'exact' })
         .order('created_at', { ascending: false });
@@ -200,7 +199,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
         const userIds = data?.map(user => user.id) || [];
         const { data: levelStatsData, error: levelStatsError } = await supabase
           .from('user_level_stats')
-          .select('user_id, current_level, current_level_xp')
+          .select('user_id, current_level, current_level_xp, total_wagered')
           .in('user_id', userIds);
 
         if (levelStatsError) {
@@ -221,7 +220,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             level: levelStats?.current_level || 1,
             xp: levelStats?.current_level_xp || 0,
             balance: user.balance || 0,
-            total_wagered: user.total_wagered || 0,
+            total_wagered: levelStats?.total_wagered || 0,
             created_at: user.created_at || ''
           };
         }));
