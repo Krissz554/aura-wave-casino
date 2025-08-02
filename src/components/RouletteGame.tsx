@@ -571,32 +571,17 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
 
       console.log(`💰 Round results: Bet ${totalBetAmount}, Profit ${totalProfit}, Win: ${isWin}`);
 
-      // Update user statistics using the proper function
-      console.log('📊 Updating roulette statistics with:', {
+      // NOTE: Stats are now handled by the roulette-engine in completeRound function
+      // This prevents double-counting of roulette statistics
+      console.log('📊 Roulette statistics will be updated by roulette-engine for all users:', {
         user_id: user.id,
         game_type: 'roulette',
         bet_amount: totalBetAmount,
         result: isWin ? 'win' : 'loss',
         profit: totalProfit,
         winning_color: completedRound.result_color,
-        bet_colors: userBetsInRound.map(([color, _]) => color).join(',') // Multiple colors if user bet on multiple
+        bet_colors: userBetsInRound.map(([color, _]) => color).join(',')
       });
-
-      const { data: statsResult, error: statsError } = await supabase.rpc('update_user_stats_and_level', {
-        p_user_id: user.id,
-        p_game_type: 'roulette',
-        p_bet_amount: totalBetAmount,
-        p_result: isWin ? 'win' : 'loss',
-        p_profit: totalProfit,
-        p_winning_color: completedRound.result_color,
-        p_bet_color: userBetsInRound.map(([color, _]) => color).join(',') // Multiple colors if user bet on multiple
-      });
-
-      if (statsError) {
-        console.error('❌ Error updating user stats:', statsError);
-      } else {
-        console.log('✅ User stats updated successfully:', statsResult);
-      }
 
       // Small delay to let backend finish processing payouts
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -814,21 +799,8 @@ export function RouletteGame({ userData, onUpdateUser }: RouletteGameProps) {
         variant: "success",
       });
 
-      // XP TRACKING - Now handled automatically by total_wagered trigger
-      
-      // Force refresh XP data after successful bet - IMMEDIATE + FOLLOW-UP
-      
-      // Immediate refresh (no delay)
-      forceFullRefresh().catch(console.error);
-      
-      // Follow-up refreshes to ensure it catches (backend processing can take time)
-      setTimeout(() => {
-        forceFullRefresh().catch(console.error);
-      }, 200);
-      
-      setTimeout(() => {
-        forceFullRefresh().catch(console.error);
-      }, 1000);
+      // XP TRACKING - XP will be awarded when round completes, not on bet placement
+      // No immediate XP refresh needed - XP is only awarded when the round ends
 
       // Update local user bets immediately
       setUserBets(prev => {

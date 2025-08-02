@@ -26,13 +26,13 @@ WHERE trigger_name = 'game_history_trigger';
 ### 3. **Test Manual XP Addition**
 ```sql
 -- Get your user ID first
-SELECT id, username, lifetime_xp FROM profiles WHERE username = 'YOUR_USERNAME';
+SELECT p.id, p.username, uls.lifetime_xp FROM profiles p LEFT JOIN user_level_stats uls ON uls.user_id = p.id WHERE p.username = 'YOUR_USERNAME';
 
 -- Manually add XP to test the function
 SELECT * FROM public.add_xp_and_check_levelup('YOUR_USER_ID'::uuid, 1.000);
 
 -- Check if it updated
-SELECT id, username, lifetime_xp, current_xp FROM profiles WHERE username = 'YOUR_USERNAME';
+SELECT p.id, p.username, uls.lifetime_xp, p.xp as current_xp FROM profiles p LEFT JOIN user_level_stats uls ON uls.user_id = p.id WHERE p.username = 'YOUR_USERNAME';
 ```
 
 ### 4. **Check Real-Time Subscriptions**

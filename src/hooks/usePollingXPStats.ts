@@ -24,22 +24,15 @@ export function usePollingXPStats() {
     }
 
     try {
-      // Get from both sources and compare
-      const [profileResult, userLevelStatsResult] = await Promise.all([
-        supabase
-          .from('profiles')
-          .select('current_level, lifetime_xp, current_xp, xp_to_next_level, border_tier')
-          .eq('id', user.id)
-          .single(),
-        supabase
-          .from('user_level_stats')
-          .select('current_level, lifetime_xp, current_level_xp, xp_to_next_level, border_tier')
-          .eq('user_id', user.id)
-          .single()
-      ]);
+      // Get stats from user_level_stats ONLY (single source of truth)
+      const userLevelStatsResult = await supabase
+        .from('user_level_stats')
+        .select('current_level, lifetime_xp, current_level_xp, xp_to_next_level, border_tier')
+        .eq('user_id', user.id)
+        .single();
 
-      // Use user_level_stats as primary, profiles as backup
-      const primaryData = userLevelStatsResult.data || profileResult.data;
+              // Use user_level_stats as single source of truth
+        const primaryData = userLevelStatsResult.data;
       
       if (primaryData) {
         const newStats = {

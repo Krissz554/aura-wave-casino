@@ -22,11 +22,11 @@ DECLARE
   level_diff INTEGER;
   i INTEGER;
 BEGIN
-  -- Get current level and XP (use lifetime_xp from profiles)
+  -- Get current level and XP from user_level_stats (CORRECT TABLE)
   SELECT current_level, COALESCE(lifetime_xp, 0), COALESCE(border_tier, 1) 
   INTO old_level, old_xp, old_border_tier
-  FROM public.profiles 
-  WHERE id = user_uuid;
+  FROM public.user_level_stats 
+  WHERE user_id = user_uuid;
   
   -- If user not found, return default
   IF old_level IS NULL THEN

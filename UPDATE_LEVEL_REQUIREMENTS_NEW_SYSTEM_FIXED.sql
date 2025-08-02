@@ -1101,7 +1101,7 @@ DECLARE
     user_rec RECORD;
     level_calc RECORD;
 BEGIN
-    FOR user_rec IN SELECT id, lifetime_xp FROM public.profiles WHERE lifetime_xp > 0 LOOP
+    FOR user_rec IN SELECT uls.user_id as id, uls.lifetime_xp FROM public.user_level_stats uls WHERE uls.lifetime_xp > 0 LOOP
         -- Calculate new level information
         SELECT * INTO level_calc FROM public.calculate_level_from_xp_new(FLOOR(user_rec.lifetime_xp)::integer);
         
