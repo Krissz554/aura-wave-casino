@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-08-02T15:04:02.666Z",
+  "currentState": {
+    "existingTables": 27,
+    "missingTables": 0,
+    "functionStatus": {
+      "functionExists": true,
+      "currentReturnType": "object"
+    }
+  },
+  "edgeFunctions": {
+    "count": 10,
+    "functions": [
+      "roulette-engine (57KB)",
+      "tower-engine (16KB)",
+      "coinflip-streak-engine (8KB)",
+      "crash-engine (10KB)",
+      "case-opening-engine (7KB)",
+      "claim-free-case (7KB)",
+      "delete-user-account (6KB)",
+      "migrate-daily-seeds (5KB)",
+      "process-pending-deletions (3KB)",
+      "process-tip (2KB)"
+    ]
+  },
+  "fixGenerated": true
+}
